@@ -15,12 +15,14 @@ addpath('eval_scripts')
 addpath('genlib')
 addpath(genpath('dynasim'))
 
-researchDrive = 'MiceSpatialGrids/';
-ICdir = [researchDrive 'ICStim/Mouse/s30_sg0.5_ml0.01_20200424-145616'];
-% ICdir = 'ICSimStim\mouse\v2\145638_s30';
+ICdir = ['MiceSpatialGrids/' 'ICStim/Mouse/s30_sg0.5_ml0.01_20200424-145616'];
 ICdirPath = [ICdir filesep];
 ICstruc = dir([ICdirPath '*.mat']);
 if isempty(ICstruc), error('empty data directory'); end
+
+% specify the set or subset of configurations to run
+% subz = find(contains({ICstruc.name},'m0.mat')); % sXm0 (target only) cases
+subz = 1:length(ICstruc);
 %% varied parameters
 varies(1).conxn = '(IC->IC)';
 varies(1).param = 'trial';
@@ -30,11 +32,8 @@ varies(end+1).conxn = 'C';
 varies(end).param = 'noise';
 varies(end).range = 0.03;%:0.01:0.05;
 
-varies(end+1).conxn = '(S->R)';
-varies(end).param = 'gSYN';
-varies(end).range = 0.19:0.01:0.22; %0.15:0.005:0.19;
-
-variedParam = 'S-R_gsyn';
+variedParam = 'CNoise';
+% variedParam = 'S-R_gsyn';
 % varies(end+1).conxn = '(IC->R)';
 % varies(end).param = 'gSYN';
 % varies(end).range = .2; %0.15:0.005:0.19;
@@ -42,6 +41,7 @@ variedParam = 'S-R_gsyn';
 %% netcons
 nCells = 4; %synchronise this variable with mouse_network
 
+% x-channel inhibition
 % irNetcon = diag(ones(1,nCells))*0.1;
 irNetcon = zeros(nCells);
 % irNetcon(2,1) = 1;
@@ -49,15 +49,15 @@ irNetcon = zeros(nCells);
 % irNetcon(4,1) = 1;
 % irNetcon(2,4) = 1;
 
+% sharpening
 srNetcon = diag(ones(1,nCells));
-% srNetcon = zeros(nCells);
 
-rcNetcon = zeros(4,1); %add this as input to mouse_network
-% make rnNetcon have variable weights (instead of zeros)
+% may need to make rcNetcon have variable weights
+rcNetcon = ones(4,1)*.5; 
 
 netCons.irNetcon = irNetcon;
 netCons.srNetcon = srNetcon;
-netcons.rcNetcon = rcNetcon;
+netCons.rcNetcon = rcNetcon;
 %% Initialize variables
 plot_rasters = 1;
 
@@ -68,8 +68,6 @@ datetime=datestr(now,'yyyymmdd-HHMMSS');
 
 set(0, 'DefaultFigureVisible', 'off')
 h = figure('Position',[50,50,850,690]);
-
-subz = find(contains({ICstruc.name},'m0.mat')); % sXm0 (target only) cases
 for z = subz %1:length(ICstruc)
     % restructure IC spikes
     load([ICdirPath ICstruc(z).name],'t_spiketimes');
@@ -88,7 +86,7 @@ for z = subz %1:length(ICstruc)
 
     % save spk file
     spatialConfig = strsplit(ICstruc(z).name,'.');
-    study_dir = fullfile(pwd, 'run', datetime, filesep, spatialConfig{1});
+    study_dir = fullfile(pwd, 'run', datetime, spatialConfig{1});
     if exist(study_dir, 'dir')
       rmdir(study_dir, 's');
     end
@@ -98,9 +96,10 @@ for z = subz %1:length(ICstruc)
     % call network
     h.Name = ICstruc(z).name;
     time_end = size(spks,3);
-    [data(z).perf, data(z).annot] = mouse_network(study_dir,time_end,varies,netCons,plot_rasters);
+    [data(z).perf, data(z).fr, data(z).annot] = mouse_network(study_dir,time_end,varies,netCons,plot_rasters);
     data(z).name = ICstruc(z).name;
 end
+save([pwd filesep 'run' filesep, datetime filesep 'summary_results.mat'],'data')
 
 % figure;
 % for ii = 1:4
@@ -119,49 +118,63 @@ targetIdx = find(contains(temp,'m0'));
 maskerIdx = find(contains(temp,'s0'));
 % mixedIdx = setdiff(1:length(temp),[targetIdx,maskerIdx]);
 mixedIdx = find(~contains(temp,'m0') & ~contains(temp,'s0') & ~contains(temp,'empty'));
-textColorThresh = 70;
-numSpatialChan = 4;
+numNeuronTypes = 4;
 
-h = figure;
+h = figure('position',[200 200 1600 600]);
 for vv = 1:nvaried
     if ~isempty(mixedIdx)
         % mixed config cases
         for i = 1:length(mixedIdx)
+            perf.IC(i,:) = data(mixedIdx(i)).perf.IC(:,vv);
             perf.R(i,:) = data(mixedIdx(i)).perf.R(:,vv);
             perf.C(i) = data(mixedIdx(i)).perf.C(vv);
+            fr.IC(i,:) = data(mixedIdx(i)).fr.IC(:,vv);
+            fr.R(i,:) = data(mixedIdx(i)).fr.R(:,vv);
+            fr.C(i) = data(mixedIdx(i)).fr.C(vv);
         end
-        figure('position',[200 200 1200 600]);
 
         % relay neurons
-        order = [1,2,4,5];
-        for nn = 1:numSpatialChan
-            subplot(2,3,order(nn))
-            plotPerfGrid(perf.R(:,nn),neurons(nn),textColorThresh);
+        order = [1,2,3,4];
+        for nn = 1:numNeuronTypes
+            subplot(2,5,order(nn))
+            plotPerfGrid(perf.R(:,nn),fr.R(:,nn),neurons(nn));
+            subplot(2,5,order(nn)+5)
+            plotPerfGrid(perf.IC(:,nn),fr.IC(:,nn),[]);
         end
-
+        subplot(2,5,1);
+        ylabel({'R neurons',' ',' '})
+        subplot(2,5,6)
+        xticklabels({'-90','0','45','90'})
+        yticklabels(fliplr({'-90','0','45','90'}))
+        xlabel('Song Location')
+        ylabel({'IC neurons','Masker Location'})
         % C neuron
-        subplot('Position',[0.7 0.15 0.2 0.4])
-        plotPerfGrid(perf.C',[],textColorThresh);
+        subplot('Position',[0.8 0.15 0.15 0.35])
+        plotPerfGrid(perf.C',fr.C',[]);
     end
     
     % C neuron; target or masker only cases
     perf.CT = zeros(1,4);
     perf.CM = zeros(1,4);
+    fr.CT = zeros(1,4);
+    fr.CM = zeros(1,4);
     if ~isempty(targetIdx)
         for i = 1:length(targetIdx)
             perf.CT(i) = data(targetIdx(i)).perf.C(vv);
+            fr.CT(i) = data(targetIdx(i)).fr.C(vv);
         end
     end    
     if ~isempty(maskerIdx)
         for i = 1:length(targetIdx)
             perf.CM(i) = data(maskerIdx(i)).perf.C(vv);
+            fr.CM(i) = data(maskerIdx(i)).fr.C(vv);
         end
     end    
-    subplot('Position',[0.7 0.6 0.2 0.2])
-    plotPerfGrid([perf.CT;perf.CM],'Cortical',textColorThresh);
+    subplot('Position',[0.8 0.6 0.15 0.2])
+    plotPerfGrid([perf.CT;perf.CM],[fr.CT;fr.CM],'Cortical');
     
     % simulation info
-    annotation('textbox',[.75 .85 .2 .1],...
+    annotation('textbox',[.8 .85 .15 .2],...
            'string',data(z).annot(vv,3:end),...
            'FitBoxToText','on',...
            'LineStyle','none')
