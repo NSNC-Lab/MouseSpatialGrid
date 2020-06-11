@@ -151,11 +151,11 @@ for vv = 1:jump % for each varied parameter
     subData = data(vv:jump:length(data));
 
     %% visualize spikes
-    ICspks = zeros(20,4,time_end);
-    Ispks = zeros(20,4,time_end);
-    Rspks = zeros(20,4,time_end);
-    Cspks = zeros(20,time_end);
-    for i = 1:20
+    ICspks = zeros(40,4,time_end);
+    Ispks = zeros(40,4,time_end);
+    Rspks = zeros(40,4,time_end);
+    Cspks = zeros(40,time_end);
+    for i = 1:40
         for j = 1:4
             ICspks(i,j,:) = subData(i).IC_V_spikes(:,j);
             Ispks(i,j,:) = subData(i).I_V_spikes(:,j);
@@ -166,26 +166,41 @@ for vv = 1:jump % for each varied parameter
 
     % plot
     clf;
+    locs = {'Ipsi. sigmoid','Gaussian','U-shaped','Cont. sigmoid'};
     for i = 1:4 %for each spatially directed neuron
-        subplot(4,4,i+12)
+        if i > 1
+            ip = i + 1;
+        else
+            ip = 1;
+        end
+        subplot(4,5,21-ip)
         thisRaster = squeeze(ICspks(:,i,:));
         [perf.IC(i,vv),fr.IC(i,vv)] = calcPCandPlot(thisRaster,time_end,1,plot_rasters);        
-        if i==1, ylabel('IC'); end
 
-        subplot(4,4,i+8)
+        if i==4, ylabel('IC'); end
+        ax = get(gca,'position'); 
+        annotation('textbox',[ax(1)+ax(3)/2 ax(2)-0.02 0 0],...
+            'string',locs{i},...
+            'HorizontalAlignment','center',...
+            'LineStyle','none')
+        
+        subplot(4,5,16-ip)
+
         thisRaster = squeeze(Ispks(:,i,:));
         calcPCandPlot(thisRaster,time_end,0,plot_rasters);        
-        if i==1, ylabel('I'); end
+        if i==4, ylabel('I'); end
         xticklabels([])
 
-        subplot(4,4,i+4)
+        subplot(4,5,11-ip)
         thisRaster = squeeze(Rspks(:,i,:));
         [perf.R(i,vv),fr.R(i,vv)] = calcPCandPlot(thisRaster,time_end,1,plot_rasters);
-        if i==1, ylabel('R'); end
+
+        if i==4, ylabel('R'); end
         xticklabels([])
     end
-    subplot(4,4,2)
-    [perf.C(vv),fr.C(vv)] = calcPCandPlot(Cspks,time_end,1,plot_rasters);  
+    subplot(4,5,3)
+    [perf.C(vv),fr.C(vv)] = calcPCandPlot(Cspks,time_end,1,plot_rasters); 
+
     ylabel('C spikes')
     xticklabels([])
 
@@ -197,7 +212,7 @@ for vv = 1:jump % for each varied parameter
     for aa = 1:length(varies)-1
         annotstr{vv,aa+2} = sprintf('%s = %.3f',paramstr{aa},eval(['data(' num2str(vv) ').' paramstr{aa}]));
     end
-    annotation('textbox',[.55 .85 .2 .1],...
+    annotation('textbox',[.675 .85 .2 .1],...
                'string',annotstr(vv,:),...
                'FitBoxToText','on',...
                'LineStyle','none')
@@ -213,12 +228,12 @@ function [pc,fr] = calcPCandPlot(raster,time_end,calcPC,plot_rasters,h)
     if calcPC
         % spks to spiketimes in a cell array of 10x2
         tau = linspace(1,30,100);
-        spkTime = cell(20,1);
-        for ii = 1:20, spkTime{ii} = find(raster(ii,:)); end
-        spkTime = reshape(spkTime,10,2);
+        spkTime = cell(40,1);
+        for ii = 1:40, spkTime{ii} = find(raster(ii,:)); end
+        spkTime = reshape(spkTime,20,2);
         % calculate distance matrix & performance
         distMat = calcvr(spkTime, tau);
-        [performance, ~] = calcpc(distMat, 10, 2, 1,[], 'new');
+        [performance, ~] = calcpc(distMat, 20, 2, 1,[], 'new');
         pc = mean(max(performance));
         PCstr = ['PC = ' num2str(pc)];
         tauMax = mean(tau(max(performance)==performance));
@@ -230,6 +245,6 @@ function [pc,fr] = calcPCandPlot(raster,time_end,calcPC,plot_rasters,h)
     fr = mean(sum(raster,2))/time_end*1000;
     title({PCstr,['FR = ' num2str(fr)]});
     xlim([0 time_end])
-    line([0,time_end],[10.5,10.5],'color',[0.3 0.3 0.3])
+    line([0,time_end],[20.5,20.5],'color',[0.3 0.3 0.3])
     end
 end
