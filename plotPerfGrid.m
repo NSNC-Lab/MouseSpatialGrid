@@ -1,4 +1,4 @@
-function plotPerfGrid(neuronPerf,textColorThresh)
+function plotPerfGrid(neuronPerf,neuronFiring,titleString,textColorThresh)
 % plots performance grids; can handle a data array of 16 or 8 elements
 % works with mouseNetwork_main
 if ~exist('textColorThresh','var'), textColorThresh = 70; end

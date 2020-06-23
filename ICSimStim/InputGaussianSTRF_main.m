@@ -7,38 +7,38 @@
 
 clearvars;clc;close all
 addpath(genpath('strflab_v1.45'))
-addpath('..\genlib')
-addpath('..\stimuli')
+addpath('genlib')
+addpath('stimuli')
 % dataSaveLoc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\MiceSpatialGrids\ICStim';
-dataSaveLoc = pwd; %local save location
+dataSaveLoc = 'MiceSpatialGrids/ICStim/'; %local save location
 
 % Spatial tuning curve parameters
 sigma = 30; %60 for bird but 38 for mouse
-tuning = 'mouse'; %'bird' or 'mouse'
+tuning = 'Mouse'; %'bird' or 'mouse'
 stimGain = 0.5;
 maskerlvl = 0.01; %default is 0.01
 maxWeight = 1; %maximum mixed tuning weight; capped at this level.
 tic;
 
 % load stimuli & calc spectrograms
-if strcmp(tuning,'mouse')
+if strcmp(tuning,'Mouse')
     [song1,~] = audioread('200k_target1.wav');
     [song2,~] = audioread('200k_target2.wav');
-    for trial = 1:10
-        [masker,fs] = audioread(['200k_masker' num2str(trial) '.wav']);
+    for trial = 1:20
+        [masker,fs] = audioread(['200k_masker' num2str(ceil(trial/2)) '.wav']);
         [spec,~,~]=STRFspectrogram(masker/rms(masker)*maskerlvl,fs);
         masker_specs{trial} = spec;
     end
     
     %strf parameters
-    paramH.BW= 0.05; %bandwidth
-    paramH.BTM= 3.8 ; %best temporal modulation
-    paramH.t0= 0.1; % t0, peak latency (s)
-    paramH.phase= 0.48*pi; % phase
-    paramG.BW=2000;  % Hz
-    paramG.BSM=5.00E-05; % 1/Hz=s best spectral modulation
-    paramG.f0=4300;
-    strfGain = 0.35;
+    paramH.BW = 0.009; %bandwidth
+    paramH.BTM = 3.8 ; %best temporal modulation
+    paramH.t0 = 0.05; % t0, peak latency (s)
+    paramH.phase = 0.4985*pi; % phase
+    paramG.BW = 2000;  % Hz
+    paramG.BSM = 5.00E-05; % 1/Hz=s best spectral modulation
+    paramG.f0 = 4300;
+    strfGain = 1.5;
 elseif strcmp(tuning,'bird')
     % stimuli
     load('stimuli_birdsongs.mat','stimuli','fs')
@@ -66,7 +66,7 @@ specs.f = f;
 strf=STRFgen(paramH,paramG,f,t(2)-t(1));
 strf.w1 = strf.w1*strfGain;
 % ============ log message (manual entry?) ============
-saveName = sprintf('full_grids\\BW_%0.3f BTM_3.8 t0_0.1 phase%0.4f\\s%d_STRFgain%0.2f_%s',...
+saveName = sprintf('full_grids//BW_%0.3f BTM_3.8 t0_0.1 phase%0.4f//s%d_STRFgain%0.2f_%s',...
                 paramH.BW,paramH.phase/pi,sigma,strfGain,datestr(now,'YYYYmmdd-HHMMSS'));
 saveFlag = 0;
 
@@ -129,7 +129,7 @@ for i = 1:16
     perf(i,:) = data.disc;
 end
 
-neurons = {'left sigmoid','gaussian','u','right sigmoid'};
+neurons = {'cont sigmoid','u','gaussian','ipsi sigmoid'};
 [X,Y] = meshgrid(songLocs,fliplr(maskerLocs));
 figure;
 for i = 1:length(neurons)
@@ -139,8 +139,8 @@ for i = 1:length(neurons)
     neuronPerf = reshape(neuronPerf,4,4);
     imagesc(flipud(neuronPerf));
     colormap('parula');
-    xticks([1:4]); xticklabels({'-90','0','45','90'})
-    yticks([1:4]); yticklabels(fliplr({'-90','0','45','90'}))
+    xticks([1:4]); xticklabels(fliplr({'-90','0','45','90'}))
+    yticks([1:4]); yticklabels({'-90','0','45','90'})
     title(neurons(i))
     text(X(:)-0.2,Y(:),str,'Fontsize',12)
     caxis([50,100])

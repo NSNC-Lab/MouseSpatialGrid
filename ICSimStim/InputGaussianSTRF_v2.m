@@ -43,7 +43,7 @@ x0=.05;y0=.1;
 dx=.02;dy=.05;
 lx=.13;ly=.1;
 azimuth=[-90 0 45 90]; %stimuli locations
-figuresize(width, width*hwratio, 'inches')
+figuresize(width, width*hwratio, gcf,'inches')
 positionVector = [x0+dx+lx y0+dy+ly 5*lx+4*dx ly];
 subplot('Position',positionVector)
 hold on
@@ -58,7 +58,7 @@ if saveParam.flag, savedir=[saveParam.fileLoc]; mkdir(savedir); end
 % Define spatial tuning curves & plot
 sigma = tuning.sigma;
 switch tuning.type
-    case 'bird'
+    case 'Bird'
         x=-108:108;
         tuningcurve=zeros(4,length(x));
         tuningcurve(1,:)=gaussmf(x,[sigma,-90]);
@@ -66,13 +66,22 @@ switch tuning.type
         tuningcurve(3,:)=gaussmf(x,[sigma,45]);
         tuningcurve(4,:)=gaussmf(x,[sigma,90]);
         neuronNames = {'-90d deg','0 deg','45 deg','90 deg'};
-    case 'mouse'
+    case 'Mouse'
         x=-108:108;
         tuningcurve=zeros(4,length(x));
-        tuningcurve(1,:)= sigmf(-x,[0.016 -22.5])-0.05; %flipped sigmodial
-        tuningcurve(2,:)=gaussmf(x,[sigma,0]); %guassian
-        tuningcurve(3,:)= 1- gaussmf(x,[sigma,0]); %U shaped gaussian
-        tuningcurve(4,:)= sigmf(x,[0.016 -22.5])-0.05; %sigmodial
+%         tuningcurve(1,:)= sigmf(-x,[0.016 -22.5])-0.05; %flipped sigmodial
+%         tuningcurve(2,:)=gaussmf(x,[sigma,0]); %guassian
+%         tuningcurve(3,:)= 1- gaussmf(x,[sigma,0]); %U shaped gaussian
+%         tuningcurve(4,:)= sigmf(x,[0.016 -22.5])-0.05; %sigmodial
+        ono = load('ono_curves.mat');
+        s = ono.s;
+        u = ono.u;
+        g = ono.g;
+        tuningcurve(1,:) = s(ono.By1E,x)/100;
+        tuningcurve(2,:) = fliplr(u(ono.By2E,x))/100;
+        tuningcurve(3,:) = fliplr(g(ono.By3E,x))/100;
+        tuningcurve(4,:) = fliplr(s(ono.By1E,x))/100;
+
         neuronNames = {'left sigmoid','gaussian','U','right sigmoid'};
 end
 
@@ -82,6 +91,7 @@ end
 xlim([min(x) max(x)]);ylim([0 1.05])
 set(gca,'xtick',[-90 0 45 90],'XTickLabel',{'-90 deg', '0 deg', '45 deg', '90 deg'},'YColor','w')
 set(gca,'ytick',[0 0.50 1.0],'YTickLabel',{'0', '0.50', '1.0'},'YColor','b')
+set(gca,'xdir','reverse');
 
 % ---- initialize stimuli spectrogram ----
 masker_spec = specs.maskers{1};
@@ -149,7 +159,7 @@ for songn=1:2
     mixedspec=zeros(size(stim_spec));
     weight=zeros(4,4);
     for i=1:4  % summing of each channel, i.e. neuron type 1-4
-        for trial = 1:10         % for each trial, define a new random WGN masker
+        for trial = 1:20         % for each trial, define a new random WGN masker
 %             masker = wgn(1,n_length,1);
             masker_spec = specs.maskers{trial};
 
@@ -209,17 +219,17 @@ for songn=1:2
         positionVector = [x0+subplotloc*(dx+lx) y0+4*(dy+ly) lx ly];
         subplot('Position',positionVector);hold on
         %The below for loop codes for the first row of plots with the rasters.
-        for trial=1:10
-            raster(t_spiketimes{trial,i+4*(songn-1)},trial+10*(songn-1)) %need to change tempspk to change the raster
+        for trial=1:20
+            raster(t_spiketimes{trial,i+4*(songn-1)},trial+20*(songn-1)) %need to change tempspk to change the raster
         end
-        plot([0 2000],[10 10],'k')
+        plot([0 2000],[20 20],'k')
         ylim([0 20])
         xlim([0 max(t)*1000])
         %Below section gives the whole row of top labels
         if songn==2
             distMat = calcvr([t_spiketimes(:,i) t_spiketimes(:,i+4)], 10); % using ms as units, same as ts
-            [disc(i), E, correctArray] = calcpc(distMat, 10, 2, 1,[], 'new');
-            firingRate = round(sum(cellfun(@length,t_spiketimes(:,i+4)))/10);
+            [disc(i), E, correctArray] = calcpc(distMat, 20, 2, 1,[], 'new');
+            firingRate = round(sum(cellfun(@length,t_spiketimes(:,i+4)))/(t(end)*20));
             title({neuronNames{i},['disc = ', num2str(disc(i))],['FR = ',num2str(firingRate)]})
         end
 
