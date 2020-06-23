@@ -90,3 +90,14 @@ By3E = fminsearch(@(b) norm(y3E - g(b,x)), [0; 20; 90; 100]);
 plot(x, g(By3E,x), '-','color',cr,'linewidth',2);
 legend({'data','','fit',''});
 xlabel('azimuths')
+
+%% plotting the fitted functions with higher resolution
+x1 = -108:1:108
+s = @(b,x) b(1)./(1+exp(b(2)*x+b(3)))+b(4); % sigmoidal function
+g = @(b,x) b(4)*exp(-(x-b(1)).^2/(2*b(2).^2))+b(3); % gaussian
+u = @(b,x) -b(4)*exp(-(x-b(1)).^2/(2*b(2).^2))+b(3); % inverted gaussian
+figure;
+plot(x1, s(By1E,x1), '-','linewidth',2); hold on;
+plot(x1, u(By2E,x1), '-','linewidth',2);
+plot(x1, g(By3E,x1), '-','linewidth',2);
+legend('sidmoidal','U-shaped','gaussian')
