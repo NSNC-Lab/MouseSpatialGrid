@@ -38,7 +38,7 @@ if strcmp(tuning,'Mouse')
     paramG.BW = 2000;  % Hz
     paramG.BSM = 5.00E-05; % 1/Hz=s best spectral modulation
     paramG.f0 = 4300;
-    strfGain = 1.5;
+    strfGain = 2; %1.5 gain ~ 16 Hz, 4.5 gain ~ 50 Hz FR
 elseif strcmp(tuning,'bird')
     % stimuli
     load('stimuli_birdsongs.mat','stimuli','fs')
@@ -129,7 +129,7 @@ for i = 1:16
     perf(i,:) = data.disc;
 end
 
-neurons = {'cont sigmoid','u','gaussian','ipsi sigmoid'};
+neurons = {'cont sigmoid','gaussian','u','ipsi sigmoid'};
 [X,Y] = meshgrid(songLocs,fliplr(maskerLocs));
 figure;
 for i = 1:length(neurons)

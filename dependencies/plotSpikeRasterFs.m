@@ -120,6 +120,7 @@ function [xPoints, yPoints] = plotSpikeRasterFs(spikes,varargin)
 
 %% Set Defaults and Load optional arguments
 LineFormat.Color = [0.2 0.2 0.2];
+LineFormat.LineWidth = 0.35;
 MarkerFormat.MarkerSize = 1;
 MarkerFormat.Color = [0.2 0.2 0.2];
 MarkerFormat.LineStyle = 'none';

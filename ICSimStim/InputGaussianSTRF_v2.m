@@ -73,14 +73,11 @@ switch tuning.type
 %         tuningcurve(2,:)=gaussmf(x,[sigma,0]); %guassian
 %         tuningcurve(3,:)= 1- gaussmf(x,[sigma,0]); %U shaped gaussian
 %         tuningcurve(4,:)= sigmf(x,[0.016 -22.5])-0.05; %sigmodial
-        ono = load('ono_curves.mat');
-        s = ono.s;
-        u = ono.u;
-        g = ono.g;
-        tuningcurve(1,:) = s(ono.By1E,x)/100;
-        tuningcurve(2,:) = fliplr(u(ono.By2E,x))/100;
-        tuningcurve(3,:) = fliplr(g(ono.By3E,x))/100;
-        tuningcurve(4,:) = fliplr(s(ono.By1E,x))/100;
+        load('ono_curves_V2.mat','sigmoid','gauss','ushaped');
+        tuningcurve(1,:) = sigmoid;
+        tuningcurve(2,:) = gauss;
+        tuningcurve(3,:) = ushaped;
+        tuningcurve(4,:) = fliplr(sigmoid);
 
         neuronNames = {'left sigmoid','gaussian','U','right sigmoid'};
 end
@@ -91,7 +88,7 @@ end
 xlim([min(x) max(x)]);ylim([0 1.05])
 set(gca,'xtick',[-90 0 45 90],'XTickLabel',{'-90 deg', '0 deg', '45 deg', '90 deg'},'YColor','w')
 set(gca,'ytick',[0 0.50 1.0],'YTickLabel',{'0', '0.50', '1.0'},'YColor','b')
-set(gca,'xdir','reverse');
+%set(gca,'xdir','reverse');
 
 % ---- initialize stimuli spectrogram ----
 masker_spec = specs.maskers{1};
@@ -141,9 +138,9 @@ for songn=1:2
         for i=1:4
             %the below if statement creates the space in between the first graph and the other 3
             if i>1
-                subplotloc=i+1;
+                subplotloc=5-i;
             else
-                subplotloc=i;
+                subplotloc=6-i;
             end
 
             positionVector = [x0+subplotloc*(dx+lx) y0 lx ly];
@@ -185,9 +182,9 @@ for songn=1:2
             %mixedspec(i,:,:) = mixedspec(i,:,:).*stimGain;
 
             if i>1
-                subplotloc=i+1;
+                subplotloc=5-i;
             else
-                subplotloc=i;
+                subplotloc=6-i;
             end
 
             currspec=squeeze(mixedspec(i,:,:)); % currentspectrograms

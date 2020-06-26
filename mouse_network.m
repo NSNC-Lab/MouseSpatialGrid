@@ -226,11 +226,13 @@ for vv = 1:jump % for each varied parameter
 
     parts = strsplit(study_dir, filesep);
     DirPart = fullfile(parts{1:end-1});
-    saveas(gca,[filesep DirPart filesep parts{end} '_v2_' num2str(vv) '.tiff'])
+    if plot_rasters
+        saveas(gca,[filesep DirPart filesep parts{end} '_v2_' num2str(vv) '.tiff'])
+    end
     
     % plot comparison rasters and calculate VR distance
     
-    [distMat] = calcModelDist(Cspks,data_spks,optTau.R(i,vv),time_end);
+    % [distMat] = calcModelDist(Cspks,data_spks,optTau.R(i,vv),time_end);
 end
 end
 
@@ -250,10 +252,10 @@ function [pc,fr,optTau] = calcPCandPlot(raster,time_end,calcPC,plot_rasters,h)
         optTau = mean(tau(max(performance)==performance));
     end
     
+    fr = mean(sum(raster,2))/time_end*1000;
     %plot
     if plot_rasters
     plotSpikeRasterFs(flipud(logical(raster)), 'PlotType','vertline');
-    fr = mean(sum(raster,2))/time_end*1000;
     title({PCstr,['FR = ' num2str(fr)]});
     xlim([0 time_end])
     line([0,time_end],[20.5,20.5],'color',[0.3 0.3 0.3])

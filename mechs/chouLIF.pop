@@ -2,9 +2,7 @@ chouLIF:
 % Erik's Implementation
 %dV/dt = ( g_leak*(E_leak - V) + g_ad*(E_k - V) + @isyn + Itonic + noise*randn(1,N_pop)/dt )/C;
 
-dV/dt = ( g_leak*(E_leak - V) + g_ad*(E_k - V) - @isyn + Itonic + noise*randn(1,N_pop)/dt )/C;
-
-
+dV/dt = ( g_leak*(E_leak - V) + g_ad*(E_k - V) - @isyn + Itonic + noise*randn(1,N_pop)/dt )/C
 
 % use this to have no spikes:
 % if(V >= V_thresh)(V = V_reset)

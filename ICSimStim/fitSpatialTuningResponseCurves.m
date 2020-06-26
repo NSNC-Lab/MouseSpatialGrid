@@ -11,8 +11,8 @@ cr = [238,31,35]/255;
 % define functions to use
 f1 = @(b,x) b(1).*exp(b(2).*(x-b(3)))+b(4); % exponential Function
 s = @(b,x) b(1)./(1+exp(b(2)*x+b(3)))+b(4); % sigmoidal function
-g = @(b,x) b(4)*exp(-(x-b(1)).^2/(2*b(2).^2))+b(3); % gaussian
-u = @(b,x) -b(4)*exp(-(x-b(1)).^2/(2*b(2).^2))+b(3); % gaussian
+g = @(b,x) b(1)*exp(-(x).^2/(2*b(2).^2))+b(3); % gaussian
+u = @(b,x) 100-70*exp(-(x).^2/(2*b(2).^2)); % gaussian
 
 % 1 - ipsi-preferred neurons
 options = optimset('MaxFunEvals',50);
@@ -49,11 +49,11 @@ title('fit to Panniello et al., 2018')
 %% data from Ono and Oliver 2014
 x = [-90 -61 -10 0 18 61 90];
 y1I = [95 85 85 80 65 50 48]; % fig 4B
-y1E = [78 79 48 50 48 35 35];
+y1E = [78 79 48 50 48 35 35]; y1E = 100*y1E/max(y1E);
 y2I = [90 47 42 10 20 23 22]; % fig 4C
-y2E = [57 50 45 20 18 25 35];
+y2E = [57 50 45 20 18 25 35]; y2E = 100*y2E/max(y2E);
 y3I = [95 72 75 50 40 20 10]; % fig 4D
-y3E = [40 62 68 85 88 40 18];
+y3E = [40 62 68 85 88 40 18]; y3E = 100*y3E/max(y3E);
 
 figure;
 subplot(1,3,1);
@@ -77,9 +77,9 @@ plot(x, s(By1E,x), '-','color',cr,'linewidth',2);
 legend({'data','','fit',''})
 
 subplot(1,3,2);
-By2I = fminsearch(@(b) norm(y2I - u(b,x)), [0; 20; 90; 100]); 
+By2I = fminsearch(@(b) norm(y2I - u(b,x)), [50; 20; 30]); 
 plot(x, u(By2I,x), '-','color',cb,'linewidth',2);
-By2E = fminsearch(@(b) norm(y2E - u(b,x)), [0; 20; 90; 100]);
+By2E = fminsearch(@(b) norm(y2E - u(b,x)), [50; 20; 30]);
 plot(x, u(By2E,x), '-','color',cr,'linewidth',2);
 legend({'data','','fit',''});
 
@@ -92,12 +92,36 @@ legend({'data','','fit',''});
 xlabel('azimuths')
 
 %% plotting the fitted functions with higher resolution
-x1 = -108:1:108
+x1 = -108:108
 s = @(b,x) b(1)./(1+exp(b(2)*x+b(3)))+b(4); % sigmoidal function
-g = @(b,x) b(4)*exp(-(x-b(1)).^2/(2*b(2).^2))+b(3); % gaussian
-u = @(b,x) -b(4)*exp(-(x-b(1)).^2/(2*b(2).^2))+b(3); % inverted gaussian
+g = @(b,x) b(1)*exp(-(x).^2/(2*b(2).^2))+b(3); % gaussian
+u = @(b,x) 100-70*exp(-(x).^2/(2*b(2).^2)); % inverted gaussian
 figure;
 plot(x1, s(By1E,x1), '-','linewidth',2); hold on;
 plot(x1, u(By2E,x1), '-','linewidth',2);
 plot(x1, g(By3E,x1), '-','linewidth',2);
-legend('sidmoidal','U-shaped','gaussian')
+legend('sigmoidal','U-shaped','gaussian')
+
+figure;
+gauss = g(By3E,x1);
+gauss = gauss/(gauss(x1 == 0));
+
+ushaped = u(By2E,x1);
+ushaped = ushaped/(ushaped(x1 == 90));
+
+sigmoid = s(By1E,x1);
+sigmoid = sigmoid/(sigmoid(x1 == -90));
+
+subplot(1,3,1);
+plot(x1,sigmoid*100); hold on;
+plot(x,y1E,'^-','color',cr,'markersize',8,'markerfacecolor',cr)
+
+subplot(1,3,2);
+plot(x1,ushaped*100); hold on;
+plot(x,y2E,'v-','color',cr,'markersize',8,'markerfacecolor',cr)
+
+subplot(1,3,3);
+plot(x1,gauss*100); hold on;
+plot(x,y3E,'v-','color',cr,'markersize',8,'markerfacecolor',cr)
+
+save('ono_curves_V2.mat','sigmoid','gauss','ushaped','x1');
