@@ -1,4 +1,3 @@
-%% Main script for calling mouse data simulation network
 clearvars;
 close all;
 
@@ -8,21 +7,27 @@ addpath('eval_scripts')
 addpath('genlib')
 addpath(genpath('dynasim'))
 
-makeGrids = 0;  % plot spatial grids
-calcDistances = 1;  % plot VR distances
-plot_rasters = 1;   % plot rasters
+%% define parameters for optimization
+
+nIterations = 10;   % number of parameters searcches
+nSims = 3; % number of simulations to run for average MSE
+learningRate = 0.0001;
+beta = 0.5; % 0 = without momentum
+
+loss = zeros(1,nIterations);
+convGoal = 0.1;
+
+%param(1) - rcNetcon weights
+
+param = [0;0;0;0.7]; %add this as input to mouse_network
 
 %% load expeimental data to optimize model to
 
 dataCh = 25;
 
 load('9-21-2016_0dB_removed_trialscleaned(-1,4).mat','Spks_clean','Spks_masked');
-load('9-21-2016_0dB_removed_trials_performance.mat','Max','max_masked','opt_tau','opt_tau_masked');
+load('9-21-2016_0dB_removed_trials_performance.mat','Max','max_masked');
 data_perf = [Max{dataCh}(:);max_masked{dataCh}(:)];
-
-% use tau of best clean location
-[~,best_loc] = max(Max{dataCh});
-data_tau = opt_tau{dataCh}(best_loc);
 
 %% load STRF spikes
 
@@ -32,45 +37,53 @@ ICdirPath = [ICdir filesep];
 ICstruc = dir([ICdirPath '*.mat']);
 if isempty(ICstruc), error('empty data directory'); end
 
+%% Initialize variables
+plot_rasters = 0;
+calcDistances = 0;
+data_tau = 10;
+
+datetime = datestr(now,'yyyymmdd-HHMMSS');
+
+set(0, 'DefaultFigureVisible', 'off');
+h = figure('Position',[50,50,850,690]);
+
+del = 0;
+for it = 1:nIterations
+
+disp(['Starting iteration #', num2str(it)]);
+    
 %% varied parameters
 varies(1).conxn = '(IC->IC)';
 varies(1).param = 'trial';
 varies(1).range = 1:40;
 
-varies(end+1).conxn = 'R->C';
-varies(end).param = 'gSYN';
-varies(end).range = 0.21;
+varies(2).conxn = 'R->C';
+varies(2).param = 'gSYN';
+varies(2).range = 0.21;
 
-varies(end+1).conxn = 'C';
-varies(end).param = 'noise';
-varies(end).range = 1.5;
+varies(3).conxn = 'C';
+varies(3).param = 'noise';
+varies(3).range = 1.6;
 
-variedParam = 'C_{noise}';
+nvaried = {varies(2:end).range};
+nvaried = prod(cellfun(@length,nvaried));
 
 %% netcons
 nCells = 4; %synchronise this variable with mouse_network
 
-% -90, 0, 45, 90º
-% x-channel inhibition
-irNetcon = zeros(nCells);
+% % -90, 0, 45, 90º
+% % x-channel inhibition
+% irNetcon = zeros(nCells);
+% 
+% srNetcon = zeros(nCells);
 
-srNetcon = zeros(nCells);
 
-rcNetcon = [0;0;0;0.5]; %add this as input to mouse_network
-% make rnNetcon have variable weights (instead of zeros)
-
-netCons.irNetcon = irNetcon;
-netCons.srNetcon = srNetcon;
+% netCons.irNetcon = irNetcon;
+% netCons.srNetcon = srNetcon;
+rcNetcon = param;
 netCons.rcNetcon = rcNetcon;
 
-%% Initialize variables
-
-nvaried = {varies(2:end).range};
-nvaried = prod(cellfun(@length,nvaried));
-datetime = datestr(now,'yyyymmdd-HHMMSS');
-
-set(0, 'DefaultFigureVisible', 'off');
-h = figure('Position',[50,50,850,690]);
+inputChans = find(rcNetcon ~= 0);
 
 subz = find(contains({ICstruc.name},'m0.mat')); % sXm0 (target only) cases
 %subz = 5:length({ICstruc.name});    % all cases except masker-only
@@ -92,7 +105,7 @@ for z = subz
     
     % save spk file
     spatialConfig = strsplit(ICstruc(z).name,'.');
-    study_dir = fullfile(pwd, 'run', datetime, spatialConfig{1});
+    study_dir = fullfile(pwd, 'run', 'optimization',datetime, spatialConfig{1});
     if exist(study_dir, 'dir')
       rmdir(study_dir, 's');
     end
@@ -115,16 +128,24 @@ for z = subz
         data_spks = [];
     end
     
-    [data(z).perf, data(z).fr, data(z).annot, data(z).distMat, data(z).VR] = ...
-        mouse_network(study_dir,time_end,varies,netCons,plot_rasters,calcDistances,...
-        data_spks,data_tau);
+    for ns = 1:nSims
+    [temp_perf(ns), temp_fr(ns)] = ...
+        mouse_network(study_dir,time_end,varies,netCons,plot_rasters,...
+        calcDistances,data_spks,data_tau);
+    end
+    data(z).perf.R = mean([temp_perf.R],2);
+    data(z).perf.C = mean([temp_perf.C]);
+    
+    data(z).fr.R = mean([temp_fr.R],2);
+    data(z).fr.C = mean([temp_fr.C]);
+    
     data(z).name = ICstruc(z).name;
 end
-save([pwd filesep 'run' filesep, datetime filesep 'summary_results.mat'],'data')
+save([pwd filesep 'run' filesep 'optimization' filesep...
+    datetime filesep 'summary_results_iteration' num2str(it) '.mat'],'data')
 close(h);
 
 %% performance grids
-if makeGrids
 
 set(0,'defaultfigurevisible','on');
     
@@ -142,20 +163,7 @@ mixedIdx = find(~contains(temp,'m0') & ~contains(temp,'s0') & ~contains(temp,'em
 textColorThresh = 70;
 numSpatialChan = 4;
 
-width=13; hwratio=0.8;
-x0=.08; y0=.08;
-dx=.04; dy=.04;
-lx=.125; ly=.125/hwratio;
-
-x=-108:108;
-tuningcurve=zeros(4,length(x));
-ono = load('ono_curves_V2.mat','sigmoid','gauss','ushaped');
-tuningcurve(1,:) = ono.sigmoid * rcNetcon(1);
-tuningcurve(2,:) = ono.gauss * rcNetcon(2);
-tuningcurve(3,:) = ono.ushaped * rcNetcon(3);
-tuningcurve(4,:) = fliplr(ono.sigmoid) * rcNetcon(4);
-
-figstr = 'SpatialGrid vary ';
+figstr = 'CleanGrid vary ';
 
 % if more than one parameter is varied
 if sum(cellfun(@length,{varies(2:end).range}) > 1) > 1
@@ -178,65 +186,28 @@ if sum(cellfun(@length,{varies(2:end).range}) > 1) > 1
     paramPairs = reshape(c,[],2);
 else
     multiFlag = 0;
-    figstr = cat(2,figstr,variedParam,'%0.3f');
+    %figstr = cat(2,figstr,variedParam,'%0.3f');
 end
+
+width=8; hwratio=1;
+x0=.08; y0=.08;
+dx=.04; dy=.04;
+lx=.125; ly=.125/hwratio;
+
+x=-108:108;
+tuningcurve=zeros(4,length(x));
+ono = load('ono_curves_V2.mat','sigmoid','gauss','ushaped');
+tuningcurve(1,:) = ono.sigmoid * rcNetcon(1);
+tuningcurve(2,:) = ono.gauss * rcNetcon(2);
+tuningcurve(3,:) = ono.ushaped * rcNetcon(3);
+tuningcurve(4,:) = fliplr(ono.sigmoid) * rcNetcon(4);
 
 for vv = 1:nvaried
     
     h = figure('visible','on');
     figuresize(width, width*hwratio,h, 'inches')
-
-    if ~isempty(mixedIdx)
-        % mixed config cases
-        for i = 1:length(mixedIdx)
-            perf.IC(i,:) = data(mixedIdx(i)).perf.IC(:,vv);
-            fr.IC(i,:) = data(mixedIdx(i)).fr.IC(:,vv);
-            
-            perf.R(i,:) = data(mixedIdx(i)).perf.R(:,vv);
-            fr.R(i,:) = data(mixedIdx(i)).fr.R(:,vv);
-            
-            perf.C(i) = data(mixedIdx(i)).perf.C(vv);
-            fr.C(i) = data(mixedIdx(i)).fr.C(vv);
-        end
-
-        % IC and relay neurons
-        for nn = 1:numSpatialChan
-            if nn > 1
-                subplotloc = nn+1;
-            else
-                subplotloc = nn;
-            end
-            posVec = [1-(x0+subplotloc*(dx+lx)) y0+dy+ly lx ly];
-            subplot('Position',posVec)
-            plotPerfGrid(perf.IC(end:-1:1,nn),fr.IC(end:-1:1,nn),[],textColorThresh);
-            
-            if nn == 4
-                ylabel('IC')
-            else
-                ylabel('');
-            end
-            xlabel(neurons{nn});
-                            
-            posVec = [1-(x0+subplotloc*(dx+lx)) y0+2*(dy+ly) lx ly];
-            subplot('Position',posVec)
-            plotPerfGrid(perf.R(end:-1:1,nn),fr.R(end:-1:1,nn),[],textColorThresh);
-            if nn == 4
-                ylabel('R')
-            else
-                ylabel('');
-            end
-            xlabel('');   
-        end
-        
-        % C neuron
-
-        posVec = [1-(x0+3*(dx+lx)) y0+3*(dy+ly) lx ly];
-        subplot('Position',posVec);
-        plotPerfGrid(perf.C(end:-1:1)',fr.C(end:-1:1)',[],textColorThresh);
-        xlabel('')
-    end
     
-    subplot('position',[0.3 y0+dy/2 0.4 4*ly/5]); 
+    subplot(2,2,1); 
     plot(x,tuningcurve','b','linewidth',1);
     hold on;
     plot(x,sum(tuningcurve',2),'k','linewidth',2);
@@ -253,47 +224,41 @@ for vv = 1:nvaried
         for i = 1:length(targetIdx)
             perf.CT(i) = data(targetIdx(i)).perf.C(vv);
             fr.CT(i) = data(targetIdx(i)).fr.C(vv);
+            fr.R(:,i) = data(targetIdx(i)).fr.R(:,vv);
         end
     end    
     
-    posVec = [posVec(1) posVec(2)+ly+dy/4 lx ly/4];
-    subplot('Position',posVec)
-    plotPerfGrid(perf.CT(end:-1:1),[],[],textColorThresh);
+    % flip CT 
+    perf.CT = fliplr(perf.CT);
+    fr.R = fliplr(fr.R);
     
-    % simulation info
-    annotation('textbox',[.75 .75 .2 .1],...
-           'string',data(z).annot(vv,3:end),...
-           'FitBoxToText','on',...
-           'LineStyle','none')
-       
+    subplot('Position',[0.6 0.6 0.2 0.2/4])
+    plotPerfGrid(perf.CT,[],[],textColorThresh);
+           
     % show data grid next to model grid    
-    posVec = [posVec(1)+dx+lx posVec(2) lx ly/4];
-    subplot('Position',posVec)
+    subplot('Position',[0.6 0.5 0.2 0.2/4])
     plotPerfGrid(data_perf(1:4)',[],[],textColorThresh);
-    
-    temp = flipud(reshape(data_perf(5:end),[4 4]));
-    
-    posVec = [posVec(1) posVec(2)-ly-dy/4 lx ly];
-    subplot('Position',posVec)
-    plotPerfGrid(temp,[],[],textColorThresh);
-    xlabel('');
-    ylabel('');
-    
+
     % calculate error and correlation with data
     [cc_clean,MSE_clean] = calcModelPerf(perf.CT',data_perf(1:4));
-    [cc_masked,MSE_masked] = calcModelPerf(perf.C,data_perf(5:end));
+    % [cc_masked,MSE_masked] = calcModelPerf(perf.C,data_perf(5:end));
 
-    str = {sprintf('Clean C.C. = %0.3f',cc_clean),sprintf('Clean MSE = %0.1f ± %0.1f',MSE_clean)};
+    str = {sprintf('Clean C.C. = %0.3f',cc_clean),...
+        sprintf('Clean MSE = %0.1f ± %0.1f',MSE_clean),...
+        ['learningRate = ' num2str(learningRate)],...
+        ['beta = ' num2str(beta)]};
+    for rr = 1:length(inputChans)
+       str{end+1} = ['param(' num2str(inputChans(rr)) ') = ' num2str(param(inputChans(rr)))]; 
+    end
 
-    annotation('textbox',[.75 .7 .2 .1],...
+    annotation('textbox',[0.6 .35 0.2 0.1],...
            'string',str,...
            'FitBoxToText','on',...
            'LineStyle','none')
        
     % Show FR vs azimuth
-    posVec = [x0 y0+3*ly+4*dy 2*lx+dx 5*ly/4];
-    subplot('position',posVec)
-    plot([-90 0 45 90],data_FR(targetIdx),[-90 0 45 90],fr.CT,'linewidth',2);
+    subplot(2,2,3)
+    plot([-90 0 45 90],data_FR(targetIdx),'-b',[-90 0 45 90],fr.CT,'-r','linewidth',2);
     hold on
     plot([-90 0 45 90],ones(1,4)*mean(data_FR(targetIdx)),'--b',...
         [-90 0 45 90],ones(1,4)*mean(fr.CT),'--r','linewidth',2);
@@ -308,15 +273,37 @@ for vv = 1:nvaried
     % save grid
     Dirparts = strsplit(study_dir, filesep);
     DirPart = fullfile(Dirparts{1:end-1});
-    if multiFlag == 1
-        saveas(gca,[filesep DirPart filesep sprintf(figstr,paramPairs(vv,1),paramPairs(vv,2)) '.tiff'])
-    else
-        saveas(gca,[filesep DirPart filesep sprintf(figstr,varies(end).range(vv)) '.tiff'])
-    end
+    % if multiFlag == 1
+    %    saveas(gca,[filesep DirPart filesep sprintf(figstr,paramPairs(vv,1),paramPairs(vv,2)) '.tiff'])
+    % else
+        saveas(gca,[filesep DirPart filesep 'iteration' num2str(it) '.tiff'])
+    % end
     % clf
 
 end
 
+% update params and loss function
+
+paramHistory(it,:) = param;
+perfHistory(it,:) = perf.CT;
+if it > 1 && abs(MSE_clean(1) - loss(it-1)) < convGoal
+    break;
+else
+    loss(it) = MSE_clean(1);
+    for rr = 1:length(inputChans)
+        del = beta*del - learningRate*2*(perf.CT-data_perf(1:4)')*fr.R(rr,:)';
+        param(inputChans(rr)) = param(inputChans(rr)) + del;
+    end
 end
 
+end
 
+figure; subplot(2,1,1); plot(loss);
+ylabel('MSE');
+subplot(2,1,2);
+plot(paramHistory(:,inputChans)); xlabel('iteration');
+legend('rcNetcon contra')
+ylim([0 1]);
+
+saveas(gcf,[filesep DirPart filesep 'MSE.png'])
+save([filesep DirPart filesep 'optimization_results.mat'],'loss','paramHistory','perfHistory');

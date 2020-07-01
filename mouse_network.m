@@ -1,5 +1,5 @@
-function [perf, fr, optTau, annotstr] = mouse_network(study_dir,time_end,...
-    varies,netCons,plot_rasters,data_spks)
+function [perf, fr, annotstr, distMat, VR] = mouse_network(study_dir,time_end,...
+    varies,netCons,plot_rasters,calcDistances,data_spks,data_tau)
 % [performance, tauMax] = mouse_network(study_dir,time_end,varies,plot_rasters,data_spks)
 % study_dir: location of IC spike files + directory for log and data files
 % time_end: length of simulation in ms
@@ -57,15 +57,15 @@ s.populations(1).equations = 'chouLIF';
 s.populations(1).size = nCells;
 s.populations(1).parameters = {'Itonic',0,'noise',0}; % 10-20 Hz spiking at rest
 
-s.populations(end+1).name = 'X';
-s.populations(end).equations = 'chouLIF';
-s.populations(end).size = nCells;
-s.populations(end).parameters = {'Itonic',0, 'noise',0}; % 10-20 Hz spiking at rest
-
-s.populations(end+1).name = 'S'; % S for sharpening
-s.populations(end).equations = 'chouLIF';
-s.populations(end).size = nCells;
-s.populations(end).parameters = {'Itonic',0, 'noise',0}; % 10-20 Hz spiking at rest
+% s.populations(end+1).name = 'X';
+% s.populations(end).equations = 'chouLIF';
+% s.populations(end).size = nCells;
+% s.populations(end).parameters = {'Itonic',0, 'noise',0}; % 10-20 Hz spiking at rest
+% 
+% s.populations(end+1).name = 'S'; % S for sharpening
+% s.populations(end).equations = 'chouLIF';
+% s.populations(end).size = nCells;
+% s.populations(end).parameters = {'Itonic',0, 'noise',0}; % 10-20 Hz spiking at rest
 
 s.populations(end+1).name='R';
 s.populations(end).equations = 'chouLIF';
@@ -101,25 +101,25 @@ s.connections(1).direction='IC->IC';
 s.connections(1).mechanism_list={'IC_V2'};
 s.connections(1).parameters={'g_postIC',0.2,'trial',5}; % 100 hz spiking
 
-s.connections(end+1).direction='IC->X';
-s.connections(end).mechanism_list={'synDoubleExp'};
-s.connections(end).parameters={'gSYN',.21, 'tauR',0.4, 'tauD',2, 'netcon',diag(ones(1,nCells))}; 
-
-s.connections(end+1).direction='IC->S';
-s.connections(end).mechanism_list={'synDoubleExp'};
-s.connections(end).parameters={'gSYN',.21, 'tauR',0.4, 'tauD',2, 'netcon',diag(ones(1,nCells))}; 
+% s.connections(end+1).direction='IC->X';
+% s.connections(end).mechanism_list={'synDoubleExp'};
+% s.connections(end).parameters={'gSYN',.21, 'tauR',0.4, 'tauD',2, 'netcon',diag(ones(1,nCells))}; 
+% 
+% s.connections(end+1).direction='IC->S';
+% s.connections(end).mechanism_list={'synDoubleExp'};
+% s.connections(end).parameters={'gSYN',.21, 'tauR',0.4, 'tauD',2, 'netcon',diag(ones(1,nCells))}; 
 
 s.connections(end+1).direction='IC->R';
 s.connections(end).mechanism_list={'synDoubleExp'};
 s.connections(end).parameters={'gSYN',.21, 'tauR',0.4, 'tauD',2, 'netcon',diag(ones(1,nCells)),'delay',0}; 
 
-s.connections(end+1).direction='X->R';
-s.connections(end).mechanism_list={'synDoubleExp'};
-s.connections(end).parameters={'gSYN',.2, 'tauR',0.4, 'tauD',10, 'netcon',irNetcon, 'ESYN',-80}; 
-
-s.connections(end+1).direction='S->R';
-s.connections(end).mechanism_list={'synDoubleExp'};
-s.connections(end).parameters={'gSYN',.17, 'tauR',0.4, 'tauD',5, 'netcon',srNetcon, 'ESYN',-80, 'delay',3}; 
+% s.connections(end+1).direction='X->R';
+% s.connections(end).mechanism_list={'synDoubleExp'};
+% s.connections(end).parameters={'gSYN',.2, 'tauR',0.4, 'tauD',10, 'netcon',irNetcon, 'ESYN',-80}; 
+% 
+% s.connections(end+1).direction='S->R';
+% s.connections(end).mechanism_list={'synDoubleExp'};
+% s.connections(end).parameters={'gSYN',.17, 'tauR',0.4, 'tauD',5, 'netcon',srNetcon, 'ESYN',-80, 'delay',3}; 
 
 s.connections(end+1).direction='R->C';
 s.connections(end).mechanism_list={'synDoubleExp'};
@@ -157,13 +157,13 @@ for vv = 1:jump % for each varied parameter
 
     %% visualize spikes
     ICspks = zeros(40,4,time_end);
-    Xspks = zeros(40,4,time_end);
+    %Xspks = zeros(40,4,time_end);
     Rspks = zeros(40,4,time_end);
     Cspks = zeros(40,time_end);
     for i = 1:40
         for j = 1:4
             ICspks(i,j,:) = subData(i).IC_V_spikes(:,j);
-            Xspks(i,j,:) = subData(i).X_V_spikes(:,j);
+            %Xspks(i,j,:) = subData(i).X_V_spikes(:,j);
             Rspks(i,j,:) = subData(i).R_V_spikes(:,j);
         end
         Cspks(i,:) = subData(i).C_V_spikes;
@@ -178,7 +178,7 @@ for vv = 1:jump % for each varied parameter
         else
             ip = 1;
         end
-        subplot(4,5,21-ip)
+        if plot_rasters, subplot(4,5,21-ip); end
         thisRaster = squeeze(ICspks(:,i,:));
         [perf.IC(i,vv),fr.IC(i,vv)] = calcPCandPlot(thisRaster,time_end,1,plot_rasters);        
 
@@ -189,26 +189,33 @@ for vv = 1:jump % for each varied parameter
             'HorizontalAlignment','center',...
             'LineStyle','none')
         
-        subplot(4,5,16-ip)
+        if plot_rasters, subplot(4,5,16-ip); end
 
-        thisRaster = squeeze(Xspks(:,i,:));
-        calcPCandPlot(thisRaster,time_end,0,plot_rasters);        
-        if i==4, ylabel('X'); end
-        xticklabels([])
+%         thisRaster = squeeze(Xspks(:,i,:));
+%         calcPCandPlot(thisRaster,time_end,0,plot_rasters);        
+%         if i==4, ylabel('X'); end
+%         xticklabels([])
 
-        subplot(4,5,11-ip)
+        if plot_rasters, subplot(4,5,11-ip); end
         thisRaster = squeeze(Rspks(:,i,:));
         [perf.R(i,vv),fr.R(i,vv)] = calcPCandPlot(thisRaster,time_end,1,plot_rasters);
 
         if i==4, ylabel('R'); end
         xticklabels([])
     end
-    subplot(4,5,3)
-    [perf.C(vv),fr.C(vv),optTau.R(i,vv)] = calcPCandPlot(Cspks,time_end,1,plot_rasters); 
-
-    ylabel('C spikes')
-    xticklabels([])
-
+    if plot_rasters, subplot(4,5,3); ylabel('C spikes'); xticklabels([]); end
+    [perf.C(vv),fr.C(vv)] = calcPCandPlot(Cspks,time_end,1,plot_rasters);     
+    
+    if plot_rasters, subplot(4,5,2); xticklabels([]); ylabel('Data spikes');
+        tempspks = zeros(numel(data_spks),time_end);
+        for tt = 1:numel(data_spks)
+            temp = round(data_spks{tt}*1000);
+            temp(temp < 0 | temp >= time_end) = [];
+            tempspks(tt,temp+1) = 1;
+        end
+    calcPCandPlot(tempspks,time_end,1,plot_rasters);  
+    end
+    
     dataFR = mean(mean(cellfun(@(x) sum(x >= 0 & x < time_end/1000),data_spks)))/time_end*1000;
     
     % figure annotations
@@ -219,24 +226,38 @@ for vv = 1:jump % for each varied parameter
     for aa = 1:length(varies)-1
         annotstr{vv,aa+2} = sprintf('%s = %.3f',paramstr{aa},eval(['data(' num2str(vv) ').' paramstr{aa}]));
     end
-    annotation('textbox',[.675 .85 .2 .1],...
-               'string',annotstr(vv,:),...
-               'FitBoxToText','on',...
-               'LineStyle','none')
-
+    
     parts = strsplit(study_dir, filesep);
     DirPart = fullfile(parts{1:end-1});
+    
     if plot_rasters
+        annotation('textbox',[.675 .85 .2 .1],...
+            'string',annotstr(vv,:),...
+            'FitBoxToText','on',...
+            'LineStyle','none')
+        
         saveas(gca,[filesep DirPart filesep parts{end} '_v2_' num2str(vv) '.tiff'])
     end
     
     % plot comparison rasters and calculate VR distance
     
-    % [distMat] = calcModelDist(Cspks,data_spks,optTau.R(i,vv),time_end);
+    if calcDistances
+        [distMat(vv),VR(vv),taufig] = plotVRDists(Cspks,data_spks,data_tau,time_end);
+        
+        figure(taufig);
+        annotation('textbox',[.75 .85 .2 .1],...
+            'string',annotstr(vv,:),...
+            'FitBoxToText','on',...
+            'LineStyle','none')
+        
+        saveas(gca,[filesep DirPart filesep parts{end} '_' num2str(vv) '_VRdistances.tiff'])
+        close(taufig);
+    end
+    
 end
 end
 
-function [pc,fr,optTau] = calcPCandPlot(raster,time_end,calcPC,plot_rasters,h)
+function [pc,fr] = calcPCandPlot(raster,time_end,calcPC,plot_rasters,h)
     PCstr = '';
     if calcPC
         % spks to spiketimes in a cell array of 20x2
@@ -249,7 +270,6 @@ function [pc,fr,optTau] = calcPCandPlot(raster,time_end,calcPC,plot_rasters,h)
         [performance, ~] = calcpc(distMat, 20, 2, 1,[], 'new');
         pc = mean(max(performance));
         PCstr = ['PC = ' num2str(pc)];
-        optTau = mean(tau(max(performance)==performance));
     end
     
     fr = mean(sum(raster,2))/time_end*1000;
@@ -262,42 +282,67 @@ function [pc,fr,optTau] = calcPCandPlot(raster,time_end,calcPC,plot_rasters,h)
     end
 end
 
-function [distMat] = calcModelDist(raster,data_spks,optTau,time_end)
+function [distMat,VR,taufig] = plotVRDists(raster,data_spks,data_tau,time_end)
 
-[numTrials] = size(data_spks);
+% VR distances for model
 
-% spks to spiketimes in a cell array of 20x2
-tau = linspace(1,30,100);
+% target 1
+for tid = 1:2
+    spkTime = cell(20,1);
+    for ii = 1:20, spkTime{ii} = find(raster(20*(tid-1)+ii,:))/1000; end
+    spkTime = spkTime(~cellfun('isempty',spkTime));
+    % calculate distance matrix & performance
+    distMat.model{tid} = calcvr(spkTime, data_tau/1000);
+    
+    temp_model{tid} = distMat.model{tid}(distMat.model{tid} ~= 0);
+    VR.model(tid) = mean(temp_model{tid},'all');
+end
 
-% VR distances for target 1
-spkTime = cell(40,1);
-for ii = 1:20, spkTime{ii} = find(raster(ii,:)); end
-for ii = 1:numTrials, spkTime{20+ii} = data_spks{ii,1}'*1000;
-spkTime{20+ii}(spkTime{20+ii} < 0 | spkTime{20+ii} > time_end) = []; end
+% target 2
 
-spkTime = spkTime(~cellfun('isempty',spkTime));
-% calculate distance matrix & performance
-distMat{1} = calcvr(spkTime, optTau);
+% VR distances for data
+[numTrials] = numel(data_spks);
 
-% VR distances for target 2
-spkTime = cell(40,1);
-for ii = 21:40, spkTime{ii-20} = find(raster(ii,:)); end
-for ii = 1:numTrials, spkTime{20+ii} = data_spks{ii,2}'*1000;
-spkTime{20+ii}(spkTime{20+ii} < 0 | spkTime{20+ii} > time_end) = [];  end
+for tid = 1:2
+    spkTime = cell(size(data_spks(:,tid)));
+    for ii = 1:length(data_spks(:,tid))
+        spkTime{ii} = data_spks{ii,tid}';
+        spkTime{ii}(spkTime{ii} < 0 | spkTime{ii} > time_end/1000) = []; 
+    end
+    
+    spkTime = spkTime(~cellfun('isempty',spkTime));
+    % calculate distance matrix & performance
+    distMat.exp{tid} = calcvr(spkTime, data_tau/1000);
+    
+    temp_exp{tid} = distMat.exp{tid}(distMat.exp{tid} ~= 0);
+    VR.exp(tid) = mean(temp_exp{tid},'all');
+end
 
-spkTime = spkTime(~cellfun('isempty',spkTime));
-% calculate distance matrix & performance
-distMat{2} = calcvr(spkTime, optTau);
+allVRs = [distMat.exp{1}(:);distMat.exp{2}(:);distMat.model{1}(:);distMat.model{2}(:)];
 
-[N1,edges] = histcounts(distMat{1}(end-numTrials+1:end,1:20),50);
-[N2] = histcounts(distMat{2}(end-numTrials+1:end,1:20),edges);
+maxVR = max(allVRs,[],'all');
 
-edges = edges + (edges(2)-edges(1))/2;
-VR = mean([distMat{1}(end-numTrials+1:end,1:20) distMat{2}(end-numTrials+1:end,1:20)],'all');
+binsize = 10;
+bins = 0:binsize:maxVR+10;
 
-figure;
-bar(edges(1:end-1),N1+N2);
+for tid = 1:2
+    [N_model{tid}] = histcounts(temp_model{tid},bins);
+    [N_exp{tid}] = histcounts(temp_exp{tid},bins);
+end
+bins = bins + binsize/2;
+
+taufig = figure;
+subplot(2,1,1);
+plot(bins(1:end-1),N_model{1},bins(1:end-1),N_model{2});
+title(['Model VR: [' num2str(VR.model(1)) ', ' num2str(VR.model(2)) '], #trials = 40']);
+xlim([0 maxVR]);
+ylim([0 max([N_model{1},N_exp{1},N_model{2},N_exp{2}])]);
+
+subplot(2,1,2);
+plot(bins(1:end-1),N_exp{1},bins(1:end-1),N_exp{2});
 xlabel('VR distance');
-title({['Tau = ' num2str(optTau)],['VR = ' num2str(VR)]});
+title(['Experimental VR: [' num2str(VR.exp(1)) ',' num2str(VR.exp(2)) '], #trials = ' num2str(numTrials)]);
+xlim([0 maxVR]);
+ylim([0 max([N_model{1},N_exp{1},N_model{2},N_exp{2}])]);
 
 end
