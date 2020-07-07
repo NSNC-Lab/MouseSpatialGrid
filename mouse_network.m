@@ -280,6 +280,16 @@ function [pc,fr] = calcPCandPlot(raster,time_end,calcPC,plot_rasters,h)
     xlim([0 time_end])
     line([0,time_end],[20.5,20.5],'color',[0.3 0.3 0.3])
     end
+    
+%     t_vec = 1:5:size(raster,2);
+%     temp1 = mean(raster(1:20,:));
+%     temp2 = mean(raster(21:end,:));
+%     for t = 1:length(t_vec)-1
+%         t1(t) = sum(temp1(t_vec(t):t_vec(t+1)));
+%         t2(t) = sum(temp2(t_vec(t):t_vec(t+1)));
+%     end
+%     t1(end+1) = sum(temp1(t_vec(end):end));
+%     t2(end+1) = sum(temp2(t_vec(end):end));
 end
 
 function [distMat,VR,taufig] = plotVRDists(raster,data_spks,data_tau,time_end)

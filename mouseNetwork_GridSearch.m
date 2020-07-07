@@ -7,22 +7,21 @@ addpath('eval_scripts')
 addpath('genlib')
 addpath(genpath('dynasim'))
 
+%%%%%%%% start of user inputs
+
 makeGrids = 1;  % plot spatial grids
 calcDistances = 1;  % plot VR distances
-plot_rasters = 1;   % plot rasters
+plot_rasters = 0;   % plot rasters
 
 %% define parameters for optimization
 
 nSims = 3; % number of simulations to run for average MSE
 
-temp = 0.1:0.05:0.3;
-temp2 = temp;
+temp = 1;
+weights = [zeros(size(temp,2),3),temp']; %add this as input to mouse_network
 
-[A,B] = meshgrid(temp,temp2);
-c=cat(2,A',B');
-d=reshape(c,[],2);
+%%%%%%%% end of user inputs
 
-weights = [d(:,1),zeros(size(d,1),2),d(:,2)]; %add this as input to mouse_network
 inputChans = find(weights(1,:) ~= 0);
 
 %% load expeimental data to optimize model to
@@ -40,7 +39,7 @@ data_tau = opt_tau{dataCh}(best_loc);
 %% load STRF spikes
 
 researchDrive = 'MiceSpatialGrids/';
-ICdir = [researchDrive 'ICStim/Mouse/full_grids//BW_0.009 BTM_3.8 t0_0.1 phase0.4985//s30_STRFgain3.00_20200624-160717'];
+ICdir = [researchDrive 'ICStim/Mouse/full_grids//BW_0.009 BTM_3.8 t0_0.1 phase0.4985//s30_STRFgain4.50_20200622-150507'];
 ICdirPath = [ICdir filesep];
 ICstruc = dir([ICdirPath '*.mat']);
 if isempty(ICstruc), error('empty data directory'); end
@@ -63,11 +62,11 @@ varies(1).range = 1:40;
 
 varies(2).conxn = 'R->C';
 varies(2).param = 'gSYN';
-varies(2).range = 0.21;
+varies(2).range = 0.18;
 
 varies(3).conxn = 'C';
 varies(3).param = 'noise';
-varies(3).range = 1.6;
+varies(3).range = 1.3:0.1:1.4;
 
 nvaried = {varies(2:end).range};
 nvaried = prod(cellfun(@length,nvaried));
@@ -132,15 +131,19 @@ for z = subz
     end
     
     for ns = 1:nSims
-    [temp_perf(ns), temp_fr(ns)] = ...
+    [temp_perf(ns), temp_fr(ns), data(z).annot,~, data(z).VR] = ...
         mouse_network(study_dir,time_end,varies,netCons,plot_rasters,...
         calcDistances,data_spks,data_tau);
     end
-    data(z).perf.R = mean([temp_perf.R],2);
-    data(z).perf.C = mean([temp_perf.C]);
     
-    data(z).fr.R = mean([temp_fr.R],2);
-    data(z).fr.C = mean([temp_fr.C]);
+    % average across multiple simulations if needed
+    for vv = 1:nvaried
+        inds = 1:nvaried:nvaried*nSims + (vv-1);
+        temp = [temp_perf.R]; data(z).perf.R(:,vv) = mean(temp(:,inds),2);
+        temp = [temp_perf.C]; data(z).perf.C(vv) = mean(temp(inds));
+        temp = [temp_fr.R]; data(z).fr.R(:,vv) = mean(temp(:,inds),2);
+        temp = [temp_fr.C]; data(z).fr.C(vv) = mean(temp(inds));
+    end
     
     data(z).name = ICstruc(z).name;
 end
@@ -280,17 +283,17 @@ for vv = 1:nvaried
         saveas(gca,[filesep DirPart filesep 'iteration' num2str(it) '.tiff'])
     % end
     % clf
-
+        
+    perfHistory(it,:,vv) = perf.CT;
+    frHistory(it,:,vv) = mean(fr.CT);
+    loss(it,vv) = MSE_clean(1);
 end
 
 end
 
-% update params and loss function
-
-perfHistory(it,:) = perf.CT;
-loss(it) = MSE_clean(1);
-
 end
+
+%% need to manually code this when you change the parameter space for grid search
 
 names = {'RC_{ipsi}','RC_{G}','RC_{U}','RC_{contra}'};
 
@@ -316,3 +319,26 @@ end
 
 saveas(gcf,[filesep DirPart filesep 'MSE grid search.png'])
 save([filesep DirPart filesep 'grid_search_results.mat'],'loss','weights','perfHistory');
+
+% plot FR vs param
+figure;
+if dims < 2
+    [temp,I] = sort(temp);
+    plot(temp,squeeze(frHistory(:,:,I)));
+    xlabel(names{inputChans}); ylabel('Mean clean FR');
+    hold on; plot(temp,ones(size(temp))*mean(data_FR(targetIdx)))
+elseif dims == 2
+    sz1 = length(unique(temp(:,1)));
+    sz2 = length(unique(temp(:,2)));
+    
+    X = reshape(temp(:,1),sz1,sz2)';
+    Y = reshape(temp(:,2),sz1,sz2)';
+    Z = reshape(frHistory,sz1,sz2)';
+    surf(X,Y,Z);
+    hold on;
+    surf(X,Y,ones(size(Z))*mean(data_FR(targetIdx)))
+    xlabel(names{inputChans(1)}); ylabel(names{inputChans(2)}); zlabel('Mean clean FR');
+end
+legend('Model','Data')
+
+saveas(gcf,[filesep DirPart filesep 'MSE FR.png'])

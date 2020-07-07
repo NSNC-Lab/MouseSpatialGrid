@@ -1,6 +1,6 @@
 function f = mouseNetwork_objective(w)
 
-close all;
+close all
 
 addpath('mechs')
 addpath('dependencies')
@@ -9,15 +9,17 @@ addpath('genlib')
 addpath(genpath('dynasim'))
 
 makeGrids = 1;  % plot spatial grids
-calcDistances = 1;  % plot VR distances
-plot_rasters = 1;   % plot rasters
+calcDistances = 0;  % plot VR distances
+plot_rasters = 0;   % plot rasters
 
 %% define parameters for optimization
 
-nSims = 3; % number of simulations to run for average MSE
+if size(w,1) ~= 4
+   w = w'; 
+end
+rcNetcon = w;
 
-weights = w; %add this as input to mouse_network
-inputChans = find(weights(1,:) ~= 0);
+%inputChans = find(weights ~= 0);
 
 %% load expeimental data to optimize model to
 
@@ -53,7 +55,7 @@ varies(1).range = 1:40;
 
 varies(2).conxn = 'R->C';
 varies(2).param = 'gSYN';
-varies(2).range = 0.21;
+varies(2).range = 0.18;
 
 varies(3).conxn = 'C';
 varies(3).param = 'noise';
@@ -73,7 +75,6 @@ nCells = 4; %synchronise this variable with mouse_network
 
 % netCons.irNetcon = irNetcon;
 % netCons.srNetcon = srNetcon;
-rcNetcon = weights(it,:)';
 netCons.rcNetcon = rcNetcon;
 
 subz = find(contains({ICstruc.name},'m0.mat')); % sXm0 (target only) cases
@@ -96,7 +97,7 @@ for z = subz
     
     % save spk file
     spatialConfig = strsplit(ICstruc(z).name,'.');
-    study_dir = fullfile(pwd, 'run', 'grid-search', datetime, spatialConfig{1});
+    study_dir = fullfile(pwd, 'run', 'optimization', datetime, spatialConfig{1});
     if exist(study_dir, 'dir')
       rmdir(study_dir, 's');
     end
@@ -119,7 +120,7 @@ for z = subz
         data_spks = [];
     end
     
-    for ns = 1:nSims
+    for ns = 1
     [temp_perf(ns), temp_fr(ns)] = ...
         mouse_network(study_dir,time_end,varies,netCons,plot_rasters,...
         calcDistances,data_spks,data_tau);
@@ -132,8 +133,8 @@ for z = subz
     
     data(z).name = ICstruc(z).name;
 end
-save([pwd filesep 'run' filesep 'grid-search' filesep...
-    datetime filesep 'summary_results_iteration' num2str(it) '.mat'],'data')
+save([pwd filesep 'run' filesep 'optimization' filesep...
+    datetime filesep 'summary_results.mat'],'data')
 close(h);
 
 %% performance grids
@@ -265,7 +266,7 @@ for vv = 1:nvaried
     % if multiFlag == 1
     %    saveas(gca,[filesep DirPart filesep sprintf(figstr,paramPairs(vv,1),paramPairs(vv,2)) '.tiff'])
     % else
-        saveas(gca,[filesep DirPart filesep 'iteration' num2str(it) '.tiff'])
+        saveas(gca,[filesep DirPart filesep 'gridresults.tiff'])
     % end
     % clf
 

@@ -8,7 +8,7 @@ addpath('eval_scripts')
 addpath('genlib')
 addpath(genpath('dynasim'))
 
-makeGrids = 0;  % plot spatial grids
+makeGrids = 1;  % plot spatial grids
 calcDistances = 1;  % plot VR distances
 plot_rasters = 1;   % plot rasters
 
@@ -39,13 +39,9 @@ varies(1).range = 1:40;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN';
-varies(end).range = 0.21;
+varies(end).range = 0.03:0.03:0.21;
 
-varies(end+1).conxn = 'C';
-varies(end).param = 'noise';
-varies(end).range = 1.5;
-
-variedParam = 'C_{noise}';
+variedParam = 'R->CgSYN';
 
 %% netcons
 nCells = 4; %synchronise this variable with mouse_network
@@ -56,7 +52,7 @@ irNetcon = zeros(nCells);
 
 srNetcon = zeros(nCells);
 
-rcNetcon = [0;0;0;0.5]; %add this as input to mouse_network
+rcNetcon = [0;0;0;1]; %add this as input to mouse_network
 % make rnNetcon have variable weights (instead of zeros)
 
 netCons.irNetcon = irNetcon;
@@ -115,7 +111,7 @@ for z = subz
         data_spks = [];
     end
     
-    [data(z).perf, data(z).fr, data(z).annot, data(z).distMat, data(z).VR] = ...
+    [data(z).perf, data(z).fr, data(z).annot, ~, ~] = ...
         mouse_network(study_dir,time_end,varies,netCons,plot_rasters,calcDistances,...
         data_spks,data_tau);
     data(z).name = ICstruc(z).name;
@@ -256,6 +252,9 @@ for vv = 1:nvaried
         end
     end    
     
+    if ~exist('posVec','var')
+       posVec = [x0+2*(lx+dx) y0+3*(dy+ly)]; 
+    end
     posVec = [posVec(1) posVec(2)+ly+dy/4 lx ly/4];
     subplot('Position',posVec)
     plotPerfGrid(perf.CT(end:-1:1),[],[],textColorThresh);
@@ -281,7 +280,9 @@ for vv = 1:nvaried
     
     % calculate error and correlation with data
     [cc_clean,MSE_clean] = calcModelPerf(perf.CT',data_perf(1:4));
+    if exist('perf.C','var')
     [cc_masked,MSE_masked] = calcModelPerf(perf.C,data_perf(5:end));
+    end
 
     str = {sprintf('Clean C.C. = %0.3f',cc_clean),sprintf('Clean MSE = %0.1f ± %0.1f',MSE_clean)};
 

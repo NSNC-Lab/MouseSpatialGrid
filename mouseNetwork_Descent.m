@@ -7,19 +7,19 @@ addpath('eval_scripts')
 addpath('genlib')
 addpath(genpath('dynasim'))
 
-%% define parameters for optimization
+%% define parameters for gradient-descent
 
-nIterations = 10;   % number of parameters searcches
-nSims = 3; % number of simulations to run for average MSE
-learningRate = 0.0001;
-beta = 0.5; % 0 = without momentum
+nIterations = 5;   % number of parameters searcches
+nSims = 1; % number of simulations to run for average MSE
+learningRate = 0.00001;
+beta = 0.9; % 0 = without momentum
 
 loss = zeros(1,nIterations);
 convGoal = 0.1;
 
 %param(1) - rcNetcon weights
 
-param = [0;0;0;0.7]; %add this as input to mouse_network
+param = [0.1;0;0;0.7]; %add this as input to mouse_network
 
 %% load expeimental data to optimize model to
 
@@ -105,7 +105,7 @@ for z = subz
     
     % save spk file
     spatialConfig = strsplit(ICstruc(z).name,'.');
-    study_dir = fullfile(pwd, 'run', 'optimization',datetime, spatialConfig{1});
+    study_dir = fullfile(pwd, 'run', 'gradient-descent',datetime, spatialConfig{1});
     if exist(study_dir, 'dir')
       rmdir(study_dir, 's');
     end
@@ -141,7 +141,7 @@ for z = subz
     
     data(z).name = ICstruc(z).name;
 end
-save([pwd filesep 'run' filesep 'optimization' filesep...
+save([pwd filesep 'run' filesep 'gradient-descent' filesep...
     datetime filesep 'summary_results_iteration' num2str(it) '.mat'],'data')
 close(h);
 
@@ -291,8 +291,11 @@ if it > 1 && abs(MSE_clean(1) - loss(it-1)) < convGoal
 else
     loss(it) = MSE_clean(1);
     for rr = 1:length(inputChans)
-        del = beta*del - learningRate*2*(perf.CT-data_perf(1:4)')*fr.R(rr,:)';
-        param(inputChans(rr)) = param(inputChans(rr)) + del;
+        del = beta*del + learningRate*2*(perf.CT-data_perf(1:4)')*fr.R(rr,:)';
+        param(inputChans(rr)) = param(inputChans(rr)) - del;
+        if param(inputChans(rr)) < 0
+           param(inputChans(rr)) = 0; 
+        end
     end
 end
 
