@@ -8,7 +8,7 @@ addpath('eval_scripts')
 addpath('genlib')
 addpath(genpath('dynasim'))
 
-makeGrids = 1;  % plot spatial grids
+makeGrids = 0;  % plot spatial grids
 calcDistances = 1;  % plot VR distances
 plot_rasters = 1;   % plot rasters
 
@@ -37,9 +37,9 @@ varies(1).conxn = '(IC->IC)';
 varies(1).param = 'trial';
 varies(1).range = 1:40;
 
-varies(end+1).conxn = 'R->C';
-varies(end).param = 'gSYN';
-varies(end).range = 0.03:0.03:0.21;
+varies(end+1).conxn = 'C';
+varies(end).param = 'noise';
+varies(end).range = 0.5:0.5:2.5;
 
 variedParam = 'R->CgSYN';
 
@@ -48,14 +48,14 @@ nCells = 4; %synchronise this variable with mouse_network
 
 % -90, 0, 45, 90º
 % x-channel inhibition
-irNetcon = zeros(nCells);
+xrNetcon = zeros(nCells);
 
 srNetcon = zeros(nCells);
 
 rcNetcon = [0;0;0;1]; %add this as input to mouse_network
 % make rnNetcon have variable weights (instead of zeros)
 
-netCons.irNetcon = irNetcon;
+netCons.irNetcon = xrNetcon;
 netCons.srNetcon = srNetcon;
 netCons.rcNetcon = rcNetcon;
 
@@ -111,9 +111,9 @@ for z = subz
         data_spks = [];
     end
     
-    [data(z).perf, data(z).fr, data(z).annot, ~, ~] = ...
-        mouse_network(study_dir,time_end,varies,netCons,plot_rasters,calcDistances,...
-        data_spks,data_tau);
+    [data(z).perf, data(z).fr, data(z).annot, ~, data(z).VR] = ...
+        mouse_network(study_dir,time_end,varies,netCons,plot_rasters,...
+        calcDistances,data_spks,data_tau);
     data(z).name = ICstruc(z).name;
 end
 save([pwd filesep 'run' filesep, datetime filesep 'summary_results.mat'],'data')
@@ -281,7 +281,7 @@ for vv = 1:nvaried
     % calculate error and correlation with data
     [cc_clean,MSE_clean] = calcModelPerf(perf.CT',data_perf(1:4));
     if exist('perf.C','var')
-    [cc_masked,MSE_masked] = calcModelPerf(perf.C,data_perf(5:end));
+        [cc_masked,MSE_masked] = calcModelPerf(perf.C,data_perf(5:end));
     end
 
     str = {sprintf('Clean C.C. = %0.3f',cc_clean),sprintf('Clean MSE = %0.1f ± %0.1f',MSE_clean)};

@@ -31,14 +31,14 @@ if strcmp(tuning,'Mouse')
     end
     
     %strf parameters
-    paramH.BW = 0.009; %bandwidth
-    paramH.BTM = 3.8 ; %best temporal modulation
+    paramH.BW = 0.009; %bandwidth   %0.009
+    paramH.BTM = 3.8; %best temporal modulation   %3.8
     paramH.t0 = 0.05; % t0, peak latency (s)
-    paramH.phase = 0.4985*pi; % phase
+    paramH.phase = 0.4985*pi; % phase  %0.4985
     paramG.BW = 2000;  % Hz
     paramG.BSM = 5.00E-05; % 1/Hz=s best spectral modulation
     paramG.f0 = 4300;
-    strfGain = 2; %1.5 gain ~ 16 Hz, 4.5 gain ~ 50 Hz FR
+    strfGain = 1; %1.5 gain ~ 16 Hz, 4.5 gain ~ 50 Hz FR
 elseif strcmp(tuning,'bird')
     % stimuli
     load('stimuli_birdsongs.mat','stimuli','fs')
@@ -99,10 +99,10 @@ for songloc = songLocs
     close all
     maskerloc=0;
     
-    t_spiketimes=InputGaussianSTRF_v2(specs,songloc,maskerloc,tuningParam,saveParam,mean_rate,stimGain,maxWeight);
-    t_spiketimes=InputGaussianSTRF_v2(specs,maskerloc,songloc,tuningParam,saveParam,mean_rate,stimGain,maxWeight);
+    t_spiketimes = InputGaussianSTRF_v2(specs,songloc,maskerloc,tuningParam,saveParam,mean_rate,stimGain,maxWeight);
+    t_spiketimes = InputGaussianSTRF_v2(specs,maskerloc,songloc,tuningParam,saveParam,mean_rate,stimGain,maxWeight);
     for maskerloc = maskerLocs
-        t_spiketimes=InputGaussianSTRF_v2(specs,songloc,maskerloc,tuningParam,saveParam,mean_rate,stimGain,maxWeight);
+        t_spiketimes = InputGaussianSTRF_v2(specs,songloc,maskerloc,tuningParam,saveParam,mean_rate,stimGain,maxWeight);
     end
 end
 set(0, 'DefaultFigureVisible', 'on')
@@ -149,5 +149,3 @@ for i = 1:length(neurons)
     set(gca,'fontsize',12)
 end
 saveas(gca,[fileloc filesep 'performance_grid.tiff'])
-
-

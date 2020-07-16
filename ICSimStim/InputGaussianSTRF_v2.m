@@ -69,10 +69,6 @@ switch tuning.type
     case 'Mouse'
         x=-108:108;
         tuningcurve=zeros(4,length(x));
-%         tuningcurve(1,:)= sigmf(-x,[0.016 -22.5])-0.05; %flipped sigmodial
-%         tuningcurve(2,:)=gaussmf(x,[sigma,0]); %guassian
-%         tuningcurve(3,:)= 1- gaussmf(x,[sigma,0]); %U shaped gaussian
-%         tuningcurve(4,:)= sigmf(x,[0.016 -22.5])-0.05; %sigmodial
         load('ono_curves_V2.mat','sigmoid','gauss','ushaped');
         tuningcurve(1,:) = sigmoid;
         tuningcurve(2,:) = gauss;
@@ -88,7 +84,7 @@ end
 xlim([min(x) max(x)]);ylim([0 1.05])
 set(gca,'xtick',[-90 0 45 90],'XTickLabel',{'-90 deg', '0 deg', '45 deg', '90 deg'},'YColor','w')
 set(gca,'ytick',[0 0.50 1.0],'YTickLabel',{'0', '0.50', '1.0'},'YColor','b')
-%set(gca,'xdir','reverse');
+set(gca,'xdir','reverse');
 
 % ---- initialize stimuli spectrogram ----
 masker_spec = specs.maskers{1};
@@ -113,7 +109,7 @@ title('STRF')
 %%
 t_spiketimes={};
 avgSpkRate=zeros(1,4);disc=zeros(1,4);
-for songn=1:2
+for songn = 1:2
     %convert sound pressure waveform to spectrogram representation
 %     songs(:,songn)=songs{songn}(1:n_length);
 %     [song_spec,~,~]=STRFspectrogram(songs{songn},fs);
@@ -127,20 +123,20 @@ for songn=1:2
 
     if songloc
         % when masker and song are colocated
-        if maskerloc==songloc
-            stim_spec(songloc,:,:)=(masker_spec + song_spec)/2;
+        if maskerloc == songloc
+            stim_spec(songloc,:,:) = (masker_spec + song_spec)/2;
         else
-            stim_spec(songloc,:,:)=song_spec;
+            stim_spec(songloc,:,:) = song_spec;
         end
     end
-    if songn==1
+    if songn == 1
         % plot spectrograms for song1- bottom row of graphs
-        for i=1:4
+        for i = 1:4
             %the below if statement creates the space in between the first graph and the other 3
-            if i>1
-                subplotloc=5-i;
+            if i > 1
+                subplotloc = 5-i;
             else
-                subplotloc=6-i;
+                subplotloc = 6-i;
             end
 
             positionVector = [x0+subplotloc*(dx+lx) y0 lx ly];
@@ -156,6 +152,13 @@ for songn=1:2
     mixedspec=zeros(size(stim_spec));
     weight=zeros(4,4);
     for i=1:4  % summing of each channel, i.e. neuron type 1-4
+        
+        if i > 1
+            subplotloc = 5-i;
+        else
+            subplotloc = 6-i;
+        end
+        
         for trial = 1:20         % for each trial, define a new random WGN masker
 %             masker = wgn(1,n_length,1);
             masker_spec = specs.maskers{trial};
@@ -181,16 +184,10 @@ for songn=1:2
             end
             %mixedspec(i,:,:) = mixedspec(i,:,:).*stimGain;
 
-            if i>1
-                subplotloc=5-i;
-            else
-                subplotloc=6-i;
-            end
-
             currspec=squeeze(mixedspec(i,:,:)); % currentspectrograms
 
             %% plot mixed spectrograms (of song1)- 3rd row of graphs
-            if songn==1 && trial==1
+            if songn == 1 && trial == 1
                 positionVector = [x0+subplotloc*(dx+lx) y0+2*(dy+ly) lx ly];
                 subplot('Position',positionVector)
                 imagesc(t,f,currspec',[0 80]);colormap('parula');
@@ -207,7 +204,7 @@ for songn=1:2
 
         %% plot FR (of song1)
         %2nd row of plots- spectograph
-        if songn==1
+        if songn == 1
             positionVector = [x0+subplotloc*(dx+lx) y0+3*(dy+ly) lx ly];
             subplot('Position',positionVector)
             plot(t,rate);xlim([0 max(t)])
@@ -223,7 +220,7 @@ for songn=1:2
         ylim([0 20])
         xlim([0 max(t)*1000])
         %Below section gives the whole row of top labels
-        if songn==2
+        if songn == 2
             distMat = calcvr([t_spiketimes(:,i) t_spiketimes(:,i+4)], 10); % using ms as units, same as ts
             [disc(i), E, correctArray] = calcpc(distMat, 20, 2, 1,[], 'new');
             firingRate = round(sum(cellfun(@length,t_spiketimes(:,i+4)))/(t(end)*20));

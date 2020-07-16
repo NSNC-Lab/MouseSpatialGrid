@@ -8,8 +8,8 @@ addpath('eval_scripts')
 addpath('genlib')
 addpath(genpath('dynasim'))
 
-makeGrids = 1;  % plot spatial grids
-calcDistances = 0;  % plot VR distances
+plot_grids = 0;  % plot spatial grids
+plot_distances = 0;  % plot VR distances
 plot_rasters = 0;   % plot rasters
 
 %% define parameters for optimization
@@ -53,13 +53,9 @@ varies(1).conxn = '(IC->IC)';
 varies(1).param = 'trial';
 varies(1).range = 1:40;
 
-varies(2).conxn = 'R->C';
-varies(2).param = 'gSYN';
-varies(2).range = 0.18;
-
-varies(3).conxn = 'C';
-varies(3).param = 'noise';
-varies(3).range = 1.6;
+varies(end+1).conxn = 'C';
+varies(end).param = 'noise';
+varies(end).range = 1.6;
 
 nvaried = {varies(2:end).range};
 nvaried = prod(cellfun(@length,nvaried));
@@ -120,17 +116,10 @@ for z = subz
         data_spks = [];
     end
     
-    for ns = 1
-    [temp_perf(ns), temp_fr(ns)] = ...
+    [data(z).perf, data(z).fr, data(z).annot,~, data(z).VR] = ...
         mouse_network(study_dir,time_end,varies,netCons,plot_rasters,...
-        calcDistances,data_spks,data_tau);
-    end
-    data(z).perf.R = mean([temp_perf.R],2);
-    data(z).perf.C = mean([temp_perf.C]);
-    
-    data(z).fr.R = mean([temp_fr.R],2);
-    data(z).fr.C = mean([temp_fr.C]);
-    
+        plot_distances,data_spks,data_tau);
+
     data(z).name = ICstruc(z).name;
 end
 save([pwd filesep 'run' filesep 'optimization' filesep...
@@ -139,140 +128,24 @@ close(h);
 
 %% performance grids
 
-if makeGrids
-
-set(0,'defaultfigurevisible','on');
-    
-% performance vector has dimensions [numSpatialChan,nvaried]
-neurons = {'Ipsi. sigmoid','Gaussian','U','Cont. sigmoid'};
+if plot_grids
+    makeGrids(data,varies,DirPart,rcNetcon,nvaried,data_perf,data_FR);
+end
 
 temp = {data.name};
 temp(cellfun('isempty',temp)) = {'empty'}; %label empty content
 
 targetIdx = find(contains(temp,'m0') & ~strcmp(temp,'s0m0.mat'));
-maskerIdx = find(contains(temp,'s0') & ~strcmp(temp,'s0m0.mat'));
+% maskerIdx = find(contains(temp,'s0') & ~strcmp(temp,'s0m0.mat'));
+% mixedIdx = find(~contains(temp,'m0') & ~contains(temp,'s0') & ~contains(temp,'empty'));
 
-%mixedIdx = setdiff(1:length(temp),[targetIdx,maskerIdx]);
-mixedIdx = find(~contains(temp,'m0') & ~contains(temp,'s0') & ~contains(temp,'empty'));
-textColorThresh = 70;
-numSpatialChan = 4;
-
-figstr = 'CleanGrid vary ';
-
-% if more than one parameter is varied
-if sum(cellfun(@length,{varies(2:end).range}) > 1) > 1
-    
-    multiFlag = 1;
-    
-    temp = find((cellfun(@length,{varies.range}) > 1) == 1);
-    temp(1) = [];
-    variedConxns = {varies(temp).conxn};
-    variedParams = {varies(temp).param};
-    variedRanges = {varies(temp).range};
-    
-    for i = 1:length(temp)
-        figstr = cat(2,figstr,[variedConxns{i},variedParams{i},'%0.3f, ']);
-    end
-    figstr(end-1:end) = []; % delete extra ', '
-    
-    [A,B] = meshgrid(variedRanges{1},variedRanges{2});
-    c = cat(2,A',B');
-    paramPairs = reshape(c,[],2);
-else
-    multiFlag = 0;
-    %figstr = cat(2,figstr,variedParam,'%0.3f');
+for i = 1:length(targetIdx)
+    perf(i) = data(targetIdx(i)).perf.C;
+    fr(i) = data(targetIdx(i)).fr.C;
 end
+perf = fliplr(perf);
 
-width=8; hwratio=1;
-x0=.08; y0=.08;
-dx=.04; dy=.04;
-lx=.125; ly=.125/hwratio;
-
-x=-108:108;
-tuningcurve=zeros(4,length(x));
-ono = load('ono_curves_V2.mat','sigmoid','gauss','ushaped');
-tuningcurve(1,:) = ono.sigmoid * rcNetcon(1);
-tuningcurve(2,:) = ono.gauss * rcNetcon(2);
-tuningcurve(3,:) = ono.ushaped * rcNetcon(3);
-tuningcurve(4,:) = fliplr(ono.sigmoid) * rcNetcon(4);
-
-for vv = 1:nvaried
-    
-    h = figure('visible','on');
-    figuresize(width, width*hwratio,h, 'inches')
-    
-    subplot(2,2,1); 
-    plot(x,tuningcurve','b','linewidth',1);
-    hold on;
-    plot(x,sum(tuningcurve',2),'k','linewidth',2);
-    ylim([0 max(sum(tuningcurve',2))+0.2]);
-    xlim([x(1) x(end)]);
-    set(gca,'xdir','reverse');
-    xticks([-90,0:45:90]);
-    xlabel('Azimuth');
-    
-    % C neuron; target or masker only cases
-    perf.CT = zeros(1,4);
-    fr.CT = zeros(1,4);
-    if ~isempty(targetIdx)
-        for i = 1:length(targetIdx)
-            perf.CT(i) = data(targetIdx(i)).perf.C(vv);
-            fr.CT(i) = data(targetIdx(i)).fr.C(vv);
-            fr.R(:,i) = data(targetIdx(i)).fr.R(:,vv);
-        end
-    end    
-    
-    % flip CT 
-    perf.CT = fliplr(perf.CT);
-    fr.R = fliplr(fr.R);
-    
-    subplot('Position',[0.6 0.6 0.2 0.2/4])
-    plotPerfGrid(perf.CT,[],[],textColorThresh);
-           
-    % show data grid next to model grid    
-    subplot('Position',[0.6 0.5 0.2 0.2/4])
-    plotPerfGrid(data_perf(1:4)',[],[],textColorThresh);
-
-    % calculate error and correlation with data
-    [cc_clean,MSE_clean] = calcModelPerf(perf.CT',data_perf(1:4));
-    % [cc_masked,MSE_masked] = calcModelPerf(perf.C,data_perf(5:end));
-
-    str = {sprintf('Clean C.C. = %0.3f',cc_clean),...
-        sprintf('Clean MSE = %0.1f ± %0.1f',MSE_clean),...
-        ['RC weights = ',mat2str(rcNetcon)]};
-        
-    annotation('textbox',[0.6 .35 0.2 0.1],...
-           'string',str,...
-           'FitBoxToText','on',...
-           'LineStyle','none')
-       
-    % Show FR vs azimuth
-    subplot(2,2,3)
-    plot([-90 0 45 90],data_FR(targetIdx),'-b',[-90 0 45 90],fr.CT,'-r','linewidth',2);
-    hold on
-    plot([-90 0 45 90],ones(1,4)*mean(data_FR(targetIdx)),'--b',...
-        [-90 0 45 90],ones(1,4)*mean(fr.CT),'--r','linewidth',2);
-    legend('Data','Model');
-    xlabel('Azimuth');
-    ylabel('Clean FR (Hz)')
-    set(gca,'xdir','reverse');
-    ylim([0 70]);
-    xticks([-90,0:45:90]);
-    % title(['RC weights = ' mat2str(round(100*rcNetcon)/100)])
-
-    % save grid
-    Dirparts = strsplit(study_dir, filesep);
-    DirPart = fullfile(Dirparts{1:end-1});
-    % if multiFlag == 1
-    %    saveas(gca,[filesep DirPart filesep sprintf(figstr,paramPairs(vv,1),paramPairs(vv,2)) '.tiff'])
-    % else
-        saveas(gca,[filesep DirPart filesep 'gridresults.tiff'])
-    % end
-    % clf
-
-end
-
-end
+[~,MSE_clean] = calcModelPerf(perf',data_perf(1:4));
 
 f = MSE_clean(1);
 

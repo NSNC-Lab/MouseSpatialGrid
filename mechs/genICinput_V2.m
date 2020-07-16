@@ -8,11 +8,11 @@ function sigIn = genICinput_V2(trial,dt)
 %
 % TODO: allow resampling of spk_IC to different dt
 
-if exist('IC_spks.mat','file')
+%if exist('IC_spks.mat','file')
     fileData = load('IC_spks.mat','spks');
-else
-    fileData = load('..\IC_spks.mat','spks');
-end
+%else
+    %fileData = load('..\IC_spks.mat','spks');
+%end
 
 % IC data: trial x location x time
 % Desired: time x location x trial
