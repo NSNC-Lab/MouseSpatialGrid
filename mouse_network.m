@@ -121,6 +121,7 @@ s.connections(end).parameters={'inputChan1',1,'inputChan2',1,'inputChan3',1,'inp
 
 if viz_network, vizNetwork; end
 
+
 %% vary params
 vary = cell(length(varies),3);
 for i = 1:length(varies)
@@ -128,6 +129,8 @@ for i = 1:length(varies)
     vary{i,2} = varies(i).param;
     vary{i,3} = varies(i).range;
 end
+
+numTrials = max(vary{1,3});
 
 %% simulate
 tic;
@@ -151,11 +154,11 @@ for vv = 1:jump % for each varied parameter
     subData = data(vv:jump:length(data));
 
     %% visualize spikes
-    ICspks = zeros(40,4,time_end);
-    %Sspks = zeros(40,4,time_end);
-    Rspks = zeros(40,4,time_end);
-    Cspks = zeros(40,time_end);
-    for i = 1:40
+    ICspks = zeros(numTrials,4,time_end);
+    %Sspks = zeros(numTrials,4,time_end);
+    Rspks = zeros(numTrials,4,time_end);
+    Cspks = zeros(numTrials,time_end);
+    for i = 1:numTrials
         for j = 1:4
             ICspks(i,j,:) = subData(i).IC_V_spikes(:,j);
             %Sspks(i,j,:) = subData(i).S_V_spikes(:,j);
@@ -246,15 +249,16 @@ end
 
 function [pc,fr] = calcPCandPlot(raster,time_end,calcPC,plot_rasters,h)
     PCstr = '';
+    numTrials = size(raster,1);
     if calcPC
         % spks to spiketimes in a cell array of 20x2
         tau = linspace(1,30,100);
-        spkTime = cell(40,1);
-        for ii = 1:40, spkTime{ii} = find(raster(ii,:)); end
-        spkTime = reshape(spkTime,20,2);
+        spkTime = cell(numTrials,1);
+        for ii = 1:numTrials, spkTime{ii} = find(raster(ii,:)); end
+        spkTime = reshape(spkTime,numTrials/2,2);
         % calculate distance matrix & performance
         distMat = calcvr(spkTime, tau);
-        [performance, ~] = calcpc(distMat, 20, 2, 1,[], 'new');
+        [performance, ~] = calcpc(distMat, numTrials/2, 2, 1,[], 'new');
         pc = mean(max(performance));
         PCstr = ['PC = ' num2str(pc)];
     end
@@ -265,28 +269,29 @@ function [pc,fr] = calcPCandPlot(raster,time_end,calcPC,plot_rasters,h)
     plotSpikeRasterFs(flipud(logical(raster)), 'PlotType','vertline');
     title({PCstr,['FR = ' num2str(fr)]});
     xlim([0 time_end])
-    line([0,time_end],[20.5,20.5],'color',[0.3 0.3 0.3])
+    line([0,time_end],[numTrials/2 + 0.5,numTrials/2 + 0.5],'color',[0.3 0.3 0.3])
     end
     
-    t_vec = 1:5:size(raster,2);
-    temp1 = mean(raster(1:20,:));
-    temp2 = mean(raster(21:end,:));
-    for t = 1:length(t_vec)-1
-        t1(t) = sum(temp1(t_vec(t):t_vec(t+1)));
-        t2(t) = sum(temp2(t_vec(t):t_vec(t+1)));
-    end
-    t1(end+1) = sum(temp1(t_vec(end):end));
-    t2(end+1) = sum(temp2(t_vec(end):end));
+%     t_vec = 1:5:size(raster,2);
+%     temp1 = mean(raster(1:numTrials/2,:));
+%     temp2 = mean(raster(numTrials/2 + 1:end,:));
+%     for t = 1:length(t_vec)-1
+%         t1(t) = sum(temp1(t_vec(t):t_vec(t+1)));
+%         t2(t) = sum(temp2(t_vec(t):t_vec(t+1)));
+%     end
+%     t1(end+1) = sum(temp1(t_vec(end):end));
+%     t2(end+1) = sum(temp2(t_vec(end):end));
 end
 
 function [distMat,VR,taufig] = plotVRDists(raster,data_spks,data_tau,time_end,plot_distances)
 
 % VR distances for model
+numModel = size(raster,1);
 
 % target 1
 for tid = 1:2
-    spkTime = cell(20,1);
-    for ii = 1:20, spkTime{ii} = find(raster(20*(tid-1)+ii,:))/1000; end
+    spkTime = cell(numModel/2,1);
+    for ii = 1:numModel/2, spkTime{ii} = find(raster(numModel/2*(tid-1)+ii,:))/1000; end
     spkTime = spkTime(~cellfun('isempty',spkTime));
     % calculate distance matrix & performance
     distMat.model{tid} = calcvr(spkTime, data_tau/1000);
@@ -298,7 +303,7 @@ end
 % target 2
 
 % VR distances for data
-[numTrials] = numel(data_spks);
+numExp = numel(data_spks);
 
 for tid = 1:2
     spkTime = cell(size(data_spks(:,tid)));
@@ -340,7 +345,7 @@ ylim([0 max([N_model{1},N_exp{1},N_model{2},N_exp{2}])]);
 subplot(2,1,2);
 plot(bins(1:end-1),N_exp{1},bins(1:end-1),N_exp{2});
 xlabel('VR distance');
-title(['Experimental VR: [' num2str(VR.exp(1)) ',' num2str(VR.exp(2)) '], #trials = ' num2str(numTrials)]);
+title(['Experimental VR: [' num2str(VR.exp(1)) ',' num2str(VR.exp(2)) '], #trials = ' num2str(numExp)]);
 xlim([0 maxVR]);
 ylim([0 max([N_model{1},N_exp{1},N_model{2},N_exp{2}])]);
 end
@@ -367,6 +372,5 @@ for aa = 1:length(varies)-1
     end
 end
 annotstr{:,end+1} = ['RC_{gSYN} = ' mat2str(gSYNs)];
-annotstr{:,end+1} = ['RC_{netcon} = ' mat2str(RCs)];
 
 end

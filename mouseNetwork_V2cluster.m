@@ -11,15 +11,15 @@ addpath(genpath('dynasim'))
 
 plot_grids = 0;  % plot spatial grids
 plot_distances = 0;  % plot VR distances
-plot_rasters = 0;   % plot rasters
+plot_rasters = 1;   % plot rasters
 
 data_spks_file = '9-21-2016_0dB_removed_trialscleaned(-1,4).mat';
 data_perf_file = '9-21-2016_0dB_removed_trials_performance.mat';
-dataCh = 23;
+dataCh = 25;
 
 %%%%%%%% end of user inputs
 
-subject = extractBefore(data_perf_file,'_performance');
+subject = [extractBefore(data_perf_file,'_performance') '-Ch' num2str(dataCh)];
 folder = 'Data-fitting';
 
 %% load experimental data to optimize model to
@@ -34,47 +34,21 @@ data_perf = [Max{dataCh}(:);max_masked{dataCh}(:)];
 [~,best_loc] = max(Max{dataCh});
 data_tau = opt_tau{dataCh}(best_loc);
 
-%% calculate which STRF gain to use
+%% calculate cortical noise based on spontaneous FR
 
+% data_FR arranged ipsi->contra
 for s = 1:4
     data_spks = squeeze(Spks_clean{dataCh}(:,5-s,:));
-    time_end = 2971;
-    data_FR(s) = mean(mean(cellfun(@(x) sum(x >= 0 & x < time_end/1000),data_spks)))/time_end*1000;
-    
-    % calc VR distance for cortical noise parameter
-    spkTime = cell(size(data_spks));
-    for ii = 1:length(data_spks)
-        spkTime{ii} = data_spks{ii}';
-        spkTime{ii}(spkTime{ii} < 0 | spkTime{ii} > time_end/1000) = []; 
-    end
-    spkTime = spkTime(~cellfun('isempty',spkTime));
-    % calculate distance matrix & performance
-    distMat = calcvr(spkTime, data_tau/1000);
-    VR(s) = mean(distMat(distMat ~= 0),'all');
+    FR_r0(s) = mean(cellfun(@(x) sum(x < 0 | x >= 3),data_spks),'all')/2;
+    data_FR(s) = mean(cellfun(@(x) sum(x >= 0 & x < 3),data_spks),'all')/3;
 end
-% from strfFR code: all_fit is linear fit to STRF gain vs FR
-all_fit = [9.35093660665019; 5.90086696599368];
+load('Cnoise_vs_FR0.mat','fit');
+Cnoise = (mean(FR_r0)-fit(1))/fit(2);
 
-% extract all STRF gains
-gains = dir('/Users/jionocon/Documents/MATLAB/Spatial-grid-simulations/MiceSpatialGrids/ICStim/Mouse/full_grids/BW_0.009 BTM_3.8 t0_0.1 phase0.4985');
-gains(~contains({gains.name},'s30')) = [];
-gain_nums = extractBetween({gains.name},'STRFgain','_20');
-gain_nums = cellfun(@str2num,gain_nums);
+%% calculate best STRF gain data based on single channel case
 
-gain1 = (mean(data_FR)-all_fit(1))/all_fit(2);
-[~,n] = min(abs(gain_nums-gain1));
-ICdir = [gains(n).folder filesep gains(n).name];
-
-%% load STRF spikes
-
-ICdirPath = [ICdir filesep];
-ICstruc = dir([ICdirPath '*.mat']);
-
-if isempty(ICstruc), error('empty data directory'); end
-
-%% calculate best cortical noise parameter using data VR distance on full channel case
-
-noise_range = 0.5:0.5:5;
+[~,best_chan] = max(data_perf(1:4));
+best_chan = 5-best_chan;    % azimuth indexes are flipped b/w model and data
 
 varies = struct;
 
@@ -84,54 +58,54 @@ varies(1).range = 1:40;
 
 varies(end+1).conxn = 'C';
 varies(end).param = 'noise';
-varies(end).range = noise_range;
+varies(end).range = Cnoise;
 
-varies(end+1).conxn = 'R->C';
-varies(end).param = 'gSYN1';
-varies(end).range = 0.042;
-
-varies(end+1).conxn = 'R->C';
-varies(end).param = 'gSYN2';
-varies(end).range = 0.042;
-
-varies(end+1).conxn = 'R->C';
-varies(end).param = 'gSYN3';
-varies(end).range = 0.042;
-
-varies(end+1).conxn = 'R->C';
-varies(end).param = 'gSYN4';
-varies(end).range = 0.042;
-
-nvaried = {varies(2:end).range};
-nvaried = prod(cellfun(@length,nvaried));
-
-data = mouseNetwork_initialize(varies,ICstruc,ICdirPath,Spks_clean,...
-    Spks_masked,dataCh,data_tau,plot_distances,plot_rasters,folder,subject,'-noisefitting');
-
-temp = {data.name};
-temp(cellfun('isempty',temp)) = {'empty'}; %label empty content
-
-targetIdx = find(contains(temp,'m0') & ~strcmp(temp,'s0m0.mat'));
-%maskerIdx = find(contains(temp,'s0') & ~strcmp(temp,'s0m0.mat'));
-%mixedIdx = find(~contains(temp,'m0') & ~contains(temp,'s0') & ~contains(temp,'empty'));
-
-for i = 1:length(targetIdx)
-    temp = [data(targetIdx(i)).VR.model];
-    for vv = 1:length(noise_range)
-        VR_model(vv,5-i) = temp(2*vv-1);
+for c = 1:4
+    varies(end+1).conxn = 'R->C';
+    varies(end).param = ['gSYN' num2str(c)];
+    if c == best_chan
+        varies(end).range = 0.21;
+    else
+        varies(end).range = 0;
     end
 end
-VR_model = mean(VR_model,2);
 
-[~,n] = min(abs(mean(VR)-VR_model));
-C_noise = noise_range(n);
+% extract all STRF gains
+gains = dir('/Users/jionocon/Documents/MATLAB/Spatial-grid-simulations/MiceSpatialGrids/ICStim/Mouse/full_grids/BW_0.009 BTM_3.8 t0_0.1 phase0.4985');
+gains(~contains({gains.name},'s30')) = [];
+
+model_FR = [];
+for g = 1:length(gains)-1
+    ICdir = [gains(g).folder filesep gains(g).name];
+    ICdirPath = [ICdir filesep];
+    ICstruc = dir([ICdirPath '*.mat']);
+    
+    data = mouseNetwork_initialize(varies,ICstruc,ICdirPath,Spks_clean,...
+        Spks_masked,dataCh,data_tau,plot_distances,plot_rasters,folder,subject,'-STRF-fitting');
+    
+    temp = {data.name};
+    temp(cellfun('isempty',temp)) = {'empty'}; %label empty content
+    
+    targetIdx = find(contains(temp,'m0') & ~strcmp(temp,'s0m0.mat'));
+    %maskerIdx = find(contains(temp,'s0') & ~strcmp(temp,'s0m0.mat'));
+    %mixedIdx = find(~contains(temp,'m0') & ~contains(temp,'s0') & ~contains(temp,'empty'));
+    for i = 1:length(targetIdx)
+        model_FR(g,i) = data(targetIdx(i)).fr.C;
+    end
+end
+% find best gain closest to average clean trial FR
+[~,ind] = min(abs(mean(model_FR,2) - mean(data_FR)));
+
+ICdir = [gains(ind).folder filesep gains(ind).name];
+ICdirPath = [ICdir filesep];
+ICstruc = dir([ICdirPath '*.mat']);
 
 %% single channel cases
-gsyn_range = 0.03:0.03:0.21;
+gsyn_range = 0.09:0.03:0.21;
 
 single_channel_folders = [];
 
-for cases = 1:4
+for cases = 4
     
 ranges = cell(1,4);
 for n = 1:nCells
@@ -152,7 +126,7 @@ varies(1).range = 1:40;
 
 varies(end+1).conxn = 'C';
 varies(end).param = 'noise';
-varies(end).range = C_noise;
+varies(end).range = Cnoise;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN1';
@@ -188,16 +162,16 @@ temp(cellfun('isempty',temp)) = {'empty'}; %label empty content
 targetIdx = find(contains(temp,'m0') & ~strcmp(temp,'s0m0.mat'));
 %maskerIdx = find(contains(temp,'s0') & ~strcmp(temp,'s0m0.mat'));
 %mixedIdx = find(~contains(temp,'m0') & ~contains(temp,'s0') & ~contains(temp,'empty'));
-perf = []; fr = [];
+perf = []; model_FR = [];
 for i = 1:length(targetIdx)
     perf(:,5-i) = data(targetIdx(i)).perf.C;
-    fr(:,5-i) = data(targetIdx(i)).fr.C;
+    model_FR(:,5-i) = data(targetIdx(i)).fr.C;
 end
 
-[~,MSE_clean] = calcModelPerf(perf,data_perf(1:4));
+[~,MSE_clean] = calcModelPerf(perf,data_perf(1:4)');
 
 loss = MSE_clean(:,1);
-frdiffs = abs(mean(fr,2) - mean(data_FR(data_FR ~= 0)));
+frdiffs = abs(mean(model_FR,2) - mean(data_FR(data_FR ~= 0)));
 within_thresh = frdiffs <= 5;
 
 % no wts are within FR thresh, just get the absolute minimum
@@ -207,7 +181,7 @@ end
 
 [minloss(cases),i] = min(loss(within_thresh));
 temp = find(within_thresh);
-best_iteration = temp(i);
+best_iteration(cases) = temp(i);
 
 best_wt(cases) = gsyn_range(best_iteration);
 best_perf(cases,:) = perf(best_iteration,:);
@@ -220,6 +194,14 @@ end
 best_gSYN = best_wt(best_channel);
 
 onechan_perf = best_perf(best_channel,:);
+
+onechan_results.loss = onechan_loss;
+onechan_results.best_channel = best_channel;
+onechan_results.best_gSYN = best_gSYN;
+onechan_results.perf = onechan_perf;
+onechan_results.folders = single_channel_folders;
+onechan_results.best_iteration = best_iteration;
+onechan_results.minloss = minloss;
 
 %% second channel cases
 minloss = [];
@@ -255,7 +237,7 @@ varies(1).range = 1:40;
 
 varies(end+1).conxn = 'C';
 varies(end).param = 'noise';
-varies(end).range = C_noise;
+varies(end).range = Cnoise;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN1';
@@ -291,16 +273,16 @@ temp(cellfun('isempty',temp)) = {'empty'}; %label empty content
 targetIdx = find(contains(temp,'m0') & ~strcmp(temp,'s0m0.mat'));
 %maskerIdx = find(contains(temp,'s0') & ~strcmp(temp,'s0m0.mat'));
 %mixedIdx = find(~contains(temp,'m0') & ~contains(temp,'s0') & ~contains(temp,'empty'));
-perf = []; fr = [];
+perf = []; model_FR = [];
 for i = 1:length(targetIdx)
     perf(:,5-i) = data(targetIdx(i)).perf.C;
-    fr(:,5-i) = data(targetIdx(i)).fr.C;
+    model_FR(:,5-i) = data(targetIdx(i)).fr.C;
 end
 
-[~,MSE_clean] = calcModelPerf(perf,data_perf(1:4));
+[~,MSE_clean] = calcModelPerf(perf,data_perf(1:4)');
 
 loss = MSE_clean(:,1);
-frdiffs = abs(mean(fr,2) - mean(data_FR(data_FR ~= 0)));
+frdiffs = abs(mean(model_FR,2) - mean(data_FR(data_FR ~= 0)));
 within_thresh = frdiffs <= 5;
 
 % no wts are within FR thresh, just get the absolute minimum
@@ -310,7 +292,7 @@ end
 
 [minloss(cases),i] = min(loss(within_thresh));
 temp = find(within_thresh);
-best_iteration = temp(i);
+best_iteration(cases) = temp(i);
 
 [A,B] = meshgrid(best_gsyn_range,second_gsyn_range);
 c = cat(2,A',B');
@@ -348,15 +330,11 @@ twochan_results.best_gSYNs = best_two_wts;
 twochan_results.decreased_loss = decreased_loss;
 twochan_results.sig_perf = sig_perf;
 twochan_results.folders = two_channel_folders;
-
-onechan_results.loss = onechan_loss;
-onechan_results.best_channel = best_channel;
-onechan_results.best_gSYN = best_gSYN;
-onechan_results.perf = onechan_perf;
-onechan_results.folders = single_channel_folders;
+twochan_results.best_iteration = best_iteration;
+twochan_results.minloss = minloss;
 
 save([folder filesep subject 'fitting_results.mat'],...
-    'twochan_results','C_noise','onechan_results');
+    'twochan_results','Cnoise','onechan_results');
 
 %% generate best grid
 
@@ -365,6 +343,8 @@ if singleFlag
 else
     best_case_folder = two_channel_folders{decreased_loss};
 end
+
+addpath(genpath([cd filesep folder]));
 
 load([best_case_folder filesep 'summary_results.mat'])
 nvaried = {varies(2:end).range};
