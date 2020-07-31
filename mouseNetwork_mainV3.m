@@ -13,11 +13,13 @@ plot_grids = 0;  % plot spatial grids
 plot_distances = 0;  % plot VR distances
 plot_rasters = 1;   % plot rasters
 
-data_spks_file = '9-21-2016_0dB_removed_trialscleaned(-1,4).mat';
-data_perf_file = '9-21-2016_0dB_removed_trials_performance.mat';
-dataCh = 25;
+data_spks_file = '03_30_18_0dB_cleaned(-1,4).mat';
+data_perf_file = '03_30_18_0dB_performance.mat';
+dataCh = 31;
 
 %%%%%%%% end of user inputs
+
+mainTime = tic;
 
 subject = [extractBefore(data_perf_file,'_performance') '-Ch' num2str(dataCh)];
 folder = 'Data-fitting';
@@ -45,68 +47,43 @@ end
 load('Cnoise_vs_FR0.mat','fit');
 Cnoise = (mean(FR_r0)-fit(1))/fit(2);
 
-%% calculate best STRF gain data based on single channel case
+%% calculate best STRF gain data based on best channel
 
-[~,best_chan] = max(data_perf(1:4));
-best_chan = 5-best_chan;    % azimuth indexes are flipped b/w model and data
-
-varies = struct;
-
-varies(1).conxn = '(IC->IC)';
-varies(1).param = 'trial';
-varies(1).range = 1:40;
-
-varies(end+1).conxn = 'C';
-varies(end).param = 'noise';
-varies(end).range = Cnoise;
-
-for c = 1:4
-    varies(end+1).conxn = 'R->C';
-    varies(end).param = ['gSYN' num2str(c)];
-    if c == best_chan
-        varies(end).range = 0.21;
-    else
-        varies(end).range = 0;
-    end
-end
+[~,best_loc] = max(data_perf(1:4));
+best_loc = 5-best_loc;    % azimuth indexes are flipped b/w model and data
 
 % extract all STRF gains
 gains = dir('/Users/jionocon/Documents/MATLAB/Spatial-grid-simulations/MiceSpatialGrids/ICStim/Mouse/full_grids/BW_0.009 BTM_3.8 t0_0.1 phase0.4985');
 gains(~contains({gains.name},'s30')) = [];
 
-model_FR = [];
-
+STRF_FR = zeros(length(gains),4);
 for g = 1:length(gains)-1
     ICdir = [gains(g).folder filesep gains(g).name];
     ICdirPath = [ICdir filesep];
     ICstruc = dir([ICdirPath '*.mat']);
     
-    data = mouseNetwork_initialize(varies,ICstruc,ICdirPath,Spks_clean,...
-        Spks_masked,dataCh,data_tau,plot_distances,plot_rasters,folder,subject,'-STRF-fitting');
-    
-    temp = {data.name};
-    temp(cellfun('isempty',temp)) = {'empty'}; %label empty content
-    
-    targetIdx = find(contains(temp,'m0') & ~strcmp(temp,'s0m0.mat'));
-    %maskerIdx = find(contains(temp,'s0') & ~strcmp(temp,'s0m0.mat'));
-    %mixedIdx = find(~contains(temp,'m0') & ~contains(temp,'s0') & ~contains(temp,'empty'));
-    for i = 1:length(targetIdx)
-        model_FR(g,i) = data(targetIdx(i)).fr.C;
+    subz = find(contains({ICstruc.name},'m0.mat')); % sXm0 (target only) cases
+    i = 1;
+    for z = subz
+        % restructure IC spikes
+        load([ICdirPath ICstruc(z).name],'avgSpkRate');
+        STRF_FR(g,i) = avgSpkRate(best_loc);
+        i = i + 1;
     end
 end
 % find best gain closest to average clean trial FR
-[~,ind] = min(abs(mean(model_FR,2) - mean(data_FR)));
+[~,ind] = min(abs(mean(STRF_FR,2) - mean(data_FR)));
 
 ICdir = [gains(ind).folder filesep gains(ind).name];
 ICdirPath = [ICdir filesep];
 ICstruc = dir([ICdirPath '*.mat']);
 
 %% single channel cases
-gsyn_range = 0.21;
+gsyn_range = 0.03:0.03:0.21;
 
 single_channel_folders = [];
 
-for cases = 4
+for cases = 1:4
     
 ranges = cell(1,4);
 for n = 1:nCells
@@ -153,9 +130,9 @@ nvaried = prod(cellfun(@length,nvaried));
 
 %% performance grids
 
-if plot_grids
-    makeGrids(data,varies,single_channel_folders{cases},nvaried,data_perf,data_FR);
-end
+% if plot_grids
+%     makeGrids(data,varies,single_channel_folders{cases},nvaried,data_perf,data_FR);
+% end
 
 temp = {data.name};
 temp(cellfun('isempty',temp)) = {'empty'}; %label empty content
@@ -179,6 +156,8 @@ within_thresh = frdiffs <= 5;
 if sum(within_thresh) == 0
    within_thresh = frdiffs == min(frdiffs);
 end
+
+plotModelResults(ranges,DirPart,loss,mean(model_FR,2),within_thresh);
 
 [minloss(cases),i] = min(loss(within_thresh));
 temp = find(within_thresh);
@@ -210,13 +189,14 @@ best_wt = [];
 twochan_perf = [];
 
 two_channel_folders = [];
+
 for cases = find(1:4 ~= best_channel)
      
 % % -90, 0, 45, 90º
 
-best_gsyn_range = best_gSYN-0.02:0.01:best_gSYN+0.02;
+best_gsyn_range = 0.06:0.03:best_gSYN;
 
-second_gsyn_range = 0.03:0.03:best_gSYN;
+second_gsyn_range = best_gsyn_range-0.03;
 
 ranges = cell(1,4);
 for n = 1:nCells
@@ -291,6 +271,8 @@ if sum(within_thresh) == 0
    within_thresh = frdiffs == min(frdiffs);
 end
 
+plotModelResults(ranges,DirPart,loss,mean(model_FR,2),within_thresh);
+
 [minloss(cases),i] = min(loss(within_thresh));
 temp = find(within_thresh);
 best_iteration(cases) = temp(i);
@@ -352,3 +334,7 @@ nvaried = {varies(2:end).range};
 nvaried = prod(cellfun(@length,nvaried));
 
 makeGrids(data,varies,[cd filesep folder filesep subject],nvaried,data_perf,data_FR)
+
+elapsedTime = toc(mainTime);
+disp(['Time for complete run through fitting: ' num2str(elapsedTime/60) ' minutes' ...
+    ' or ' num2str(elapsedTime/3600) ' hours.']);

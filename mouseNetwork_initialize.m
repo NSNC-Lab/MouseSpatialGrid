@@ -1,9 +1,9 @@
-function [data,data_FR,DirPart] = mouseNetwork_initialize(varies,ICstruc,ICdirPath,Spks_clean,...
+function [data,DirPart] = mouseNetwork_initialize(varies,ICstruc,ICdirPath,Spks_clean,...
     Spks_masked,dataCh,data_tau,plot_distances,plot_rasters,folder,subject,detail)
 
 datetime = datestr(now,'yyyymmdd-HHMMSS');
 
-set(0, 'DefaultFigureVisible', 'off');
+%set(0, 'DefaultFigureVisible', 'off');
 
 h = figure('Position',[50,50,850,690]);
 
@@ -46,7 +46,6 @@ for z = subz
         else
             data_spks = squeeze(Spks_masked{dataCh}(:,5-str2double(spatialConfig{1}(2)),5-str2double(spatialConfig{1}(4)),:));
         end
-        data_FR(z) = mean(mean(cellfun(@(x) sum(x >= 0 & x < time_end/1000),data_spks)))/time_end*1000;
     else
         data_spks = [];
     end

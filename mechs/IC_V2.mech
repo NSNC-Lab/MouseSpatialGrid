@@ -6,10 +6,6 @@ ICinput = genICinput_V2(trial,dt);
 
 g_postIC = 0.1
 E_exc = 0
-tauR = 0.4
-tauD = 2
-
-% f(x) = (exp(-x/tauD) - exp(-x/tauR)).*(x>0)
 
 netcon = eye(N_pre,N_post)
 

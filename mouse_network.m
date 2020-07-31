@@ -31,25 +31,12 @@ end
 %% solver params
 solverType = 'euler';
 dt = 1; %ms % the IC input is currently dt=1
-viz_network = 0;
-
-%% visualize IC spikes (Figure 1 which is the IR level (as seen from the
-% inputguassian file)
-%{
-figure
-for i = 1:4 %for each spatially directed neuron
-   subplot(1,4,i)
-   plotSpikeRasterFs(logical(squeeze(spks(:,i,:))), 'PlotType','vertline');
-   xlim([0 time_end])
-   line([0,time_end],[10.5,10.5],'color',[0.3 0.3 0.3])
-end
-%}
 
 %% neuron populations
 %tonic = bias = cells spontaneous firing
 
 nCells = 4;
-noise = 1.6; % low noise
+noise = 0.01; % low noise
 s = struct();
 
 s.populations(1).name = 'IC';
@@ -77,23 +64,11 @@ s.populations(end).equations = 'chouLIF';
 s.populations(end).size = 1;
 s.populations(end).parameters = {'noise',noise};
 
-%% connection mechanisms
-% synDoubleExp={
-%   'gSYN = 1; ESYN = 0; tauD = 4; tauR = 1; delay = 0'
-%   'f(x) = (exp(-x/tauD) - exp(-x/tauR)).*(x>0)'
-%   'netcon=ones(N_pre,N_post)'
-%   'synDoubleExp(X,t) = gSYN .* ( f(t - tspike_pre - delay) * netcon ).*(X - ESYN)'
-%   '@isyn += synDoubleExp(V_post,t)'
-%   };
-% 
-% s.mechanisms(1).name='synDoubleExp';
-% s.mechanisms(1).equations=synDoubleExp;
-
 %% connections
 
 s.connections(1).direction='IC->IC';
 s.connections(1).mechanism_list={'IC_V2'};
-s.connections(1).parameters={'g_postIC',0.2,'trial',5}; % 100 hz spiking
+s.connections(1).parameters={'g_postIC',0.25,'trial',5}; % 100 hz spiking
 
 % s.connections(end+1).direction='IC->X';
 % s.connections(end).mechanism_list={'synDoubleExp'};
@@ -105,7 +80,7 @@ s.connections(1).parameters={'g_postIC',0.2,'trial',5}; % 100 hz spiking
 
 s.connections(end+1).direction='IC->R';
 s.connections(end).mechanism_list={'synDoubleExp'};
-s.connections(end).parameters={'gSYN',0.21 'tauR',0.4, 'tauD',2, 'netcon', diag(ones(1,nCells)),'delay',0}; 
+s.connections(end).parameters={'gSYN',0.21, 'tauR',0.3, 'tauD',1.5, 'netcon', diag(ones(1,nCells)),'delay',0}; 
 
 % s.connections(end+1).direction='X->R';
 % s.connections(end).mechanism_list={'synDoubleExp'};
@@ -119,8 +94,7 @@ s.connections(end+1).direction='R->C';
 s.connections(end).mechanism_list={'synDoubleExp_V2'};
 s.connections(end).parameters={'inputChan1',1,'inputChan2',1,'inputChan3',1,'inputChan4',1}; 
 
-if viz_network, vizNetwork; end
-
+% if viz_network, vizNetwork; end
 
 %% vary params
 vary = cell(length(varies),3);
@@ -136,7 +110,7 @@ numTrials = max(vary{1,3});
 tic;
 data = dsSimulate(s,'time_limits',[dt time_end], 'solver',solverType, 'dt',dt,...
   'downsample_factor',1, 'save_data_flag',0, 'save_results_flag',1,...
-  'study_dir',study_dir, 'vary',vary, 'debug_flag',1, 'verbose_flag',0);
+  'study_dir',study_dir, 'vary',vary, 'debug_flag',0, 'verbose_flag',0);
 toc
 
 %% insert spikes
