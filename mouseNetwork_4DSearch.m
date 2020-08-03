@@ -36,6 +36,8 @@ data_tau = opt_tau{dataCh}(best_loc);
 %% calculate cortical noise based on spontaneous FR
 
 % data_FR arranged ipsi->contra
+FR_r0 = zeros(1,4);
+data_FR = zeros(1,4);
 for s = 1:4
     data_spks = squeeze(Spks_clean{dataCh}(:,5-s,:));
     FR_r0(s) = mean(cellfun(@(x) sum(x < 0 | x >= 3),data_spks),'all')/2;
@@ -82,6 +84,7 @@ gsyn_sum = 0.21*(mean(data_FR) - mean(FR_r0))./(mean(STRF_FR(ind,:)));
 %% 4D search
 gsyn_range = 0.03; %[0 gsyn_sum/4-0.02:0.01:gsyn_sum/4+0.02];
     
+ranges = cell{1,4};
 for c = 1:4
    ranges{c} = gsyn_range; 
 end
@@ -134,9 +137,14 @@ for i = 1:length(targetIdx)
     model_FR(:,5-i) = data(targetIdx(i)).fr.C;
 end
 
-[~,MSE_clean] = calcModelPerf(perf,data_perf(1:4)');
+[fit_perf,MSE_clean_perf] = calcModelLoss(perf,data_perf(1:4)');
+% calcualte loss for FR as a percentage of model FR
+[~,MSE_clean_FR] = calcModelLoss(((model_FR-data_FR)./data_FR)*100,100*ones(size(data_FR)));
 
-loss = MSE_clean(:,1);
+fit_perf(isnan(fit_perf)) = 0;
+
+loss = MSE_clean_perf(:,1) + MSE_clean_FR(:,1);
+
 frdiffs = abs(mean(model_FR,2) - mean(data_FR(data_FR ~= 0)));
 within_thresh = frdiffs <= 5;
 
@@ -147,10 +155,13 @@ end
 
 makeParallelPlot(data,within_thresh,loss)
 
-[minloss,i] = min(loss(within_thresh));
-temp = find(within_thresh);
-best_iteration = temp(i);
+[temp,inds] = sort(loss(within_thresh),'ascend');
 
-% make grid of best iteration
+best_iterations = zeros(1,5);
+for i = 1:5
+    best_iterations(i) = find(loss == temp(i));
+end
 
-makeGrids_bestIteration(data,varies,DirPart,nvaried,data_perf,data_FR,best_iteration);
+% make grid of best iterations
+
+makeGrids_bestIteration(data,varies,[],data_perf,data_FR,best_iterations);

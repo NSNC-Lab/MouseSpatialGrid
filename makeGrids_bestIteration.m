@@ -1,4 +1,4 @@
-function makeGrids_bestIteration(data,varies,DirPart,nvaried,data_perf,data_FR,best_iteration)
+function makeGrids_bestIteration(data,varies,DirPart,data_perf,data_FR,best_iterations)
 
 set(0,'defaultfigurevisible','on');
     
@@ -56,7 +56,10 @@ gsyn_str = data(targetIdx(1)).annot(contains(data(targetIdx(1)).annot,'RC_{gSYN}
 h = figure('visible','on');
 figuresize(width, width*hwratio,h, 'inches')
 
-for vv = best_iteration
+for i = 1:length(best_iterations)
+    
+    vv = best_iterations(i);
+    
     gSYNs = extractAfter(gsyn_str{vv},'RC_{gSYN} = ');
     gSYNs = str2num(gSYNs);
     
@@ -81,8 +84,8 @@ for vv = best_iteration
     if ~isempty(targetIdx)
         for i = 1:length(targetIdx)
             perf.CT(5-i) = data(targetIdx(i)).perf.C(vv);
-            fr.CT(i) = data(targetIdx(i)).fr.C(vv);
-            fr.R(:,i) = data(targetIdx(i)).fr.R(:,vv);
+            fr.CT(5-i) = data(targetIdx(i)).fr.C(vv);
+            fr.R(:,5-i) = data(targetIdx(i)).fr.R(:,vv);
         end
     end    
     
@@ -96,12 +99,15 @@ for vv = best_iteration
     title('Data');
     
     % calculate error and correlation with data
-    [cc_clean,MSE_clean] = calcModelPerf(perf.CT,data_perf(1:4)');
-    % [cc_masked,MSE_masked] = calcModelPerf(perf.C,data_perf(5:end));
-
-    str = {sprintf('Clean C.C. = %0.3f',cc_clean),...
-        sprintf('Clean MSE = %0.1f ± %0.1f',MSE_clean),...
-        sprintf('Clean MSE = %0.1f ± %0.1f',mean(abs(perf.CT-data_perf(1:4)'))),...
+    [cc_clean,MSE_clean_perf] = calcModelLoss(perf.CT,data_perf(1:4)');
+    [~,MSE_clean_FR] = calcModelLoss(fr.CT,data_FR);
+    % [cc_masked,MSE_masked] = calcModelLoss(perf.C,data_perf(5:end));
+    
+    MSE_clean = MSE_clean_perf(1) + MSE_clean_FR(1);
+    
+    str = {sprintf('Clean loss = %0.1f',MSE_clean),...
+        sprintf('Clean perf C.C. = %0.3f',cc_clean),...
+        sprintf('Clean avg. deviation = %0.1f',mean(abs(perf.CT-data_perf(1:4)'))),...
         data(targetIdx(1)).annot{vv,1:end}};
         
     annotation('textbox',[0.6 .35 0.2 0.1],...
@@ -112,7 +118,7 @@ for vv = best_iteration
     % Show FR vs azimuth for clean data
     subplot(2,2,3)
     plot([-90 0 45 90],data_FR,'-b',...
-        [-90 0 45 90],fr.CT,'-r','linewidth',2);
+        [-90 0 45 90],fliplr(fr.CT),'-r','linewidth',2);
     hold on
     plot([-90 0 45 90],ones(1,4)*mean(data_FR),'--b',...
         [-90 0 45 90],ones(1,4)*mean(fr.CT),'--r','linewidth',2);
@@ -124,9 +130,9 @@ for vv = best_iteration
     xticks([-90,0:45:90]);
 
     % save grid
-    saveas(gca,[filesep DirPart filesep 'best_iteration.tiff'])
-    clf
+    %saveas(gca,[filesep DirPart filesep 'best_iteration_V2_' num2str(vv) '.tiff'])
+    %clf
         
 end
-close;
+%close;
 end
