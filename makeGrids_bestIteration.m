@@ -126,7 +126,7 @@ for i = 1:length(best_iterations)
     xticks([-90,0:45:90]);
 
     % save grid
-    saveas(gca,[filesep DirPart filesep 'best_iteration_V4_' num2str(vv) '.tiff'])
+    saveas(gca,[filesep DirPart filesep 'best_iteration_' num2str(vv) '.tiff'])
     clf
         
 end
