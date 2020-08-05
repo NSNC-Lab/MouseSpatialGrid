@@ -1,4 +1,4 @@
-function makeGrids_bestIteration(data,varies,DirPart,data_perf,data_FR,best_iterations)
+function makeGrids_bestIteration(data,varies,DirPart,data_perf,data_FR,best_iterations,loss)
 
 set(0,'defaultfigurevisible','on');
     
@@ -9,8 +9,8 @@ temp = {data.name};
 temp(cellfun('isempty',temp)) = {'empty'}; %label empty content
 
 targetIdx = find(contains(temp,'m0') & ~strcmp(temp,'s0m0.mat'));
-maskerIdx = find(contains(temp,'s0') & ~strcmp(temp,'s0m0.mat'));
-mixedIdx = find(~contains(temp,'m0') & ~contains(temp,'s0') & ~contains(temp,'empty'));
+%maskerIdx = find(contains(temp,'s0') & ~strcmp(temp,'s0m0.mat'));
+%mixedIdx = find(~contains(temp,'m0') & ~contains(temp,'s0') & ~contains(temp,'empty'));
 textColorThresh = 70;
 numSpatialChan = 4;
 
@@ -99,13 +99,9 @@ for i = 1:length(best_iterations)
     title('Data');
     
     % calculate error and correlation with data
-    [cc_clean,MSE_clean_perf] = calcModelLoss(perf.CT,data_perf(1:4)');
-    [~,MSE_clean_FR] = calcModelLoss(fr.CT,data_FR);
-    % [cc_masked,MSE_masked] = calcModelLoss(perf.C,data_perf(5:end));
-    
-    MSE_clean = MSE_clean_perf(1) + MSE_clean_FR(1);
-    
-    str = {sprintf('Clean loss = %0.1f',MSE_clean),...
+    [cc_clean,~] = calcModelLoss(perf.CT,data_perf(1:4)');
+
+    str = {sprintf('Clean loss = %0.1f',loss(vv)),...
         sprintf('Clean perf C.C. = %0.3f',cc_clean),...
         sprintf('Clean avg. deviation = %0.1f',mean(abs(perf.CT-data_perf(1:4)'))),...
         data(targetIdx(1)).annot{vv,1:end}};
@@ -130,9 +126,9 @@ for i = 1:length(best_iterations)
     xticks([-90,0:45:90]);
 
     % save grid
-    %saveas(gca,[filesep DirPart filesep 'best_iteration_V2_' num2str(vv) '.tiff'])
-    %clf
+    saveas(gca,[filesep DirPart filesep 'best_iteration_V4_' num2str(vv) '.tiff'])
+    clf
         
 end
-%close;
+close;
 end

@@ -137,13 +137,16 @@ for i = 1:length(targetIdx)
     model_FR(:,5-i) = data(targetIdx(i)).fr.C;
 end
 
-[fit_perf,MSE_clean_perf] = calcModelLoss(perf,data_perf(1:4)');
+[fit_perf,MSE_clean_perf] = calcModelLoss(100*(perf)./data_perf(1:4)',100*data_perf(1:4)'./data_perf(1:4)');
 % calcualte loss for FR as a percentage of model FR
-[~,MSE_clean_FR] = calcModelLoss(((model_FR-data_FR)./data_FR)*100,100*ones(size(data_FR)));
+[~,MSE_clean_FR] = calcModelLoss(100*(model_FR)./data_FR,100*data_FR./data_FR);
 
 fit_perf(isnan(fit_perf)) = 0;
 
-loss = MSE_clean_perf(:,1) + MSE_clean_FR(:,1);
+% weighing loss from firing rate vs performance
+alpha = 1;
+
+loss = MSE_clean_perf(:,1) + alpha*MSE_clean_FR(:,1);
 
 frdiffs = abs(mean(model_FR,2) - mean(data_FR(data_FR ~= 0)));
 within_thresh = frdiffs <= 5;
@@ -164,4 +167,7 @@ end
 
 % make grid of best iterations
 
-makeGrids_bestIteration(data,varies,[],data_perf,data_FR,best_iterations);
+% v1 - perf only
+% v2 - fr and perf
+% v4 - both fr and perf converted to percents
+makeGrids_bestIteration(data,varies,DirPart,data_perf,data_FR,best_iterations,loss);
