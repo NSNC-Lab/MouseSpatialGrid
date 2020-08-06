@@ -145,12 +145,12 @@ for vv = 1:jump % for each varied parameter
     clf;
     locs = {'Ipsi. sigmoid','Gaussian','U-shaped','Cont. sigmoid'};
     for i = 1:4 %for each spatially directed neuron
-        if i > 1
-            ip = i + 1;
+        if i < 3
+            ip = i;
         else
-            ip = 1;
+            ip = i + 1;
         end
-        if plot_rasters, subplot(4,5,21-ip); end
+        if plot_rasters, subplot(4,5,15+ip); end
         thisRaster = squeeze(ICspks(:,i,:));
         [perf.IC(i,vv),fr.IC(i,vv)] = calcPCandPlot(thisRaster,time_end,1,plot_rasters);        
 
@@ -161,14 +161,14 @@ for vv = 1:jump % for each varied parameter
             'HorizontalAlignment','center',...
             'LineStyle','none')
         
-%         if plot_rasters, subplot(4,5,16-ip); end
+%         if plot_rasters, subplot(4,5,10+ip); end
 % 
 %         thisRaster = squeeze(Sspks(:,i,:));
 %         calcPCandPlot(thisRaster,time_end,0,plot_rasters);        
 %         if i==4, ylabel('S'); end
 %         xticklabels([])
 
-        if plot_rasters, subplot(4,5,11-ip); end
+        if plot_rasters, subplot(4,5,5+ip); end
         thisRaster = squeeze(Rspks(:,i,:));
         [perf.R(i,vv),fr.R(i,vv)] = calcPCandPlot(thisRaster,time_end,1,plot_rasters);
 

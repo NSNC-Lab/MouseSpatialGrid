@@ -7,8 +7,8 @@ datetime = datestr(now,'yyyymmdd-HHMMSS');
 
 h = figure('Position',[50,50,850,690]);
 
-subz = find(contains({ICstruc.name},'m0.mat')); % sXm0 (target only) cases
-%subz = 5:length({ICstruc.name});    % all cases except masker-only
+%subz = find(contains({ICstruc.name},'m0.mat')); % sXm0 (target only) cases
+subz = find(~contains({ICstruc.name},'s0'));    % all cases except masker-only
 for z = subz
     % restructure IC spikes
     load([ICdirPath ICstruc(z).name],'t_spiketimes');
@@ -42,9 +42,9 @@ for z = subz
     % load spikes from data
     if ~contains(spatialConfig{1},'s0')
         if strcmp(spatialConfig{1}(4),'0')
-            data_spks = squeeze(Spks_clean{dataCh}(:,5-str2double(spatialConfig{1}(2)),:));
+            data_spks = squeeze(Spks_clean{dataCh}(:,str2double(spatialConfig{1}(2)),:));
         else
-            data_spks = squeeze(Spks_masked{dataCh}(:,5-str2double(spatialConfig{1}(2)),5-str2double(spatialConfig{1}(4)),:));
+            data_spks = squeeze(Spks_masked{dataCh}(:,str2double(spatialConfig{1}(2)),str2double(spatialConfig{1}(4)),:));
         end
     else
         data_spks = [];

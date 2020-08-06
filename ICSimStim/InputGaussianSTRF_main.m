@@ -9,8 +9,7 @@ clearvars;clc;close all
 addpath(genpath('strflab_v1.45'))
 addpath('genlib')
 addpath('stimuli')
-% dataSaveLoc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\MiceSpatialGrids\ICStim';
-dataSaveLoc = 'MiceSpatialGrids/ICStim/'; %local save location
+dataSaveLoc = '/Users/jionocon/Documents/MATLAB/Spatial-grid-simulations/STRFs'; %local save location
 
 % Spatial tuning curve parameters
 sigma = 30; %60 for bird but 38 for mouse
@@ -38,7 +37,7 @@ if strcmp(tuning,'Mouse')
     paramG.BW = 2000;  % Hz
     paramG.BSM = 5.00E-05; % 1/Hz=s best spectral modulation
     paramG.f0 = 4300;
-    strfGain = 1; %1.5 gain ~ 16 Hz, 4.5 gain ~ 50 Hz FR
+    strfGain = 5.5; %1.5 gain ~ 16 Hz, 4.5 gain ~ 50 Hz FR
 elseif strcmp(tuning,'bird')
     % stimuli
     load('stimuli_birdsongs.mat','stimuli','fs')
@@ -66,8 +65,8 @@ specs.f = f;
 strf=STRFgen(paramH,paramG,f,t(2)-t(1));
 strf.w1 = strf.w1*strfGain;
 % ============ log message (manual entry?) ============
-saveName = sprintf('full_grids//BW_%0.3f BTM_3.8 t0_0.1 phase%0.4f//s%d_STRFgain%0.2f_%s',...
-                paramH.BW,paramH.phase/pi,sigma,strfGain,datestr(now,'YYYYmmdd-HHMMSS'));
+saveName = [sprintf('BW_%0.3f BTM_%0.1f t0_%0.1f phase%0.4f/s%0.0f_STRFgain%0.2f',...
+                paramH.BW,paramH.BTM,paramH.t0,paramH.phase/pi,sigma,strfGain),'_2020'];
 saveFlag = 0;
 
 msg{1} = ['capped tuning weight to' num2str(maxWeight)];
@@ -86,7 +85,7 @@ songLocs = 1:4;
 maskerLocs = 1:4;
 
 saveParam.flag = 1;
-saveParam.fileLoc = [dataSaveLoc filesep tuning filesep saveName];
+saveParam.fileLoc = [dataSaveLoc filesep saveName];
 if ~exist(saveParam.fileLoc,'dir'), mkdir(saveParam.fileLoc); end
 tuningParam.strf = strf;
 tuningParam.type = tuning;
@@ -100,7 +99,7 @@ for songloc = songLocs
     maskerloc=0;
     
     t_spiketimes = InputGaussianSTRF_v2(specs,songloc,maskerloc,tuningParam,saveParam,mean_rate,stimGain,maxWeight);
-    t_spiketimes = InputGaussianSTRF_v2(specs,maskerloc,songloc,tuningParam,saveParam,mean_rate,stimGain,maxWeight);
+    %t_spiketimes = InputGaussianSTRF_v2(specs,maskerloc,songloc,tuningParam,saveParam,mean_rate,stimGain,maxWeight);
     for maskerloc = maskerLocs
         t_spiketimes = InputGaussianSTRF_v2(specs,songloc,maskerloc,tuningParam,saveParam,mean_rate,stimGain,maxWeight);
     end
@@ -115,10 +114,8 @@ if fid == -1
 end
 for k=1:length(msg), fprintf(fid, '%s: %s\n', datestr(now, 0), msg{k}); end
 fclose(fid);
+
 %% Grids for each neuron
-% fileloc =
-% 'C:\Users\Kenny\Desktop\GitHub\MouseSpatialGrid\ICSimStim\mouse\v2\155210_seed142307_s30'; dataloc?
-% fileloc = 'Z:\eng_research_hrc_binauralhearinglab\kfchou\ActiveProjects\MiceSpatialGrids\ICStim\Mouse\s30_gain0.5_maskerLvl0.01_20200415-213511';
 fileloc = [saveParam.fileLoc];
 allfiles = dir([fileloc filesep '*.mat'])
 tgtalone = dir([fileloc filesep '*m0.mat'])
@@ -129,7 +126,7 @@ for i = 1:16
     perf(i,:) = data.disc;
 end
 
-neurons = {'cont sigmoid','gaussian','u','ipsi sigmoid'};
+neurons = {'cont sigmoid','u','gaussian','ipsi sigmoid'};
 [X,Y] = meshgrid(songLocs,fliplr(maskerLocs));
 figure;
 for i = 1:length(neurons)

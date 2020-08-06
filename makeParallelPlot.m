@@ -45,8 +45,7 @@ for t = 1:5
 end
 
 set(gca,'xtick',1:4);
-set(gca,'xticklabels',{'RC_{ipsi}','RC_{Gauss}','RC_{U}','RC_{contra}'});
-set(gca,'xdir','reverse');
+set(gca,'xticklabels',{'RC_{contra}','RC_{U}','RC_{Gauss}','RC_{ipsi}'});
 xlim([0.5 4.5])
 ylim([min(y,[],'all') max(y,[],'all')])
 set(gca,'ytick',[0 1]);

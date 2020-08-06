@@ -42,7 +42,7 @@ width=11.69;hwratio=.6;
 x0=.05;y0=.1;
 dx=.02;dy=.05;
 lx=.13;ly=.1;
-azimuth=[-90 0 45 90]; %stimuli locations
+azimuth=fliplr([-90 0 45 90]); %stimuli locations (flipped to match mouse data)
 figuresize(width, width*hwratio, gcf,'inches')
 positionVector = [x0+dx+lx y0+dy+ly 5*lx+4*dx ly];
 subplot('Position',positionVector)
@@ -70,12 +70,12 @@ switch tuning.type
         x=-108:108;
         tuningcurve=zeros(4,length(x));
         load('ono_curves_V2.mat','sigmoid','gauss','ushaped');
-        tuningcurve(1,:) = sigmoid;
-        tuningcurve(2,:) = gauss;
-        tuningcurve(3,:) = ushaped;
-        tuningcurve(4,:) = fliplr(sigmoid);
+        tuningcurve(1,:) = fliplr(sigmoid); % flip sigmoid so that contra(+90°) = 1
+        tuningcurve(2,:) = ushaped;
+        tuningcurve(3,:) = gauss;
+        tuningcurve(4,:) = sigmoid; % at -90°, sigmoid == 1
 
-        neuronNames = {'left sigmoid','gaussian','U','right sigmoid'};
+        neuronNames = fliplr({'ipsi sigmoid','gaussian','U','contra sigmoid'});
 end
 
 for i=1:4
@@ -133,10 +133,10 @@ for songn = 1:2
         % plot spectrograms for song1- bottom row of graphs
         for i = 1:4
             %the below if statement creates the space in between the first graph and the other 3
-            if i > 1
-                subplotloc = 5-i;
+            if i > 3
+                subplotloc = i+1;
             else
-                subplotloc = 6-i;
+                subplotloc = i;
             end
 
             positionVector = [x0+subplotloc*(dx+lx) y0 lx ly];
@@ -153,10 +153,10 @@ for songn = 1:2
     weight=zeros(4,4);
     for i=1:4  % summing of each channel, i.e. neuron type 1-4
         
-        if i > 1
-            subplotloc = 5-i;
+        if i > 3
+            subplotloc = i+1;
         else
-            subplotloc = 6-i;
+            subplotloc = i;
         end
         
         for trial = 1:20         % for each trial, define a new random WGN masker
