@@ -9,12 +9,11 @@ addpath(genpath('dynasim'))
 
 %%%%%%%% start of user inputs
 
-plot_distances = 0;  % plot VR distances
 plot_rasters = 0;   % plot rasters
 
-data_spks_file = '03_30_18_0dB_cleaned(-1,4).mat';
-data_perf_file = '03_30_18_0dB_performance.mat';
-dataCh = 31;
+data_spks_file = '9-21-2016_0dB_removed_trials_cleaned(-1,4).mat';
+data_perf_file = '9-21-2016_0dB_removed_trials_performance.mat';
+dataCh = 25;
 
 %%%%%%%% end of user inputs
 
@@ -98,11 +97,15 @@ ICstruc = dir([ICdirPath '*.mat']);
 gsyn_sum = 0.21*(mean(data_FR) - mean(FR_r0))./(mean(STRF_FR(ind,:)));
 
 %% 4D search
-gsyn_range = 0.03; %[0 gsyn_sum/4-0.02:0.01:gsyn_sum/4+0.02];
+gsyn_range = [0 gsyn_sum/4:gsyn_sum/4:3*gsyn_sum/4];
     
 ranges = cell(1,4);
 for c = 1:4
-   ranges{c} = gsyn_range; 
+    if c == best_loc 
+        ranges{c} = gsyn_range; 
+    else
+        ranges{c} = gsyn_range(1:end-1);
+    end
 end
 
 %% varied parameters
@@ -119,25 +122,27 @@ varies(end).range = Cnoise;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN1';
-varies(end).range = 0;%ranges{1};
+varies(end).range = ranges{1};
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN2';
-varies(end).range = 0.03;%ranges{2};
+varies(end).range = ranges{2};
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN3';
-varies(end).range = 0.06;%ranges{3};
+varies(end).range = ranges{3};
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN4';
-varies(end).range = 0.03;%ranges{4};
+varies(end).range = ranges{4};
 
 nvaried = {varies(2:end).range};
 nvaried = prod(cellfun(@length,nvaried));
 
+allFlag = 0;
+
 [data,DirPart] = mouseNetwork_initialize(varies,ICstruc,ICdirPath,Spks_clean,...
-    Spks_masked,dataCh,data_tau,plot_distances,plot_rasters,folder,subject,'-4D-search');
+    Spks_masked,dataCh,data_tau,plot_rasters,folder,subject,'-4D-search',allFlag);
 
 %% performance grids
 
@@ -147,30 +152,35 @@ temp(cellfun('isempty',temp)) = {'empty'}; %label empty content
 targetIdx = find(contains(temp,'m0') & ~strcmp(temp,'s0m0.mat'));
 %maskerIdx = find(contains(temp,'s0') & ~strcmp(temp,'s0m0.mat'));
 mixedIdx = find(~contains(temp,'m0') & ~contains(temp,'s0') & ~contains(temp,'empty'));
-perf = []; model_FR = [];
+perf_clean = []; model_FR = [];
 
 % clean performance and FR
 for i = 1:length(targetIdx)
-    perf(:,i) = data(targetIdx(i)).perf.C;
+    perf_clean(:,i) = data(targetIdx(i)).perf.C;
     model_FR(:,i) = data(targetIdx(i)).fr.C;
 end
 
 perf_masked = []; model_FR_masked = [];
 % mixed performance and FR
+if ~isempty(mixedIdx)
 for i = 1:length(mixedIdx)
     perf_masked(:,i) = data(mixedIdx(i)).perf.C;
     model_FR_masked(:,i) = data(mixedIdx(i)).fr.C;
 end
+end
 
-[~,MSE_clean_perf] = calcModelLoss(perf,data_perf(1:4)');
+[~,MSE_clean_perf] = calcModelLoss(perf_clean,data_perf(1:4)');
 % calculate loss for FR as a percentage of model FR
 [~,MSE_clean_FR] = calcModelLoss(100*(model_FR)./data_FR,100*data_FR./data_FR);
 
-[~,MSE_masked_perf] = calcModelLoss(perf_masked,data_perf(5:end)');
-% calculate loss for FR as a percentage of model FR
-[~,MSE_masked_FR] = calcModelLoss(100*(model_FR_masked)./data_FR_masked,100*data_FR_masked./data_FR_masked);
-
-loss = MSE_clean_perf(:,1) + MSE_clean_FR(:,1) + MSE_masked_perf(:,1) + MSE_masked_FR(:,1);
+if ~isempty(mixedIdx)
+    [~,MSE_masked_perf] = calcModelLoss(perf_masked,data_perf(5:end)');
+    % calculate loss for FR as a percentage of model FR
+    [~,MSE_masked_FR] = calcModelLoss(100*(model_FR_masked)./data_FR_masked,100*data_FR_masked./data_FR_masked);
+    loss = MSE_clean_perf(:,1) + MSE_clean_FR(:,1) + MSE_masked_perf(:,1) + MSE_masked_FR(:,1);
+else
+    loss = MSE_clean_perf(:,1) + MSE_clean_FR(:,1);
+end
 
 frdiffs = abs(mean(model_FR,2) - mean(data_FR(data_FR ~= 0)));
 within_thresh = frdiffs <= 5;
@@ -180,14 +190,100 @@ if sum(within_thresh) == 0
    within_thresh = frdiffs == min(frdiffs);
 end
 
-makeParallelPlot(data,within_thresh,loss)
+plotFRvsgSYN(data,within_thresh);
 
+makeParallelPlot(data,within_thresh,loss);
+
+% find sets of parameters that are within threshold
 [temp,inds] = sort(loss(within_thresh),'ascend');
 
-best_iterations = zeros(1,5);
-for i = 1:5
+if length(within_thresh) >= 5
+    best_iterations = zeros(1,5);
+else
+    best_iterations = zeros(1,length(within_thresh));
+end
+
+for i = 1:length(best_iterations)
     best_iterations(i) = find(loss == temp(i));
 end
 
 % make grid of best iterations
 makeGrids_bestIteration(data,varies,DirPart,data_perf,data_FR,best_iterations,loss);
+
+%% rerun dynasim and obtain rasters for best iteration
+
+plot_rasters = 1;
+
+gsyn_strs = cellfun(@str2num,extractAfter({data(targetIdx(1)).annot{:,2}},'RC_{gSYN} = '),'UniformOutput',false);
+best_gsyns = gsyn_strs{best_iterations(1)};
+
+varies = struct;
+
+varies(1).conxn = '(IC->IC)';
+varies(1).param = 'trial';
+varies(1).range = 1:40;
+
+varies(end+1).conxn = 'C';
+varies(end).param = 'noise';
+varies(end).range = Cnoise;
+
+varies(end+1).conxn = 'R->C';
+varies(end).param = 'gSYN1';
+varies(end).range = 0;%best_gsyns(1);
+
+varies(end+1).conxn = 'R->C';
+varies(end).param = 'gSYN2';
+varies(end).range = 0.03;%best_gsyns(2);
+
+varies(end+1).conxn = 'R->C';
+varies(end).param = 'gSYN3';
+varies(end).range = 0.06;%best_gsyns(3);
+
+varies(end+1).conxn = 'R->C';
+varies(end).param = 'gSYN4';
+varies(end).range = 0.03;%best_gsyns(4);
+
+allFlag = 1; % run all spots on grid
+
+[data,DirPart] = mouseNetwork_initialize(varies,ICstruc,ICdirPath,Spks_clean,...
+    Spks_masked,dataCh,data_tau,plot_rasters,folder,subject,'-best-iteration',allFlag);
+
+% make full spatial grid
+
+temp = {data.name};
+temp(cellfun('isempty',temp)) = {'empty'}; %label empty content
+
+targetIdx = find(contains(temp,'m0') & ~strcmp(temp,'s0m0.mat'));
+%maskerIdx = find(contains(temp,'s0') & ~strcmp(temp,'s0m0.mat'));
+mixedIdx = find(~contains(temp,'m0') & ~contains(temp,'s0') & ~contains(temp,'empty'));
+perf_clean = []; model_FR = [];
+
+% clean performance and FR
+for i = 1:length(targetIdx)
+    perf_clean(:,i) = data(targetIdx(i)).perf.C;
+    model_FR(:,i) = data(targetIdx(i)).fr.C;
+end
+
+perf_masked = []; model_FR_masked = [];
+% mixed performance and FR
+if ~isempty(mixedIdx)
+for i = 1:length(mixedIdx)
+    perf_masked(:,i) = data(mixedIdx(i)).perf.C;
+    model_FR_masked(:,i) = data(mixedIdx(i)).fr.C;
+end
+end
+
+[~,MSE_clean_perf] = calcModelLoss(perf_clean,data_perf(1:4)');
+% calculate loss for FR as a percentage of model FR
+[~,MSE_clean_FR] = calcModelLoss(100*(model_FR)./data_FR,100*data_FR./data_FR);
+
+if ~isempty(mixedIdx)
+    [~,MSE_masked_perf] = calcModelLoss(perf_masked,data_perf(5:end)');
+    % calculate loss for FR as a percentage of model FR
+    [~,MSE_masked_FR] = calcModelLoss(100*(model_FR_masked)./data_FR_masked,100*data_FR_masked./data_FR_masked);
+    loss = MSE_clean_perf(:,1) + MSE_clean_FR(:,1) + MSE_masked_perf(:,1) + MSE_masked_FR(:,1);
+else
+    loss = MSE_clean_perf(:,1) + MSE_clean_FR(:,1);
+end
+
+makeGrids(data,DirPart,data_perf,data_FR,loss);

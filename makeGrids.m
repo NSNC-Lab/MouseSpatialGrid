@@ -1,51 +1,21 @@
-function makeGrids(data,varies,DirPart,nvaried,data_perf,data_FR)
+function makeGrids(data,DirPart,data_perf,data_FR,loss)
 
 set(0,'defaultfigurevisible','on');
-    
-% performance vector has dimensions [numSpatialChan,nvaried]
-neurons = {'Ipsi. sigmoid','Gaussian','U','Cont. sigmoid'};
 
 temp = {data.name};
 temp(cellfun('isempty',temp)) = {'empty'}; %label empty content
 
 targetIdx = find(contains(temp,'m0') & ~strcmp(temp,'s0m0.mat'));
-maskerIdx = find(contains(temp,'s0') & ~strcmp(temp,'s0m0.mat'));
+%maskerIdx = find(contains(temp,'s0') & ~strcmp(temp,'s0m0.mat'));
 mixedIdx = find(~contains(temp,'m0') & ~contains(temp,'s0') & ~contains(temp,'empty'));
 textColorThresh = 70;
-numSpatialChan = 4;
 
-figstr = 'CleanGrid vary ';
-
-% if more than one parameter is varied
-if sum(cellfun(@length,{varies(2:end).range}) > 1) > 1
-    
-    multiFlag = 1;
-    
-    temp = find((cellfun(@length,{varies.range}) > 1) == 1);
-    temp(1) = [];
-    variedConxns = {varies(temp).conxn};
-    variedParams = {varies(temp).param};
-    variedRanges = {varies(temp).range};
-    
-    for i = 1:length(temp)
-        figstr = cat(2,figstr,[variedConxns{i},variedParams{i},'%0.3f, ']);
-    end
-    figstr(end-1:end) = []; % delete extra ', '
-    
-    [w1,w2] = meshgrid(variedRanges{1},variedRanges{2});
-    c = cat(2,w1,w2);
-    paramPairs = reshape(c,[],2);
-else
-    multiFlag = 0;
-    ind = find(cellfun(@length,{varies(2:end).range}) ~= 1);
-    variedParam = [varies(ind+1).conxn,varies(ind+1).param];
-    figstr = cat(2,figstr,variedParam,'%0.3f');
-end
-
-width=8; hwratio=1;
-x0=.08; y0=.08;
-dx=.04; dy=.04;
-lx=.125; ly=.125/hwratio;
+nvaried = size(data(targetIdx(1)).annot,1);
+ 
+width = 11; hwratio = 0.75;
+x0 = .08; y0 = .08;
+dx = .04; dy = .04;
+lx = .16; ly = .16/hwratio;
 
 x=-108:108;
 tuningcurve = zeros(4,length(x));
@@ -57,62 +27,39 @@ h = figure('visible','on');
 figuresize(width, width*hwratio,h, 'inches')
 
 for vv = 1:nvaried
-    gSYNs = extractAfter(gsyn_str{vv},'RC_{gSYN} = ');
-    gSYNs = str2num(gSYNs);
     
-    tuningcurve(1,:) = ono.sigmoid * gSYNs(1)/0.21;
-    tuningcurve(2,:) = ono.gauss * gSYNs(2)/0.21;
-    tuningcurve(3,:) = ono.ushaped * gSYNs(3)/0.21;
-    tuningcurve(4,:) = fliplr(ono.sigmoid) * gSYNs(4)/0.21;
-    
-    subplot(2,2,1); 
-    plot(x,tuningcurve','b','linewidth',1);
-    hold on;
-    plot(x,sum(tuningcurve',2),'k','linewidth',2);
-    ylim([0 max(sum(tuningcurve',2))+0.2]);
-    xlim([x(1) x(end)]);
-    set(gca,'xdir','reverse');
-    xticks([-90,0:45:90]);
-    xlabel('Azimuth');
-    
-    % C neuron; target or masker only cases
+    % CT; target only cases
     perf.CT = zeros(1,4);
     fr.CT = zeros(1,4);
+    
     if ~isempty(targetIdx)
         for i = 1:length(targetIdx)
-            perf.CT(5-i) = data(targetIdx(i)).perf.C(vv);
+            perf.CT(i) = data(targetIdx(i)).perf.C(vv);
             fr.CT(i) = data(targetIdx(i)).fr.C(vv);
-            fr.R(:,i) = data(targetIdx(i)).fr.R(:,vv);
         end
-    end    
+    end
     
-    subplot('Position',[0.6 0.6 0.2 0.2/4])
-    plotPerfGrid(perf.CT,[],[],textColorThresh);
-    title('Model');
-     
-    % show data grid next to model grid    
-    subplot('Position',[0.6 0.5 0.2 0.2/4])
-    plotPerfGrid(data_perf(1:4)',[],[],textColorThresh);
-    title('Data');
-
-    % calculate error and correlation with data
-    [cc_clean,MSE_clean] = calcModelPerf(perf.CT,data_perf(1:4)');
-    % [cc_masked,MSE_masked] = calcModelPerf(perf.C,data_perf(5:end));
-
-    str = {sprintf('Clean C.C. = %0.3f',cc_clean),...
-        sprintf('Clean MSE = %0.1f ± %0.1f',MSE_clean),...
-        sprintf('Clean deviation = %0.1f',mean(abs(perf.CT-data_perf(1:4)'))),...
-        data(targetIdx(1)).annot{vv,1:end}};
-        
-    annotation('textbox',[0.6 .35 0.2 0.1],...
-           'string',str,...
-           'FitBoxToText','on',...
-           'LineStyle','none')
-       
+    if ~isempty(mixedIdx)
+        for i = 1:length(mixedIdx)
+            perf.C(i) = data(mixedIdx(i)).perf.C(vv);
+            fr.C(i) = data(mixedIdx(i)).fr.C(vv);
+        end
+    end
+    
+    gSYNs = extractAfter(gsyn_str{vv},'RC_{gSYN} = ');
+    gSYNs = str2num(gSYNs); %#ok<ST2NM>
+    
+    tuningcurve(1,:) = fliplr(ono.sigmoid) * gSYNs(1)/0.21;
+    tuningcurve(2,:) = ono.ushaped * gSYNs(2)/0.21;
+    tuningcurve(3,:) = ono.gauss * gSYNs(3)/0.21;
+    tuningcurve(4,:) = ono.sigmoid * gSYNs(4)/0.21;
+    
     % Show FR vs azimuth for clean data
-    subplot(2,2,3)
-    plot([-90 0 45 90],data_FR,'-b',...
-        [-90 0 45 90],fr.CT,'-r','linewidth',2);
+    
+    % flip firing rates since 90° is first index
+    subplot('Position',[x0 y0 0.5-x0 0.4-y0])
+    plot([-90 0 45 90],fliplr(data_FR),'-b',...
+        [-90 0 45 90],fliplr(fr.CT),'-r','linewidth',2);
     hold on
     plot([-90 0 45 90],ones(1,4)*mean(data_FR),'--b',...
         [-90 0 45 90],ones(1,4)*mean(fr.CT),'--r','linewidth',2);
@@ -122,15 +69,74 @@ for vv = 1:nvaried
     set(gca,'xdir','reverse');
     ylim([min([data_FR,fr.CT])-10 max([data_FR,fr.CT])+10]);
     xticks([-90,0:45:90]);
-
-    % save grid
-    if multiFlag == 1
-        saveas(gca,[filesep DirPart filesep sprintf(figstr,paramPairs(vv,1),paramPairs(vv,2)) '.tiff'])
-    else
-        saveas(gca,[filesep DirPart filesep sprintf(figstr,varies(ind+1).range(vv)) '.tiff'])
-    end
-    clf
+    
+    % make subplot of tuning curves
+    subplot('Position',[x0 0.7-y0 0.5-x0 0.4-y0]);
+    plot(x,tuningcurve','b','linewidth',1);
+    hold on;
+    plot(x,sum(tuningcurve),'k','linewidth',2);
+    ylim([0 max(sum(tuningcurve))+0.2]);
+    xlim([x(1) x(end)]);
+    set(gca,'xdir','reverse');
+    xticks([-90,0:45:90]);
+    xlabel('Azimuth');
+    
+    % plot model grid clean
+    subplot('Position',[0.57 0.8+dy/4 lx ly/4])
+    plotPerfGrid(perf.CT,[],textColorThresh);
+    title('Model');
+    
+    % show data grid next to model grid clean
+    subplot('Position',[0.8 0.8+dy/4 lx ly/4])
+    plotPerfGrid(data_perf(1:4)',[],textColorThresh);
+    title('Data');
+    
+    % plot difference grid clean
+    subplot('Position',[0.57 0.4+dy/4 lx ly/4])
+    plotPerfGrid(data_perf(1:4)'-perf.CT,[],-5);
+    title('Difference');
+    
+    % plot all grids for mixed trials if exist
+    if ~isempty(mixedIdx)
+        subplot('Position',[0.57 0.8-ly lx ly]);
+        plotPerfGrid(perf.C,[],textColorThresh);
         
+        subplot('Position',[0.8 0.8-ly lx ly]);
+        plotPerfGrid(data_perf(5:end)',[],textColorThresh);
+        
+        subplot('Position',[0.57 0.4-ly lx ly]);
+        plotPerfGrid(data_perf(5:end)'-perf.C,[],-5);
+        
+        % calculate error and correlation with data
+        [cc_full,~] = calcModelLoss([perf.CT,perf.C],data_perf');
+        perf_str = sprintf('Full perf C.C. = %0.3f',cc_full);
+        dev_str = sprintf('Full perf deviation = %0.1f',mean(abs([perf.CT,perf.C]-data_perf')));
+    else
+        % calculate error and correlation with data
+        [cc_clean,~] = calcModelLoss(perf.CT,data_perf(1:4)');
+        perf_str = sprintf('Clean perf C.C. = %0.3f',cc_clean);
+        dev_str = sprintf('Clean perf deviation = %0.1f',mean(abs(perf.CT-data_perf(1:4)')));
+    end
+    
+    % round gsyns for plotting purposes
+    gSYNs_rounded = round(gSYNs*10000)/10000;
+    gsyn_annot = ['RC_{gSYN} = ' mat2str(gSYNs_rounded)];
+    
+    str = {sprintf('Loss = %0.1f',loss(vv)),...
+        perf_str,...
+        dev_str,...
+        data(targetIdx(1)).annot{vv,1},...
+        gsyn_annot};
+    
+    annotation('textbox',[0.8 .35 0.2 0.1],...
+        'string',str,...
+        'FitBoxToText','on',...
+        'LineStyle','none')
+    
+    % save grid
+    saveas(gca,[filesep DirPart filesep 'Grid_Iteration_' num2str(vv) '.tiff'])
+    clf
+    
 end
 close;
 end

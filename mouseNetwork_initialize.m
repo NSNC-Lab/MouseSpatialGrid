@@ -1,5 +1,5 @@
 function [data,DirPart] = mouseNetwork_initialize(varies,ICstruc,ICdirPath,Spks_clean,...
-    Spks_masked,dataCh,data_tau,plot_distances,plot_rasters,folder,subject,detail)
+    Spks_masked,dataCh,data_tau,plot_rasters,folder,subject,detail,allFlag)
 
 datetime = datestr(now,'yyyymmdd-HHMMSS');
 
@@ -7,8 +7,12 @@ datetime = datestr(now,'yyyymmdd-HHMMSS');
 
 h = figure('Position',[50,50,850,690]);
 
-%subz = find(contains({ICstruc.name},'m0.mat')); % sXm0 (target only) cases
-subz = find(~contains({ICstruc.name},'s0'));    % all cases except masker-only
+if allFlag
+    subz = find(~contains({ICstruc.name},'s0'));    % all cases except masker-only
+else
+    subz = find(contains({ICstruc.name},'m0.mat')); % sXm0 (target only) cases
+end
+
 for z = subz
     % restructure IC spikes
     load([ICdirPath ICstruc(z).name],'t_spiketimes');
@@ -52,12 +56,18 @@ for z = subz
    
     [data(z).perf, data(z).fr, data(z).annot,~, data(z).VR] = ...
         mouse_network(study_dir,time_end,varies,plot_rasters,...
-        plot_distances,data_spks,data_tau);
+        0,data_spks,data_tau);
 
     data(z).name = ICstruc(z).name;
+    
+    Dirparts = strsplit(study_dir, filesep);
+    DirPart = fullfile(Dirparts{1:end-1});
+    
+    datatemp = data(z);
+    
+    save([filesep study_dir filesep 'summary_results_' spatialConfig{1} '.mat'],'datatemp','varies')
+
 end
-Dirparts = strsplit(study_dir, filesep);
-DirPart = fullfile(Dirparts{1:end-1});
 
 save([filesep DirPart filesep 'summary_results.mat'],'data','varies')
 close(h);
