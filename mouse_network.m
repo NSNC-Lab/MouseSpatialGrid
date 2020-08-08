@@ -1,5 +1,5 @@
 function [perf, fr, annotstr, distMat, VR] = mouse_network(study_dir,time_end,...
-    varies,plot_rasters,plot_distances,data_spks,data_tau)
+    varies,plot_rasters,plot_distances,data_spks,data_tau,restrict_vary_flag)
 % [performance, tauMax] = mouse_network(study_dir,time_end,varies,plot_rasters,data_spks)
 % study_dir: location of IC spike files + directory for log and data files
 % time_end: length of simulation in ms
@@ -62,7 +62,7 @@ s.populations(end).parameters = {'Itonic',0,'noise',0};
 s.populations(end+1).name='C';
 s.populations(end).equations = 'chouLIF';
 s.populations(end).size = 1;
-s.populations(end).parameters = {'noise',noise};
+s.populations(end).parameters = {'noise',noise,'G_inc',0};
 
 %% connections
 
@@ -104,14 +104,15 @@ for i = 1:length(varies)
     vary{i,3} = varies(i).range;
 end
 
-numTrials = max(vary{1,3});
+numTrials = length(vary{1,3});
 
 %% simulate
 tic;
 data = dsSimulate(s,'time_limits',[dt time_end], 'solver',solverType, 'dt',dt,...
   'downsample_factor',1, 'save_data_flag',0, 'save_results_flag',1,...
-  'study_dir',study_dir, 'vary',vary, 'debug_flag',0, 'verbose_flag',0);
-toc
+  'study_dir',study_dir, 'vary',vary, 'debug_flag',0, 'verbose_flag',0,...
+  'restrict_vary_flag',restrict_vary_flag);
+
 
 %% insert spikes
 V_spike = 50;
@@ -143,16 +144,16 @@ for vv = 1:jump % for each varied parameter
 
     % plot
     clf;
-    locs = {'Ipsi. sigmoid','Gaussian','U-shaped','Cont. sigmoid'};
+    locs = {'Cont. sigmoid','U-shaped','Gaussian','Ipsi. sigmoid'};
     for i = 1:4 %for each spatially directed neuron
-        if i < 3
+        if i < 4
             ip = i;
         else
             ip = i + 1;
         end
         if plot_rasters, subplot(4,5,15+ip); end
         thisRaster = squeeze(ICspks(:,i,:));
-        [perf.IC(i,vv),fr.IC(i,vv)] = calcPCandPlot(thisRaster,time_end,1,plot_rasters);        
+        [perf.IC(i,vv),fr.IC(i,vv)] = calcPCandPlot(thisRaster,time_end,1,plot_rasters,numTrials);        
 
         if i==4, ylabel('IC'); end
         ax = get(gca,'position'); 
@@ -164,20 +165,20 @@ for vv = 1:jump % for each varied parameter
 %         if plot_rasters, subplot(4,5,10+ip); end
 % 
 %         thisRaster = squeeze(Sspks(:,i,:));
-%         calcPCandPlot(thisRaster,time_end,0,plot_rasters);        
+%         calcPCandPlot(thisRaster,time_end,0,plot_rasters,numTrials);        
 %         if i==4, ylabel('S'); end
 %         xticklabels([])
 
         if plot_rasters, subplot(4,5,5+ip); end
         thisRaster = squeeze(Rspks(:,i,:));
-        [perf.R(i,vv),fr.R(i,vv)] = calcPCandPlot(thisRaster,time_end,1,plot_rasters);
+        [perf.R(i,vv),fr.R(i,vv)] = calcPCandPlot(thisRaster,time_end,1,plot_rasters,numTrials);
 
         if i==4, ylabel('R'); end
         xticklabels([])
     end
     
     if plot_rasters, subplot(4,5,3); ylabel('C spikes'); xticklabels([]); end
-    [perf.C(vv),fr.C(vv)] = calcPCandPlot(Cspks,time_end,1,plot_rasters);     
+    [perf.C(vv),fr.C(vv)] = calcPCandPlot(Cspks,time_end,1,plot_rasters,numTrials);     
     
     if plot_rasters, subplot(4,5,2); xticklabels([]); ylabel('Data spikes');
         tempspks = zeros(numel(data_spks),time_end);
@@ -186,11 +187,11 @@ for vv = 1:jump % for each varied parameter
             temp(temp < 0 | temp >= time_end) = [];
             tempspks(tt,temp+1) = 1;
         end
-    calcPCandPlot(tempspks,time_end,1,plot_rasters);  
+    calcPCandPlot(tempspks,time_end,1,plot_rasters,size(tempspks,1));  
     end
         
     % figure annotations
-    annotstr(vv,:) = createAnnotStr(data(vv),varies);
+    annotstr(vv,:) = createAnnotStr(data(vv),varies(1:end-1));
     
     parts = strsplit(study_dir, filesep);
     DirPart = fullfile(parts{1:end-1});
@@ -219,11 +220,13 @@ for vv = 1:jump % for each varied parameter
     end
     close(taufig);
 end
+
+toc;
+
 end
 
-function [pc,fr] = calcPCandPlot(raster,time_end,calcPC,plot_rasters,h)
+function [pc,fr] = calcPCandPlot(raster,time_end,calcPC,plot_rasters,numTrials)
     PCstr = '';
-    numTrials = size(raster,1);
     if calcPC
         % spks to spiketimes in a cell array of 20x2
         tau = linspace(1,30,100);

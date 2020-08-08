@@ -9,11 +9,11 @@ addpath(genpath('dynasim'))
 
 %%%%%%%% start of user inputs
 
-plot_rasters = 0;   % plot rasters
+plot_rasters = 1;   % plot rasters
 
-data_spks_file = '9-21-2016_0dB_removed_trials_cleaned(-1,4).mat';
-data_perf_file = '9-21-2016_0dB_removed_trials_performance.mat';
-dataCh = 25;
+data_spks_file = '03_30_18_0dB_cleaned(-1,4).mat';
+data_perf_file = '03_30_18_0dB_performance.mat';
+dataCh = 31;
 
 %%%%%%%% end of user inputs
 
@@ -97,15 +97,11 @@ ICstruc = dir([ICdirPath '*.mat']);
 gsyn_sum = 0.21*(mean(data_FR) - mean(FR_r0))./(mean(STRF_FR(ind,:)));
 
 %% 4D search
-gsyn_range = [0 gsyn_sum/4:gsyn_sum/4:3*gsyn_sum/4];
-    
+gsyn_range = [0 gsyn_sum];
+
 ranges = cell(1,4);
 for c = 1:4
-    if c == best_loc 
-        ranges{c} = gsyn_range; 
-    else
-        ranges{c} = gsyn_range(1:end-1);
-    end
+    ranges{c} = gsyn_range; 
 end
 
 %% varied parameters
@@ -119,6 +115,10 @@ varies(1).range = 1:40;
 varies(end+1).conxn = 'C';
 varies(end).param = 'noise';
 varies(end).range = Cnoise;
+
+varies(end+1).conxn = 'C';
+varies(end).param = 'G_inc';
+varies(end).range = 0.005;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN1';
@@ -136,13 +136,19 @@ varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN4';
 varies(end).range = ranges{4};
 
+% for now: last varies field has to be restriction
+varies(end+1).conxn = 'R->C';
+varies(end).param = {'gSYN1','gSYN2','gSYN3','gSYN4'};
+varies(end).range = gsyn_sum;
+
 nvaried = {varies(2:end).range};
 nvaried = prod(cellfun(@length,nvaried));
 
 allFlag = 0;
+restrict_vary_flag = 1;
 
-[data,DirPart] = mouseNetwork_initialize(varies,ICstruc,ICdirPath,Spks_clean,...
-    Spks_masked,dataCh,data_tau,plot_rasters,folder,subject,'-4D-search',allFlag);
+[data,DirPart] = mouseNetwork_initialize(varies,ICstruc,ICdirPath,Spks_clean,Spks_masked,...
+    dataCh,data_tau,plot_rasters,folder,subject,'-4D-search',allFlag,restrict_vary_flag);
 
 %% performance grids
 
@@ -190,7 +196,7 @@ if sum(within_thresh) == 0
    within_thresh = frdiffs == min(frdiffs);
 end
 
-plotFRvsgSYN(data,within_thresh);
+% plotFRvsgSYN(data,within_thresh);
 
 makeParallelPlot(data,within_thresh,loss);
 
@@ -208,7 +214,7 @@ for i = 1:length(best_iterations)
 end
 
 % make grid of best iterations
-makeGrids_bestIteration(data,varies,DirPart,data_perf,data_FR,best_iterations,loss);
+makeGrids_bestIteration(data,DirPart,data_perf,data_FR,best_iterations,loss);
 
 %% rerun dynasim and obtain rasters for best iteration
 
@@ -229,26 +235,27 @@ varies(end).range = Cnoise;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN1';
-varies(end).range = 0;%best_gsyns(1);
+varies(end).range = best_gsyns(1);
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN2';
-varies(end).range = 0.03;%best_gsyns(2);
+varies(end).range = best_gsyns(2);
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN3';
-varies(end).range = 0.06;%best_gsyns(3);
+varies(end).range = best_gsyns(3);
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN4';
-varies(end).range = 0.03;%best_gsyns(4);
+varies(end).range = best_gsyns(4);
 
 allFlag = 1; % run all spots on grid
+restrict_vary_flag = 0;
 
 [data,DirPart] = mouseNetwork_initialize(varies,ICstruc,ICdirPath,Spks_clean,...
-    Spks_masked,dataCh,data_tau,plot_rasters,folder,subject,'-best-iteration',allFlag);
+    Spks_masked,dataCh,data_tau,plot_rasters,folder,subject,'-best-iteration',allFlag,restrict_vary_flag);
 
-% make full spatial grid
+%% make full spatial grid
 
 temp = {data.name};
 temp(cellfun('isempty',temp)) = {'empty'}; %label empty content

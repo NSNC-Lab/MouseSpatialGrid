@@ -5,7 +5,7 @@ temp(cellfun('isempty',temp)) = {'empty'}; %label empty content
 targetIdx = find(contains(temp,'m0') & ~strcmp(temp,'s0m0.mat'));
 
 % get RC_gsyn values
-gsyn_strs = cellfun(@str2num,extractAfter({data(targetIdx(1)).annot{:,2}},'RC_{gSYN} = '),'UniformOutput',false);
+gsyn_strs = cellfun(@str2num,extractAfter({data(targetIdx(1)).annot{:,3}},'RC_{gSYN} = '),'UniformOutput',false);
 all_gsyns = zeros(length(gsyn_strs),4);
 for i = 1:length(gsyn_strs)
     all_gsyns(i,:) = gsyn_strs{i};
@@ -38,7 +38,13 @@ all_lines = plot(x(within_thresh,:)',y(within_thresh,:)','k');
 [~,ind] = sort(loss(within_thresh),'ascend');
 width = fliplr([1.5,1.5,2,3,4]);
 
-for t = 1:5
+if length(all_lines) < 5
+    numTops = length(all_lines);
+else
+    numTops = 5;
+end
+
+for t = 1:numTops
     toplines(t) = all_lines(ind(t));
     toplines(t).Color = topcolors(t,:);
     toplines(t).LineWidth = width(t);

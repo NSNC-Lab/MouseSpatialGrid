@@ -1,5 +1,5 @@
 function [data,DirPart] = mouseNetwork_initialize(varies,ICstruc,ICdirPath,Spks_clean,...
-    Spks_masked,dataCh,data_tau,plot_rasters,folder,subject,detail,allFlag)
+    Spks_masked,dataCh,data_tau,plot_rasters,folder,subject,detail,allFlag,restrict_vary_flag)
 
 datetime = datestr(now,'yyyymmdd-HHMMSS');
 
@@ -56,7 +56,7 @@ for z = subz
    
     [data(z).perf, data(z).fr, data(z).annot,~, data(z).VR] = ...
         mouse_network(study_dir,time_end,varies,plot_rasters,...
-        0,data_spks,data_tau);
+        0,data_spks,data_tau,restrict_vary_flag);
 
     data(z).name = ICstruc(z).name;
     
