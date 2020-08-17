@@ -37,7 +37,7 @@ if strcmp(tuning,'Mouse')
     paramG.BW = 2000;  % Hz
     paramG.BSM = 5.00E-05; % 1/Hz=s best spectral modulation
     paramG.f0 = 4300;
-    strfGain = 5.5; %1.5 gain ~ 16 Hz, 4.5 gain ~ 50 Hz FR
+    strfGain = 15; %1.5 gain ~ 16 Hz, 4.5 gain ~ 50 Hz FR
 elseif strcmp(tuning,'bird')
     % stimuli
     load('stimuli_birdsongs.mat','stimuli','fs')

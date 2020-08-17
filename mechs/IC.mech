@@ -6,8 +6,8 @@ ICinput = genICinput(trial,tauR,tauD,dt);
 
 g_postIC = 0.5
 E_exc = 0
-tauR = 0.4
-tauD = 2
+tauR = 0.3
+tauD = 1.5
 
 % f(x) = (exp(-x/tauD) - exp(-x/tauR)).*(x>0)
 

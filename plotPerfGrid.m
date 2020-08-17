@@ -19,10 +19,10 @@ elseif numel(neuronPerf) == 8
     % 2x4 grid
     [X,Y] = meshgrid(1:4,1:2);
     str = cellstr(num2str(round(neuronPerf(:))));
-    str2 = cellstr(num2str(round(neuronFR(:))));
+    %str2 = cellstr(num2str(round(neuronFR(:))));
     imagesc(neuronPerf);
     xticks([]);
-    yticks(1:2); yticklabels({'target only','masker only'})
+    yticks(1:2); yticklabels({'Clean','Co-loc'})
 elseif numel(neuronPerf) == 4
     % 1x4 grid
     [X,Y] = meshgrid(1:4,1:1);

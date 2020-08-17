@@ -81,23 +81,23 @@ for i = 1:length(best_iterations)
     xticks([-90,0:45:90]);
     xlabel('Azimuth');
     
-    % plot model grid clean
-    subplot('Position',[0.57 0.8+dy/4 lx ly/4])
-    plotPerfGrid(perf.CT,[],textColorThresh);
+    % plot model grid clean + co-located
+    subplot('Position',[0.57 0.8+dy/4 lx ly/2])
+    plotPerfGrid([perf.CT;perf.C],[],textColorThresh);
     title('Model');
     
-    % show data grid next to model grid clean
-    subplot('Position',[0.8 0.8+dy/4 lx ly/4])
-    plotPerfGrid(data_perf(1:4)',[],textColorThresh);
+    % show data grid next to model grid clean + co-located
+    subplot('Position',[0.8 0.8+dy/4 lx ly/2])
+    plotPerfGrid([data_perf(1:4)';data_perf([5:5:20])'],[],textColorThresh);
     title('Data');
     
-    % plot difference grid clean
-    subplot('Position',[0.57 0.4+dy/4 lx ly/4])
-    plotPerfGrid(data_perf(1:4)'-perf.CT,[],-5);
+    % plot difference grid clean + co-located
+    subplot('Position',[0.57 0.4+dy/4 lx ly/2])
+    plotPerfGrid([data_perf(1:4)'-perf.CT;data_perf([5:5:20])'-perf.C],[],-5);
     title('Difference');
     
     % plot all grids for mixed trials if exist
-    if ~isempty(mixedIdx)
+    if ~isempty(mixedIdx) && length(mixedIdx) == 16
         subplot('Position',[0.57 0.8-ly lx ly]);
         plotPerfGrid(perf.C,[],textColorThresh);
         
@@ -108,14 +108,14 @@ for i = 1:length(best_iterations)
         plotPerfGrid(data_perf(5:end)'-perf.C,[],-5);
         
         % calculate error and correlation with data
-        [cc_full,~] = calcModelLoss([perf.CT,perf.C],data_perf');
+        [cc_full,~] = calcModelLoss(perf.CT,data_perf');
         perf_str = sprintf('Full perf C.C. = %0.3f',cc_full);
         dev_str = sprintf('Full perf deviation = %0.1f',mean(abs([perf.CT,perf.C]-data_perf')));
     else
         % calculate error and correlation with data
-        [cc_clean,~] = calcModelLoss(perf.CT,data_perf(1:4)');
-        perf_str = sprintf('Clean perf C.C. = %0.3f',cc_clean);
-        dev_str = sprintf('Clean perf deviation = %0.1f',mean(abs(perf.CT-data_perf(1:4)')));
+        [cc,~] = calcModelLoss([perf.CT,perf.C],[data_perf(1:4)',data_perf([5:5:20])']);
+        perf_str = sprintf('Clean+coloc perf C.C. = %0.3f',cc);
+        dev_str = sprintf('Clean+coloc perf deviation = %0.1f',mean(abs([perf.CT,perf.C]-[data_perf(1:4)',data_perf([5:5:20])'])));
     end
     
     % round gsyns for plotting purposes
