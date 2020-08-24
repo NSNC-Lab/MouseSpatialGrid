@@ -1,6 +1,6 @@
-function plotFRvsgSYN(data,within_thresh)
+function plotFRvsgSYN(simdata,within_thresh)
 
-temp = {data.name};
+temp = {simdata.name};
 temp(cellfun('isempty',temp)) = {'empty'}; %label empty content
 
 targetIdx = find(contains(temp,'m0') & ~strcmp(temp,'s0m0.mat'));
@@ -9,12 +9,12 @@ targetIdx = find(contains(temp,'m0') & ~strcmp(temp,'s0m0.mat'));
 model_FR = [];
 
 for i = 1:length(targetIdx)
-    model_FR(:,i) = data(targetIdx(i)).fr.C;
+    model_FR(:,i) = simdata(targetIdx(i)).fr.C;
 end
 model_FR = mean(model_FR,2);
 
 % get RC_gsyn values
-gsyn_strs = cellfun(@str2num,extractAfter({data(targetIdx(1)).annot{:,2}},'RC_{gSYN} = '),'UniformOutput',false);
+gsyn_strs = cellfun(@str2num,extractAfter({simdata(targetIdx(1)).annot{:,2}},'RC_{gSYN} = '),'UniformOutput',false);
 all_gsyns = zeros(length(gsyn_strs),1);
 for i = 1:length(gsyn_strs)
     all_gsyns(i) = sum(gsyn_strs{i});

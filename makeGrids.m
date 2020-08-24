@@ -1,8 +1,8 @@
-function makeGrids(data,DirPart,data_perf,data_FR,loss)
+function makeGrids(simdata,DirPart,data_perf,data_FR,loss)
 
 set(0,'defaultfigurevisible','on');
 
-temp = {data.name};
+temp = {simdata.name};
 temp(cellfun('isempty',temp)) = {'empty'}; %label empty content
 
 targetIdx = find(contains(temp,'m0') & ~strcmp(temp,'s0m0.mat'));
@@ -10,7 +10,7 @@ targetIdx = find(contains(temp,'m0') & ~strcmp(temp,'s0m0.mat'));
 mixedIdx = find(~contains(temp,'m0') & ~contains(temp,'s0') & ~contains(temp,'empty'));
 textColorThresh = 70;
 
-nvaried = size(data(targetIdx(1)).annot,1);
+nvaried = size(simdata(targetIdx(1)).annot,1);
  
 width = 11; hwratio = 0.75;
 x0 = .08; y0 = .08;
@@ -21,7 +21,7 @@ x=-108:108;
 tuningcurve = zeros(4,length(x));
 ono = load('ono_curves_V2.mat','sigmoid','gauss','ushaped');
 
-gsyn_str = data(targetIdx(1)).annot(contains(data(targetIdx(1)).annot,'RC_{gSYN} = '));
+gsyn_str = simdata(targetIdx(1)).annot(contains(simdata(targetIdx(1)).annot,'RC_{gSYN} = '));
 
 h = figure('visible','on');
 figuresize(width, width*hwratio,h, 'inches')
@@ -34,15 +34,15 @@ for vv = 1:nvaried
     
     if ~isempty(targetIdx)
         for i = 1:length(targetIdx)
-            perf.CT(i) = data(targetIdx(i)).perf.C(vv);
-            fr.CT(i) = data(targetIdx(i)).fr.C(vv);
+            perf.CT(i) = simdata(targetIdx(i)).perf.C(vv);
+            fr.CT(i) = simdata(targetIdx(i)).fr.C(vv);
         end
     end
     
     if ~isempty(mixedIdx)
         for i = 1:length(mixedIdx)
-            perf.C(i) = data(mixedIdx(i)).perf.C(vv);
-            fr.C(i) = data(mixedIdx(i)).fr.C(vv);
+            perf.C(i) = simdata(mixedIdx(i)).perf.C(vv);
+            fr.C(i) = simdata(mixedIdx(i)).fr.C(vv);
         end
     end
     
@@ -125,7 +125,7 @@ for vv = 1:nvaried
     str = {sprintf('Loss = %0.1f',loss(vv)),...
         perf_str,...
         dev_str,...
-        data(targetIdx(1)).annot{vv,1},...
+        simdata(targetIdx(1)).annot{vv,1},...
         gsyn_annot};
     
     annotation('textbox',[0.8 .35 0.2 0.1],...

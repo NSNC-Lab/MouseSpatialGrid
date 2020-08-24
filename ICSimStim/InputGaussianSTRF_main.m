@@ -8,7 +8,7 @@
 clearvars;clc;close all
 addpath(genpath('strflab_v1.45'))
 addpath('genlib')
-addpath('stimuli')
+addpath('stimuli-fixed')
 dataSaveLoc = '/Users/jionocon/Documents/MATLAB/Spatial-grid-simulations/STRFs'; %local save location
 
 % Spatial tuning curve parameters
@@ -37,7 +37,7 @@ if strcmp(tuning,'Mouse')
     paramG.BW = 2000;  % Hz
     paramG.BSM = 5.00E-05; % 1/Hz=s best spectral modulation
     paramG.f0 = 4300;
-    strfGain = 15; %1.5 gain ~ 16 Hz, 4.5 gain ~ 50 Hz FR
+    strfGain = 3; %1.5 gain ~ 16 Hz, 4.5 gain ~ 50 Hz FR
 elseif strcmp(tuning,'bird')
     % stimuli
     load('stimuli_birdsongs.mat','stimuli','fs')
@@ -65,7 +65,7 @@ specs.f = f;
 strf=STRFgen(paramH,paramG,f,t(2)-t(1));
 strf.w1 = strf.w1*strfGain;
 % ============ log message (manual entry?) ============
-saveName = [sprintf('BW_%0.3f BTM_%0.1f t0_%0.1f phase%0.4f/s%0.0f_STRFgain%0.2f',...
+saveName = [sprintf('BW_%0.3f_BTM_%0.1f_t0_%0.1f_phase%0.4f/s%0.0f_STRFgain%0.2f',...
                 paramH.BW,paramH.BTM,paramH.t0,paramH.phase/pi,sigma,strfGain),'_2020'];
 saveFlag = 0;
 

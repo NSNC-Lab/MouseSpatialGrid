@@ -1,9 +1,9 @@
-function annot = createAnnotStr(data,varies)
+function annot = createAnnotStr(data)
 
 paramstr = {data(1).varied{2:end}};
 gSYNs = []; gs = 1;
 i = 1;
-for aa = 1:length(varies)-1
+for aa = 1:length(data.varied)-1
     if contains(['data.' paramstr{aa}],'R_C_gSYN')
         gSYNs = cat(2,gSYNs,eval(['data.' paramstr{aa}]));
         gs = gs + 1;

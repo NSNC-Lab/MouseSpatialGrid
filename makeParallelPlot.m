@@ -1,11 +1,11 @@
-function makeParallelPlot(data,within_thresh,loss)
+function makeParallelPlot(simdata,within_thresh,loss)
 
-temp = {data.name};
+temp = {simdata.name};
 temp(cellfun('isempty',temp)) = {'empty'}; %label empty content
 targetIdx = find(contains(temp,'m0') & ~strcmp(temp,'s0m0.mat'));
 
 % get RC_gsyn values
-gsyn_strs = cellfun(@str2num,extractAfter({data(targetIdx(1)).annot{:,end}},'RC_{gSYN} = '),'UniformOutput',false);
+gsyn_strs = cellfun(@str2num,extractAfter({simdata(targetIdx(1)).annot{:,end}},'RC_{gSYN} = '),'UniformOutput',false);
 all_gsyns = zeros(length(gsyn_strs),4);
 for i = 1:length(gsyn_strs)
     all_gsyns(i,:) = gsyn_strs{i};

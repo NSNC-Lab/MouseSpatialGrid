@@ -141,8 +141,8 @@ for songn = 1:2
 
             positionVector = [x0+subplotloc*(dx+lx) y0 lx ly];
             subplot('Position',positionVector)
-            imagesc(t,f,squeeze(stim_spec(i,:,:))',[0 80]);colormap('parula');
-            xlim([0 max(t)])
+            imagesc(t(1:end-250),f,squeeze(stim_spec(i,(251:end),:))',[0 80]);colormap('parula');
+            xlim([0 max(t(1:end-250))])
             set(gca,'YDir','normal','xtick',[0 1],'ytick',[])
         end
     end
@@ -190,16 +190,16 @@ for songn = 1:2
             if songn == 1 && trial == 1
                 positionVector = [x0+subplotloc*(dx+lx) y0+2*(dy+ly) lx ly];
                 subplot('Position',positionVector)
-                imagesc(t,f,currspec',[0 80]);colormap('parula');
-                xlim([0 max(t)])
-                set(gca,'YDir','normal','xtick',[0 1],'ytick',[])
+                imagesc(t(1:end-250),f,currspec(251:end,:)',[0 80]);colormap('parula');
+                xlim([0 max(t(1:end-249))])
+                %set(gca,'YDir','normal','xtick',[0 1],'ytick',[])
             end
 
             %% convolve STRF with spectrogram
             [spkcnt,rate,tempspk]=STRFconvolve(strf,currspec,mean_rate,1,songn);
-            avgSpkRate(i)=spkcnt/max(t);
-            fr{trial,i+4*(songn-1)} = rate;
-            t_spiketimes{trial,i+4*(songn-1)} = tempspk; %sec
+            avgSpkRate(i)=spkcnt/max(t(1:end-250));
+            fr{trial,i+4*(songn-1)} = rate(251:end);
+            t_spiketimes{trial,i+4*(songn-1)} = tempspk-250; %sec
         end
 
         %% plot FR (of song1)
@@ -207,7 +207,7 @@ for songn = 1:2
         if songn == 1
             positionVector = [x0+subplotloc*(dx+lx) y0+3*(dy+ly) lx ly];
             subplot('Position',positionVector)
-            plot(t,rate);xlim([0 max(t)])
+            plot(t(1:end-250),rate(251:end));xlim([0 max(t(1:end-250))])
         end
         % raster plot- first row of graphs
         positionVector = [x0+subplotloc*(dx+lx) y0+4*(dy+ly) lx ly];
@@ -218,7 +218,7 @@ for songn = 1:2
         end
         plot([0 2000],[20 20],'k')
         ylim([0 20])
-        xlim([0 max(t)*1000])
+        xlim([0 max(t(1:end-250))*1000])
         %Below section gives the whole row of top labels
         if songn == 2
             distMat = calcvr([t_spiketimes(:,i) t_spiketimes(:,i+4)], 10); % using ms as units, same as ts
