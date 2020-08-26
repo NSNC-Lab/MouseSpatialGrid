@@ -8,7 +8,7 @@ for aa = 1:length(data.varied)-1
         gSYNs = cat(2,gSYNs,eval(['data.' paramstr{aa}]));
         gs = gs + 1;
     else
-        annot{:,i} = sprintf('%s = %.3f',paramstr{aa},...
+        annot{:,i} = sprintf('%s = %.5f',paramstr{aa},...
             eval(['data.' paramstr{aa}]));
         i = i + 1;
     end

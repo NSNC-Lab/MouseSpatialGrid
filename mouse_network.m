@@ -64,7 +64,7 @@ s.populations(end).parameters = {'Itonic',0,'noise',0};
 s.populations(end+1).name='C';
 s.populations(end).equations = 'chouLIF';
 s.populations(end).size = 1;
-s.populations(end).parameters = {'noise',noise,'G_inc',0};
+s.populations(end).parameters = {'noise',noise};
 
 %% connections
 

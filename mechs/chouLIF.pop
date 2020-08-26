@@ -2,20 +2,14 @@ chouLIF:
 % Erik's Implementation
 % dV/dt = ( g_leak*(E_leak - V) + g_ad*(E_k - V) + @isyn + Itonic + noise*randn(1,N_pop)/dt )/C;
 
-g_ad(0) = zeros(1,N_pop); % uS
-
 V(0) = -65
 
 dV/dt = ( g_leak*(E_leak - V) + g_ad.*(E_k - V) - @isyn + Itonic + noise*randn(1,N_pop)/dt )/C
 
-dg_ad/dt = -g_ad/tau_ad
-
 t_ref = 1; % refractory period, t_ref/fs = [ms]
 if(any(t<tspike+t_ref,1))(V = V_reset) % implement refractory period
-if(any(t==tspike,1))(g_ad = g_ad + G_inc)  % implement spike rate adaptation
 
-G_inc = 0;
-tau_ad = 175;
+g_ad = 0;
 E_k = -70; % adaptation channel
 
 monitor V.spikes(V_thresh,1)
