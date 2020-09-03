@@ -1,5 +1,5 @@
 function [simdata,DirPart] = mouseNetwork_initialize(varies,ICstruc,ICdirPath,Spks_clean,...
-    Spks_masked,dataCh,plot_rasters,folder,subject,detail,best_loc,adaptFlag,allFlag,restrict_vary_flag)
+    Spks_masked,dataCh,plot_rasters,folder,subject,detail,subz,restricts,Cnoise2)
 
 datetime = datestr(now,'yyyymmdd-HHMMSS');
 
@@ -7,15 +7,7 @@ datetime = datestr(now,'yyyymmdd-HHMMSS');
 
 h = figure('Position',[50,50,850,690],'visible','off');
 
-if allFlag
-    subz = find(~contains({ICstruc.name},'s0'));    % all cases except masker-only
-elseif adaptFlag
-    subz(1) = find(contains({ICstruc.name},['s' num2str(best_loc) 'm' num2str(best_loc)]));
-    subz(2) = find(contains({ICstruc.name},['s' num2str(best_loc) 'm0'])); % sXm0 (target only) cases
-else % fit model to both clean and co-located data
-    subz = find(cellfun(@(x) strcmp(x(2),x(4)),{ICstruc.name})); % co-located cases
-    subz = cat(2,subz,find(contains({ICstruc.name},'m0.mat'))); % sXm0 (target only) cases
-end
+Cnoise = varies(2).range;
 
 for z = subz
     % restructure IC spikes
@@ -58,26 +50,25 @@ for z = subz
         data_spks = [];
     end
     
-    if adaptFlag
-        temp = mouse_network(study_dir,time_end,varies,restrict_vary_flag);
-        
-        [simdata(z).PSTH,simdata(z).annot] = plotPSTHs(temp,study_dir,varies);
-        
-        [simdata(z).perf] = postProcessData(temp,varies,time_end,study_dir,data_spks,plot_rasters);
-    else % run clean grid or full spatial grid
-        temp = mouse_network(study_dir,time_end,varies,restrict_vary_flag);
-        
-        [simdata(z).perf,simdata(z).fr,simdata(z).annot] = postProcessData(temp,varies,time_end,study_dir,data_spks,plot_rasters);
+    % change noise parameter if mixed simulations
+    if strcmp(spatialConfig{1}(4),'0')
+        varies(2).range = Cnoise + Cnoise2;
+    else
+        varies(2).range = Cnoise;
     end
+    
+
+    temp = mouse_network(study_dir,time_end,varies,restricts);
+    [simdata(z).perf,simdata(z).fr,simdata(z).annot] = postProcessData(temp,varies,time_end,study_dir,data_spks,plot_rasters);
     
     simdata(z).name = ICstruc(z).name;
     
 end
 
 Dirparts = strsplit(study_dir, filesep);
-DirPart = fullfile(Dirparts{1:end-1});
+DirPart = [filesep fullfile(Dirparts{1:end-1})];
 
-save([filesep DirPart filesep 'summary_results.mat'],'simdata','varies')
-close(h);
+save([filesep DirPart filesep 'summary_results.mat'],'simdata','varies','DirPart')
+% close(h);
 
 end

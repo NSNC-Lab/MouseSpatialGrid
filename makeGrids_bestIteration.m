@@ -1,4 +1,4 @@
-function makeGrids_bestIteration(simdata,DirPart,data_perf,data_FR,best_iterations,loss)
+function makeGrids_bestIteration(simdata,DirPart,data_perf,data_FR,data_FR_colocated,best_iterations,loss)
 
 set(0,'defaultfigurevisible','on');
     
@@ -47,7 +47,7 @@ for i = 1:length(best_iterations)
     end
     
     gSYNs = extractAfter(gsyn_str{vv},'RC_{gSYN} = ');
-    gSYNs = str2num(gSYNs);
+    gSYNs = str2num(gSYNs); %#ok<ST2NM>
     
     tuningcurve(1,:) = fliplr(ono.sigmoid) * gSYNs(1)/0.21;
     tuningcurve(2,:) = ono.ushaped * gSYNs(2)/0.21;
@@ -57,21 +57,34 @@ for i = 1:length(best_iterations)
     % Show FR vs azimuth for clean data
     
     % flip firing rates since 90° is first index
-    subplot('Position',[x0 y0 0.5-x0 0.4-y0])
-    plot([-90 0 45 90],fliplr(data_FR),'-b',...
+        subplot('Position',[x0 0.35 0.5-x0 0.3-y0])
+    h1=plot([-90 0 45 90],fliplr(data_FR),'-b',...
         [-90 0 45 90],fliplr(fr.CT),'-r','linewidth',2);
     hold on
     plot([-90 0 45 90],ones(1,4)*mean(data_FR),'--b',...
         [-90 0 45 90],ones(1,4)*mean(fr.CT),'--r','linewidth',2);
-    legend('Data','Model');
-    xlabel('Azimuth');
     ylabel('Clean FR (Hz)')
     set(gca,'xdir','reverse');
     ylim([min([data_FR,fr.CT])-10 max([data_FR,fr.CT])+10]);
     xticks([-90,0:45:90]);
+    legend([h1(1),h1(2)],'Data','Model');
+    
+    % for co-located data
+        subplot('Position',[x0 y0 0.5-x0 0.3-y0])
+    h2=plot([-90 0 45 90],fliplr(data_FR_colocated),'-b',...
+        [-90 0 45 90],fliplr(fr.C),'-r','linewidth',2);
+    hold on; 
+    plot([-90 0 45 90],ones(1,4)*mean(data_FR_colocated),'--b',...
+        [-90 0 45 90],ones(1,4)*mean(fr.C),'--r','linewidth',2);
+    ylabel('Co-located FR (Hz)')
+    set(gca,'xdir','reverse');
+    ylim([min([data_FR_colocated,fr.C([1:5:end])])-10 max([data_FR_colocated,fr.C([1:5:end])])+10]);
+    xticks([-90,0:45:90]);
+    xlabel('Azimuth');
+    legend([h2(1),h2(2)],'Data','Model');
     
     % make subplot of tuning curves
-    subplot('Position',[x0 0.7-y0 0.5-x0 0.4-y0]);
+    subplot('Position',[x0 0.7-y0 0.5-x0 0.3-y0]);
     plot(x,tuningcurve','b','linewidth',1);
     hold on;
     plot(x,sum(tuningcurve),'k','linewidth',2);
@@ -79,21 +92,20 @@ for i = 1:length(best_iterations)
     xlim([x(1) x(end)]);
     set(gca,'xdir','reverse');
     xticks([-90,0:45:90]);
-    xlabel('Azimuth');
     
-    % plot model grid clean + co-located
-    subplot('Position',[0.57 0.8+dy/4 lx ly/2])
-    plotPerfGrid([perf.CT;perf.C],[],textColorThresh);
+    % plot model grid clean
+    subplot('Position',[0.57 0.8+dy/4 lx ly/4])
+    plotPerfGrid(perf.CT,[],textColorThresh);
     title('Model');
     
-    % show data grid next to model grid clean + co-located
-    subplot('Position',[0.8 0.8+dy/4 lx ly/2])
-    plotPerfGrid([data_perf(1:4)';data_perf([5:5:20])'],[],textColorThresh);
+    % show data grid next to model grid clean
+    subplot('Position',[0.8 0.8+dy/4 lx ly/4])
+    plotPerfGrid(data_perf(1:4)',[],textColorThresh);
     title('Data');
     
-    % plot difference grid clean + co-located
-    subplot('Position',[0.57 0.4+dy/4 lx ly/2])
-    plotPerfGrid([data_perf(1:4)'-perf.CT;data_perf([5:5:20])'-perf.C],[],-5);
+    % plot difference grid clean
+    subplot('Position',[0.57 0.4+dy/4 lx ly/4])
+    plotPerfGrid(data_perf(1:4)'-perf.CT,[],-5);
     title('Difference');
     
     % plot all grids for mixed trials if exist

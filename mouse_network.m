@@ -1,4 +1,4 @@
-function simdata = mouse_network(study_dir,time_end,varies,restrict_vary_flag)
+function simdata = mouse_network(study_dir,time_end,varies,restricts)
 % [perf, fr, annotstr, distMat, VR] = mouse_network(study_dir,time_end,...
 %    varies,plot_rasters,plot_distances,data_spks,data_tau,restrict_vary_flag)
 
@@ -112,9 +112,9 @@ tic;
 simdata = dsSimulate(s,'tspan',[dt time_end], 'solver',solverType, 'dt',dt,...
   'downsample_factor',1, 'save_data_flag',0, 'save_results_flag',1,...
   'study_dir',study_dir, 'vary',vary, 'debug_flag', 0, 'verbose_flag',0,...
-  'restrict_vary_flag',restrict_vary_flag);
+  'restricts',restricts);
 
-simdata = rmfield(simdata,{'IC_V','IC_g_ad','R_V','R_g_ad','labels','simulator_options','model'});
+simdata = rmfield(simdata,{'IC_V','R_V','labels','simulator_options','model'});
 
 % save(fullfile(study_dir,'simulation_results.mat'),'simdata','-v7.3');
 

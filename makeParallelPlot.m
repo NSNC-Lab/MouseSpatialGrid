@@ -1,4 +1,4 @@
-function makeParallelPlot(simdata,within_thresh,loss)
+function makeParallelPlot(simdata,within_thresh,loss,DirPart)
 
 temp = {simdata.name};
 temp(cellfun('isempty',temp)) = {'empty'}; %label empty content
@@ -62,5 +62,6 @@ labels = {'Best','2^{nd}','3^{rd}','4^{th}','5^{th}'};
 legend(toplines,labels,'location','best')
 
 title('Parameter sets ordered by performance and FR loss');
+saveas(gcf,fullfile(DirPart,'parallel_plot.tiff'));
 
 end
