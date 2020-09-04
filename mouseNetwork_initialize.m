@@ -1,13 +1,17 @@
-function [simdata,DirPart] = mouseNetwork_initialize(varies,ICstruc,ICdirPath,Spks_clean,...
-    Spks_masked,dataCh,plot_rasters,folder,subject,detail,subz,restricts,Cnoise2)
+function [simdata,DirPart] = mouseNetwork_initialize(varies,Cnoise_coloc,ICdirPath,...
+    spks_file,dataCh,plot_rasters,folder,detail,subz,restricts)
 
 datetime = datestr(now,'yyyymmdd-HHMMSS');
+
+ICstruc = dir([ICdirPath '*.mat']);
+load(spks_file,'Spks_clean','Spks_masked');
 
 % set(0, 'DefaultFigureVisible', 'off');
 
 h = figure('Position',[50,50,850,690],'visible','off');
 
-Cnoise = varies(2).range;
+% clean cortical noise is stored in varies; save for co-located cases
+Cnoise_clean = varies(2).range;
 
 for z = subz
     % restructure IC spikes
@@ -27,7 +31,7 @@ for z = subz
     
     % save spk file
     spatialConfig = strsplit(ICstruc(z).name,'.');
-    study_dir = fullfile(pwd, folder, subject, [datetime detail], spatialConfig{1});
+    study_dir = fullfile(pwd, folder, [datetime detail], spatialConfig{1});
     if exist(study_dir, 'dir')
         rmdir(study_dir, 's');
     end
@@ -51,24 +55,25 @@ for z = subz
     end
     
     % change noise parameter if mixed simulations
-    if strcmp(spatialConfig{1}(4),'0')
-        varies(2).range = Cnoise + Cnoise2;
-    else
-        varies(2).range = Cnoise;
+    if strcmp(spatialConfig{1}(4),'0') % clean
+        varies(2).range = Cnoise_clean;
+    else % mixed
+        varies(2).range = Cnoise_clean + Cnoise_coloc;
     end
-    
 
     temp = mouse_network(study_dir,time_end,varies,restricts);
-    [simdata(z).perf,simdata(z).fr,simdata(z).annot] = postProcessData(temp,varies,time_end,study_dir,data_spks,plot_rasters);
+    
+    [simdata(z).perf,simdata(z).fr,simdata(z).annot] = postProcessData(temp,varies,ICdirPath,...
+        time_end,study_dir,data_spks,plot_rasters);
     
     simdata(z).name = ICstruc(z).name;
     
 end
 
-Dirparts = strsplit(study_dir, filesep);
+Dirparts = strsplit(study_dir,filesep);
 DirPart = [filesep fullfile(Dirparts{1:end-1})];
 
-save([filesep DirPart filesep 'summary_results.mat'],'simdata','varies','DirPart')
+save([DirPart filesep 'summary_results.mat'],'simdata','varies','DirPart')
 % close(h);
 
 end

@@ -75,7 +75,7 @@ s.connections(1).parameters={'g_postIC',0.25,'trial',5}; % 100 hz spiking
 % s.connections(end+1).direction='IC->X';
 % s.connections(end).mechanism_list={'synDoubleExp'};
 % s.connections(end).parameters={'gSYN',0.21, 'tauR',0.4, 'tauD',2, 'netcon',diag(ones(1,nCells))}; 
-
+%
 % s.connections(end+1).direction='IC->S';
 % s.connections(end).mechanism_list={'synDoubleExp'};
 % s.connections(end).parameters={'gSYN',0.21, 'tauR',0.4, 'tauD',2, 'netcon',diag(ones(1,nCells))}; 

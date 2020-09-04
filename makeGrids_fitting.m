@@ -1,4 +1,4 @@
-function makeGrids_bestIteration(simdata,DirPart,data_perf,data_FR,data_FR_colocated,best_iterations,loss)
+function makeGrids_fitting(simdata,DirPart,data_perf,data_FR,data_FR_coloc)
 
 set(0,'defaultfigurevisible','on');
     
@@ -24,11 +24,9 @@ gsyn_str = simdata(targetIdx(1)).annot(contains(simdata(targetIdx(1)).annot,'RC_
 h = figure('visible','on');
 figuresize(width, width*hwratio,h, 'inches')
 
-for i = 1:length(best_iterations)
-    
-    vv = best_iterations(i);
-    
-        % CT; target only cases
+for vv = 1:size(simdata(1).annot,1)
+        
+    % CT; target only cases
     perf.CT = zeros(1,4);
     fr.CT = zeros(1,4);
     
@@ -49,10 +47,10 @@ for i = 1:length(best_iterations)
     gSYNs = extractAfter(gsyn_str{vv},'RC_{gSYN} = ');
     gSYNs = str2num(gSYNs); %#ok<ST2NM>
     
-    tuningcurve(1,:) = fliplr(ono.sigmoid) * gSYNs(1)/0.21;
-    tuningcurve(2,:) = ono.ushaped * gSYNs(2)/0.21;
-    tuningcurve(3,:) = ono.gauss * gSYNs(3)/0.21;
-    tuningcurve(4,:) = ono.sigmoid * gSYNs(4)/0.21;
+    tuningcurve(1,:) = fliplr(ono.sigmoid) * gSYNs(1)/0.18;
+    tuningcurve(2,:) = ono.ushaped * gSYNs(2)/0.18;
+    tuningcurve(3,:) = ono.gauss * gSYNs(3)/0.18;
+    tuningcurve(4,:) = ono.sigmoid * gSYNs(4)/0.18;
     
     % Show FR vs azimuth for clean data
     
@@ -71,14 +69,14 @@ for i = 1:length(best_iterations)
     
     % for co-located data
         subplot('Position',[x0 y0 0.5-x0 0.3-y0])
-    h2=plot([-90 0 45 90],fliplr(data_FR_colocated),'-b',...
+    h2=plot([-90 0 45 90],fliplr(data_FR_coloc),'-b',...
         [-90 0 45 90],fliplr(fr.C),'-r','linewidth',2);
     hold on; 
-    plot([-90 0 45 90],ones(1,4)*mean(data_FR_colocated),'--b',...
+    plot([-90 0 45 90],ones(1,4)*mean(data_FR_coloc),'--b',...
         [-90 0 45 90],ones(1,4)*mean(fr.C),'--r','linewidth',2);
     ylabel('Co-located FR (Hz)')
     set(gca,'xdir','reverse');
-    ylim([min([data_FR_colocated,fr.C([1:5:end])])-10 max([data_FR_colocated,fr.C([1:5:end])])+10]);
+    ylim([min([data_FR_coloc,fr.C([1:5:end])])-10 max([data_FR_coloc,fr.C([1:5:end])])+10]);
     xticks([-90,0:45:90]);
     xlabel('Azimuth');
     legend([h2(1),h2(2)],'Data','Model');
@@ -93,62 +91,45 @@ for i = 1:length(best_iterations)
     set(gca,'xdir','reverse');
     xticks([-90,0:45:90]);
     
-    % plot model grid clean
-    subplot('Position',[0.57 0.8+dy/4 lx ly/4])
-    plotPerfGrid(perf.CT,[],textColorThresh);
+    % plot model grid clean + co-located
+    subplot('Position',[0.57 0.8+dy/4 lx ly/2])
+    plotPerfGrid([perf.CT;perf.C],[],textColorThresh);
     title('Model');
     
     % show data grid next to model grid clean
-    subplot('Position',[0.8 0.8+dy/4 lx ly/4])
-    plotPerfGrid(data_perf(1:4)',[],textColorThresh);
+    subplot('Position',[0.8 0.8+dy/4 lx ly/2])
+    plotPerfGrid([data_perf(1:4)';data_perf(5:5:end)'],[],textColorThresh);
     title('Data');
     
     % plot difference grid clean
-    subplot('Position',[0.57 0.4+dy/4 lx ly/4])
-    plotPerfGrid(data_perf(1:4)'-perf.CT,[],-5);
+    subplot('Position',[0.57 0.4+dy/4 lx ly/2])
+    plotPerfGrid([data_perf(1:4)'-perf.CT;data_perf([5:5:20])'-perf.C],[],-5);
     title('Difference');
     
-    % plot all grids for mixed trials if exist
-    if ~isempty(mixedIdx) && length(mixedIdx) == 16
-        subplot('Position',[0.57 0.8-ly lx ly]);
-        plotPerfGrid(perf.C,[],textColorThresh);
-        
-        subplot('Position',[0.8 0.8-ly lx ly]);
-        plotPerfGrid(data_perf(5:end)',[],textColorThresh);
-        
-        subplot('Position',[0.57 0.4-ly lx ly]);
-        plotPerfGrid(data_perf(5:end)'-perf.C,[],-5);
-        
-        % calculate error and correlation with data
-        [cc_full,~] = calcModelLoss(perf.CT,data_perf');
-        perf_str = sprintf('Full perf C.C. = %0.3f',cc_full);
-        dev_str = sprintf('Full perf deviation = %0.1f',mean(abs([perf.CT,perf.C]-data_perf')));
-    else
-        % calculate error and correlation with data
-        [cc,~] = calcModelLoss([perf.CT,perf.C],[data_perf(1:4)',data_perf([5:5:20])']);
-        perf_str = sprintf('Clean+coloc perf C.C. = %0.3f',cc);
-        dev_str = sprintf('Clean+coloc perf deviation = %0.1f',mean(abs([perf.CT,perf.C]-[data_perf(1:4)',data_perf([5:5:20])'])));
-    end
+    % calculate error and correlation with data
+    [cc,loss] = calcModelLoss([perf.CT,perf.C],[data_perf(1:4)',data_perf([5:5:20])']);
+    perf_str = sprintf('Clean+coloc perf C.C. = %0.3f',cc);
+    dev_str = sprintf('Clean+coloc perf deviation = %0.1f',mean(abs([perf.CT,perf.C]-[data_perf(1:4)',data_perf([5:5:20])'])));
     
     % round gsyns for plotting purposes
     gSYNs_rounded = round(gSYNs*10000)/10000;
     gsyn_annot = ['RC_{gSYN} = ' mat2str(gSYNs_rounded)];
     
-    str = {sprintf('Loss = %0.1f',loss(vv)),...
+    str = {sprintf('Loss = %0.1f',loss(1)),...
         perf_str,...
         dev_str,...
         simdata(targetIdx(1)).annot{vv,1},...
-        gsyn_annot};
+        simdata(mixedIdx(1)).annot{vv,1},...
+        gsyn_annot,...
+        simdata(targetIdx(1)).annot{vv,end}};
     
-    annotation('textbox',[0.8 .35 0.2 0.1],...
+    annotation('textbox',[0.75 0.35 0.2 0.1],...
         'string',str,...
         'FitBoxToText','on',...
         'LineStyle','none')
 
     % save grid
     saveas(gca,[filesep DirPart filesep 'best_iteration_' num2str(vv) '.tiff'])
-    clf
         
 end
-close;
 end
