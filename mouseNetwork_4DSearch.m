@@ -1,6 +1,9 @@
 % Run this part after mouseNetwork_premanual
 
-% use this code to let Matlab find the best fit for you (takes a long time)
+% use this code to let Matlab find the best fit for you (takes like 2-4 hours)
+
+% use mouseNetwork_manual to put in your own synaptic weights, noise
+% values, etc.
 
 clearvars;
 close all;
@@ -16,9 +19,7 @@ addpath(genpath('ICSimStim'))
 
 spks_file = '03_30_18_0dB_cleaned(-1,4).mat';
 perf_file = '03_30_18_0dB_performance.mat';
-dataCh = 31;
-
-fitFlag = 1;    % if only want to generate clean and co-lcoated spots, =1
+dataCh = 23;
 
 %%%%%%%% end of user inputs
 
@@ -84,22 +85,20 @@ subz = cat(2,subz,find(contains({ICstruc.name},'m0.mat'))); % sXm0 (target only)
 
 %% performance grids for 4D search
 
-nvaried = size(simdata(1).annot,1);
-
 temp = {simdata.name};
 temp(cellfun('isempty',temp)) = {'empty'}; %label empty content
 
 targetIdx = find(contains(temp,'m0') & ~strcmp(temp,'s0m0.mat'));
 colocIdx = find((cellfun(@(x) x(2),temp) == cellfun(@(x) x(4),temp)));
 
-perf_clean = zeros(nvaried,4); model_FR = zeros(nvaried,4);
+perf_clean = []; model_FR = [];
 % clean performance and FR
 for i = 1:length(targetIdx)
     perf_clean(:,i) = simdata(targetIdx(i)).perf.C;
     model_FR(:,i) = simdata(targetIdx(i)).fr.C;
 end
 
-perf_masked = zeros(nvaried,4);
+perf_masked = [];
 % mixed performance and FR
 if ~isempty(colocIdx)
     for i = 1:length(colocIdx)
@@ -141,7 +140,7 @@ for i = 1:length(best_iterations)
 end
 
 % make grid of best iterations
-makeGrids_fitting(simdata,DirPart,data_perf,data_FR,data_FR_masked(1:5:end));
+makeGrids_fitting(simdata,DirPart,data_perf,data_FR,data_FR_masked(1:5:end),best_iterations);
 
 %% rerun dynasim and obtain rasters for best iteration
 
@@ -156,30 +155,30 @@ varies(1).range = 1:40;
 
 varies(end+1).conxn = 'C';
 varies(end).param = 'noise';
-varies(end).range = Cnoise;
+varies(end).range = Cnoise*1.2;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN1';
-varies(end).range = best_gsyns(1);
+varies(end).range = 0.08;best_gsyns(1);
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN2';
-varies(end).range = best_gsyns(2);
+varies(end).range = 0;best_gsyns(2);
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN3';
-varies(end).range = best_gsyns(3);
+varies(end).range = 0;best_gsyns(3);
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN4';
-varies(end).range = best_gsyns(4);
+varies(end).range = 0;best_gsyns(4);
 
 subz = find(~contains({ICstruc.name},'s0')); % run all spots on grid
 restricts = [];
 plot_rasters = 1;
 
-[simdata,DirPart] = mouseNetwork_initialize(varies,ICstruc,ICdirPath,Spks_clean,...
-    Spks_masked,dataCh,plot_rasters,folder,subject,'-best-iteration',subz,restricts,Cnoise2);
+[simdata,DirPart] = mouseNetwork_initialize(varies,Cnoise2/2,ICdirPath,spks_file,dataCh,plot_rasters,...
+    folder,'-best-iteration',subz,restricts);
 
 %% make full spatial grid
 

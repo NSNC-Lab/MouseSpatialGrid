@@ -12,15 +12,15 @@ addpath('genlib')
 addpath(genpath('dynasim'))
 addpath(genpath('ICSimStim'))
 
-%%%%%%%% start of user inputs
+%%%%%%%% 
 
-spks_file = '03_30_18_0dB_cleaned(-1,4).mat';
-perf_file = '03_30_18_0dB_performance.mat';
+spks_file = '9-21-2016_0dB_removed_trials_cleaned(-1,4).mat';
+perf_file = '9-21-2016_0dB_removed_trials_performance.mat';
 dataCh = 31;
 
 fitFlag = 1;    % if only want to generate clean and co-lcoated spots, =1
 
-%%%%%%%% end of user inputs
+%%%%%%%%
 
 subject = [extractBefore(perf_file,'_performance') '-Ch' num2str(dataCh)];
 folder = ['Data-fitting' filesep subject];
@@ -41,7 +41,7 @@ varies(end+1).conxn = 'C';
 varies(end).param = 'noise';
 varies(end).range = 3;
 
-Cnoise2 = 1; % additional noise, so colocated noise = Cnoise2 + varies(2).range
+Cnoise2 = 4; % additional noise, so colocated noise = Cnoise2 + varies(2).range
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN1';
@@ -53,7 +53,7 @@ varies(end).range = 0;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN3';
-varies(end).range = 0.14;
+varies(end).range = 0.12;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN4';

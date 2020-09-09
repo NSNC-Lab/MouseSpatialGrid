@@ -1,4 +1,4 @@
-function makeGrids_fitting(simdata,DirPart,data_perf,data_FR,data_FR_coloc)
+function makeGrids_fitting(simdata,DirPart,data_perf,data_FR,data_FR_coloc,best_iterations)
 
 set(0,'defaultfigurevisible','on');
     
@@ -24,8 +24,14 @@ gsyn_str = simdata(targetIdx(1)).annot(contains(simdata(targetIdx(1)).annot,'RC_
 h = figure('visible','on');
 figuresize(width, width*hwratio,h, 'inches')
 
-for vv = 1:size(simdata(1).annot,1)
-        
+if ~exist('best_iterations','var')
+    inds = 1:size(simdata(1).annot,1);
+else
+    inds = best_iterations;  
+end
+
+for vv = 1:inds
+            
     % CT; target only cases
     perf.CT = zeros(1,4);
     fr.CT = zeros(1,4);
@@ -130,6 +136,8 @@ for vv = 1:size(simdata(1).annot,1)
 
     % save grid
     saveas(gca,[filesep DirPart filesep 'best_iteration_' num2str(vv) '.tiff'])
-        
+     clf;  
 end
+close;
+
 end

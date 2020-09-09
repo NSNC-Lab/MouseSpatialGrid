@@ -10,21 +10,21 @@ addpath(genpath('ICSimStim'))
 
 %%%%%%%% start of user inputs
 
-data_spks_file = '03_30_18_0dB_cleaned(-1,4).mat';
-data_perf_file = '03_30_18_0dB_performance.mat';
-dataCh = 31;
+spks_file = '03_30_18_0dB_cleaned(-1,4).mat';
+perf_file = '03_30_18_0dB_performance.mat';
+dataCh = 23;
 
 %%%%%%%% end of user inputs
 
-subject = [extractBefore(data_perf_file,'_performance') '-Ch' num2str(dataCh)];
+subject = [extractBefore(perf_file,'_performance') '-Ch' num2str(dataCh)];
 folder = ['Data-fitting' filesep subject];
 
 %% load experimental data to optimize model to
 
 nCells = 4; %synchronise this variable with mouse_network
 
-load(data_spks_file,'Spks_clean','Spks_masked','n_cum_clean','n_cum_masked');
-load(data_perf_file,'Max','max_masked','opt_tau','opt_tau_masked');
+load(spks_file,'Spks_clean','Spks_masked','n_cum_clean','n_cum_masked');
+load(perf_file,'Max','max_masked','opt_tau','opt_tau_masked');
 
 data_perf = Max{dataCh}(:); % clean performance
 for t = 1:4
@@ -132,9 +132,10 @@ varies(end).param = 'gSYN4';
 varies(end).range = ranges{4};
 
 subz = find(contains({ICstruc.name},['s' num2str(best_loc) 'm' num2str(best_loc)])); % co-located cases
+plot_rasters = 0;
 
-[simdata] = mouseNetwork_initialize(varies,ICstruc,ICdirPath,Spks_clean,...
-    Spks_masked,dataCh,1,folder,'-collocated-noise',subz,[],0);
+[simdata] = mouseNetwork_initialize(varies,0,ICdirPath,...
+    spks_file,dataCh,plot_rasters,folder,'-collocated-noise',subz,[]);
 
 % Find best colocated cortical noise
 
