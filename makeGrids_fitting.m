@@ -138,6 +138,6 @@ for vv = 1:inds
     saveas(gca,[filesep DirPart filesep 'best_iteration_' num2str(vv) '.tiff'])
      clf;  
 end
-close;
+%close;
 
 end

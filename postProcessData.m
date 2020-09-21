@@ -1,4 +1,5 @@
- function [perf,fr,annot,PSTH] = postProcessData(data,varies,ICdirPath,time_end,study_dir,data_spks,plot_rasters)
+ function [perf,fr,annot,PSTH_model] = postProcessData(data,varies,ICdirPath,...
+     time_end,study_dir,data_spks,xrNetcon,plot_rasters)
 
 numTrials = length(varies(1).range);
 
@@ -70,40 +71,33 @@ for vv = 1:jump % for each varied parameter
 %     end
     
     if plot_rasters %subplot(4,5,3); 
-        subplot(2,3,2);
+        subplot('position',[0.38 0.35 0.22 0.4]);
         ylabel('C spikes'); xticklabels([]); 
     end
     [perf.C(vv),fr.C(vv)] = calcPCandPlot(Cspks,time_end,1,plot_rasters,numTrials);     
     
-    if plot_rasters, subplot(2,3,1); xticklabels([]); ylabel('Data spikes');
+    if plot_rasters, subplot('position',[0.08 0.35 0.22 0.4]);
+        xticklabels([]); ylabel('Data spikes');
+        
         tempspks = zeros(numel(data_spks),time_end);
-        tempspks2 = zeros(numel(data_spks),5000);
         for tt = 1:numel(data_spks)
-            temp = round(data_spks{tt}*1000);   % convert spike times from sec to msec
-            temp2 = temp; % temp2 includes spontaneous spiking
-            
+            temp = round(data_spks{tt}*1000);   % convert spike times from sec to msec            
             temp(temp < 0 | temp >= time_end) = [];
             tempspks(tt,temp+1) = 1;    % add ones at spike times
-            
-            tempspks2(tt,temp2+1001) = 1;    % add ones at spike times for plooting spont.
         end
         
     calcPCandPlot(tempspks,time_end,1,plot_rasters,size(tempspks,1)); 
     
-    subplot(2,3,4);
-    [PSTH,t_vec] = makePSTH(tempspks);
-    plot(t_vec,50*PSTH/size(tempspks,1)); ylim([0 150]);
-    xlabel('Time (s)');
+    subplot('position',[0.08 0.05 0.22 0.25]);
+    makeplotPSTHs(tempspks,2);
     
     end
             
-    subplot(2,3,5);
-    [PSTH,t_vec] = makePSTH(Cspks);
-    plot(t_vec,50*PSTH/40); ylim([0 150]);
-    xlabel('Time (s)');
+    subplot('position',[0.38 0.05 0.22 0.25]);
+    PSTH_model = makeplotPSTHs(Cspks,2);
     
     % figure annotations
-    annot(vv,:) = createAnnotStr(data(vv),STRFgain);
+    annot(vv,:) = createAnnotStr(data(vv),STRFgain,xrNetcon);
     
     parts = strsplit(study_dir, filesep);
     DirPart = fullfile(parts{1:end-1});
@@ -114,12 +108,13 @@ for vv = 1:jump % for each varied parameter
             'FitBoxToText','on',...
             'LineStyle','none')
         
-        annotation('textbox',[.675 .7 .2 .1],...
+        annotation('textbox',[.675 .5 .2 .1],...
             'string', locstr,...
             'FitBoxToText','on',...
             'LineStyle','none')
         
-        saveas(gca,[filesep DirPart filesep parts{end} '_v2_' num2str(vv) '.tiff'])
+        %saveas(gca,[filesep DirPart filesep parts{end} '_v2_' num2str(vv) '.tiff'])
+        savefig(gcf,[filesep DirPart filesep parts{end} '_' num2str(vv)])
     end
     
 end
@@ -158,7 +153,7 @@ end
     
 end
 
-function annot = createAnnotStr(data,STRFgain)
+function annot = createAnnotStr(data,STRFgain,xrNetcon)
 
 paramstr = {data(1).varied{2:end}};
 gSYNs = []; gs = 1;
@@ -180,5 +175,11 @@ end
 % round-up gSYNs so that annotation strings don't have very long numbers
 annot{:,end+1} = ['RC_{gSYN} = ' mat2str(round(10000*gSYNs)/10000)];
 annot{:,end+1} = ['STRF gain = ' STRFgain{1}];
+if ~isempty(xrNetcon)
+    [r,c] = find(xrNetcon ~= 0);
+    for j = 1:length(r)
+    annot{:,end+1} = ['X' num2str(r(j)) '->R' num2str(c(j))]; % which channels are inhibiting which
+    end
+end
 
 end

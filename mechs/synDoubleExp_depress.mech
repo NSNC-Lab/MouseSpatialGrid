@@ -1,0 +1,38 @@
+ESYN = 0
+tauD = 1.5
+tauR = 0.3
+delay = 0
+
+gSYN1 = 1; gSYN2 = 1; gSYN3 = 1; gSYN4 = 1;
+
+D10 = 1
+F0 = 1
+D20 = 1
+
+Fac_inc = 0.4
+Dep1_inc = 0.8
+Dep2_inc = 0.99
+
+Fac_tau = 17
+Dep1_tau = 37
+Dep2_tau = 200
+
+f(x) = (exp(-x/tauD) - exp(-x/tauR)).*(x>0)
+
+gSYN = buildgSYN(N_pre,N_post,gSYN1,gSYN2,gSYN3,gSYN4)
+
+D1(0) = D10*ones(1,N_pop); % uS
+D2(0) = D20*ones(1,N_pop); % uS
+F(0) = F0*ones(1,N_pop); % uS
+
+synDoubleExp(X,t) = ( f(t - tspike_pre - delay) * (gSYN .* D1' .* F') ) .* (X - ESYN)
+
+dF/dt = (1-F)/Fac_tau;
+dD1/dt = (1-D1)/Dep1_tau;
+dD2/dt = (1-D2)/Dep2_tau;
+
+if(any(t==tspike_pre,1))(D1 = D1*Dep1_inc) % short-term synaptic depression
+if(any(t==tspike_pre,1))(D2 = D2*Dep2_inc) % long-term synaptic depression
+if(any(t==tspike_pre,1))(F = F + Fac_inc) % synaptic facilitation
+
+@isyn += synDoubleExp(V_post,t)

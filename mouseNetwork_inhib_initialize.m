@@ -1,4 +1,4 @@
-function [simdata,DirPart] = mouseNetwork_initialize(varies,Cnoise_coloc,ICdirPath,...
+function [simdata,DirPart] = mouseNetwork_inhib_initialize(varies,xrNetcon,Cnoise_coloc,ICdirPath,...
     spks_file,dataCh,plot_rasters,folder,detail,subz,restricts)
 
 datetime = datestr(now,'yyyymmdd-HHMMSS');
@@ -60,10 +60,10 @@ for z = subz
         varies(2).range = Cnoise_clean + Cnoise_coloc;
     end
 
-    temp = mouse_network(study_dir,time_end,varies,restricts);
-    
+    temp = mouse_network_inhib(study_dir,time_end,varies,xrNetcon,restricts);
+   
     [simdata(z).perf,simdata(z).fr,simdata(z).annot,simdata(z).PSTH] = postProcessData(temp,varies,...
-        ICdirPath,time_end,study_dir,data_spks,[],plot_rasters);
+        ICdirPath,time_end,study_dir,data_spks,xrNetcon,plot_rasters);
     
     simdata(z).name = ICstruc(z).name;
     

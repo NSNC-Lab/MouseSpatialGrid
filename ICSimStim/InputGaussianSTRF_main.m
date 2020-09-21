@@ -8,7 +8,7 @@
 clearvars;clc;close all
 addpath(genpath('strflab_v1.45'))
 addpath('genlib')
-addpath('stimuli-fixed')
+addpath('stimuli-fixed-V2')
 dataSaveLoc = '/Users/jionocon/Documents/MATLAB/Spatial-grid-simulations/STRFs'; %local save location
 
 % Spatial tuning curve parameters
@@ -23,6 +23,7 @@ tic;
 if strcmp(tuning,'Mouse')
     [song1,~] = audioread('200k_target1.wav');
     [song2,~] = audioread('200k_target2.wav');
+    
     for trial = 1:20
         [masker,fs] = audioread(['200k_masker' num2str(ceil(trial/2)) '.wav']);
         [spec,~,~]=STRFspectrogram(masker/rms(masker)*maskerlvl,fs);
@@ -37,7 +38,9 @@ if strcmp(tuning,'Mouse')
     paramG.BW = 2000;  % Hz
     paramG.BSM = 5.00E-05; % 1/Hz=s best spectral modulation
     paramG.f0 = 4300;
+    
     strfGain = 3; %1.5 gain ~ 16 Hz, 4.5 gain ~ 50 Hz FR
+    
 elseif strcmp(tuning,'bird')
     % stimuli
     load('stimuli_birdsongs.mat','stimuli','fs')

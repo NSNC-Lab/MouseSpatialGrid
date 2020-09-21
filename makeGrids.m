@@ -149,8 +149,9 @@ for vv = 1:nvaried
     
     % save grid
     saveas(gca,[filesep DirPart filesep 'Grid_Iteration_' num2str(vv) '.tiff'])
-    clf
+    clf;
     
 end
 close;
+
 end

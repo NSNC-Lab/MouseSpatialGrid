@@ -1,4 +1,4 @@
-function [PSTH,annot] = plotPSTHs(simdata,study_dir,varies)
+function plotPSTHs(t_vec,PSTH)
 
 % figure('position',[0 0 1440 940]);
     
