@@ -39,17 +39,17 @@ varies(1).range = 1:40;%[1:10 21:30]; %
 
 varies(end+1).conxn = 'C';
 varies(end).param = 'noise';
-varies(end).range = 2;
+varies(end).range = 1.5;
 
-Cnoise2 = 0.5; % additional noise, so colocated noise = Cnoise2 + varies(2).range
+Cnoise2 = 1; % additional noise, so colocated noise = Cnoise2 + varies(2).range
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN1';
-varies(end).range = 0.06;
+varies(end).range = 0.1;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN2';
-varies(end).range = 0.02;
+varies(end).range = 0;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN3';
@@ -59,31 +59,19 @@ varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN4';
 varies(end).range = 0;
 
-varies(end+1).conxn = 'R->C';
-varies(end).param = 'tau_ad';
-varies(end).range = 60;
+% varies(end+1).conxn = 'R->C';
+% varies(end).param = 'Dep1_tau';
+% varies(end).range = 60;
 
-varies(end+1).conxn = 'R->C';
-varies(end).param = 'G_inc';
-varies(end).range = 0:0.002:0.01;
+varies(end+1).conxn = 'C';
+varies(end).param = 'Ad_tau';
+varies(end).range = 90:60:350;
 
-varies(end+1).conxn = 'R->C';
-varies(end).param = 'Fac_inc';
-varies(end).range = 0;   % dF = F + Fac_inc during presynaptic spike
+varies(end+1).conxn = 'C';
+varies(end).param = 'Ad_inc';
+varies(end).range = 0.01;
 
-varies(end+1).conxn = 'R->C';
-varies(end).param = 'Dep1_inc';
-varies(end).range = 1;
-
-varies(end+1).conxn = 'R->C';
-varies(end).param = 'Dep1_tau';
-varies(end).range = 50;
-
-varies(end+1).conxn = 'R->C';
-varies(end).param = 'Dep2_inc';
-varies(end).range = 1;
-
-plot_rasters = 1;
+plot_rasters = 0;
 
 ICstruc = dir([ICdirPath '*.mat']);
 
@@ -107,6 +95,8 @@ temp(cellfun('isempty',temp)) = {'empty'}; %label empty content
 targetIdx = find(contains(temp,'m0') & ~strcmp(temp,'s0m0.mat'));
 colocIdx = find((cellfun(@(x) x(2),temp) == cellfun(@(x) x(4),temp)));
 
+nvaried = size(simdata(targetIdx(1)).annot,1);
+
 perf_clean = [];
 % clean performance and FR
 for i = 1:length(targetIdx)
@@ -120,50 +110,70 @@ mask = audioread('stimuli-fixed-V2/200k_masker1.wav');
 y1(1:round(0.250*fs)) = []; y2(1:round(0.250*fs)) = []; mask(1:round(0.250*fs)) = [];
 
 if plot_rasters
+    
     rasters = dir([DirPart filesep '*.fig']);
     temp = {rasters.name};
     rasters(strcmp(cellfun(@(x) x(4),temp,'uniformoutput',false),'0')) = [];
-    
-    locs = {'90°','45°','0°','-90°'};
-    
+        
     % plot PSTHs of clean trials over mixed trials
     for i = 1:length(targetIdx)
         
-        openfig([DirPart filesep temp{1+(i-1)*length(targetIdx)/length(colocIdx)}],'visible');
+        % find all varied
+        varied = find(contains(temp,'m0') & (cellfun(@(x) x(2),temp) == num2str(i)));
         
-        % plot stimuli
-        subplot('position',[0.08 0.8 0.22 0.15]);hold off;
-        plot((0:length(y1)-1)/fs,y1 + 2); hold on;
-        plot((0:length(y2)-1)/fs,y2);
-        plot([0 (length(y1)-1)/fs],[1 1],'k');
-        
-        subplot('position',[0.38 0.8 0.22 0.15]);hold off;
-        plot((0:length(y1)-1)/fs,y1 + 2); hold on;
-        plot((0:length(y2)-1)/fs,y2);
-        plot([0 (length(y1)-1)/fs],[1 1],'k');
-        
-        saveas(gcf,[DirPart filesep temp{1+(i-1)*length(targetIdx)/length(colocIdx)}(1:end-4) '.png']);
-        close;
+        for n = varied
+            openfig([DirPart filesep temp{n}],'invisible');
+            
+            % plot stimuli
+            subplot('position',[0.08 0.8 0.22 0.15]);hold off;
+            plot((0:length(y1)-1)/fs,y1); hold on;
+            plot((0:length(y2)-1)/fs,y2 + 2);
+            plot([0 (length(y1)-1)/fs],[1 1],'k');
+            set(gca,'xtick',[]);
+            set(gca,'ytick',[]);
+            
+            subplot('position',[0.38 0.8 0.22 0.15]);hold off;
+            plot((0:length(y1)-1)/fs,y1); hold on;
+            plot((0:length(y2)-1)/fs,y2 + 2);
+            plot([0 (length(y1)-1)/fs],[1 1],'k');
+            set(gca,'xtick',[]);
+            set(gca,'ytick',[]);
+            
+            saveas(gcf,[DirPart filesep temp{n}(1:end-4) '.png']);
+            close;
+        end
         
         % find mixed spots with the same target location
-        for m = 1:(length(targetIdx)/length(colocIdx))
+        for m = 1:4
 %             
 %             cleanPSTH = simdata(targetIdx(i)).PSTH;
 %             mixedPSTH = simdata(targetIdx(i)+m).PSTH;
 %             t_vec1 = 0:0.02:(size(cleanPSTH,2)-1)*0.02;
-%             t_vec2 = 0:0.02:(size(mixedPSTH,2)-1)*0.02;
+%             t_vec2 = 0:0.02:(size(mixedPSTH,2)-1)*0.02;   
             
-            openfig([DirPart filesep rasters((i-1)*length(targetIdx)/length(colocIdx) + m).name],'visible');
+            % find all rasters for given spatial grid spot
+            varied = find((cellfun(@(x) x(4),temp) == num2str(m) & (cellfun(@(x) x(2),temp) == num2str(i))));
+            
+            for n = varied
+
+            openfig([DirPart filesep temp{n}],'invisible');
             
             subplot('position',[0.08 0.8 0.22 0.15]); hold off;
-            plot((0:length(y1)-1)/fs,y1 + mask + 2); hold on;
-            plot((0:length(y2)-1)/fs,y2 + mask);
+            plot((0:length(y1)-1)/fs,y1 + mask); hold on;
+            plot((0:length(y2)-1)/fs,y2 + mask + 2);
             plot([0 (length(y1)-1)/fs],[1 1],'k');
+            set(gca,'xtick',[]);
+            set(gca,'ytick',[]);
             
             subplot('position',[0.38 0.8 0.22 0.15]); hold off;
-            plot((0:length(y1)-1)/fs,y1 + mask + 2); hold on;
-            plot((0:length(y2)-1)/fs,y2 + mask);
+            plot((0:length(y1)-1)/fs,y1 + mask); hold on; 
+            plot((0:length(y2)-1)/fs,y2 + mask + 2);
             plot([0 (length(y1)-1)/fs],[1 1],'k');
+            set(gca,'xtick',[]);
+            set(gca,'ytick',[]);
+            
+            % plot clean and masked PSTHs on top of each other in separate
+            % subplot
             
 %             subplot('position',[0.68 0.05 0.22 0.25]);
 %             hold off;
@@ -176,9 +186,13 @@ if plot_rasters
 %             plot(t_vec1,2*50*cleanPSTH(2,:)/size(varies(1).range,2));
 %             legend(mixed,clean,'Mixed','Clean');
 %             ylim([0 300]);
-            savefig([DirPart filesep rasters((i-1)*length(targetIdx)/length(colocIdx) + m).name]);
-            saveas(gcf,[DirPart filesep rasters((i-1)*length(targetIdx)/length(colocIdx) + m).name(1:end-4) '.png']);
+
+            savefig([DirPart filesep temp{n}]);
+            saveas(gcf,[DirPart filesep temp{n}(1:end-4) '.png']);
             close;
+            
+            end
+            
         end
     end
 end
