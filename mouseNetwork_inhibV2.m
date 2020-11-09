@@ -29,7 +29,7 @@ folder = ['Data-fitting' filesep subject];
 load(fullfile(folder,'default_parameters.mat'));
 
 % manually choose strf instead of using the saved ICdir!
-ICdir = uigetdir('STRFs/BW_0.009_BTM_3.8_t0_0.1_phase0.4985/');
+ICdir = uigetdir('STRFs/V3_BW_0.009_BTM_3.8_t0_0.1_phase0.4985/');
 if ICdir == 0
    load(fullfile(folder,'default_parameters.mat'),'ICdir');
 end
@@ -37,42 +37,50 @@ ICdirPath = [ICdir filesep];
 
 %% Initiate varies
 
+restricts(1).conxn = {'Exc->Exc','Inh->Inh'};
+restricts(1).param = 'trial';
+restricts(1).range = 1:20;
+
 varies = struct;
 
-varies(1).conxn = '(IC->IC)';
+varies(1).conxn = 'Exc->Exc';
 varies(1).param = 'trial';
-varies(1).range = 1:40;%[1:10 21:30]; %
+varies(1).range = 1:20;
+
+varies(end+1).conxn = 'Inh->Inh';
+varies(end).param = 'trial';
+varies(end).range = 1:20;
 
 varies(end+1).conxn = 'C';
 varies(end).param = 'noise';
-varies(end).range = 1.5;
+varies(end).range = 0;
 
-Cnoise2 = 1; % additional noise, so colocated noise = Cnoise2 + varies(2).range
+Cnoise2 = 0; % additional noise, so colocated noise = Cnoise2 + varies(2).range
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN1';
-varies(end).range = 0;
+varies(end).range = 0.05;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN2';
-varies(end).range = 0.14;
+varies(end).range = 0.05;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN3';
-varies(end).range = 0;
+varies(end).range = 0.05;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN4';
-varies(end).range = 0;
+varies(end).range = 0.05;
 
 % row: origin (does the inhibition)
 % column: destination (to be inhibited)
 xrNetcons = zeros(4);
-xrNetcons(3,2) = 1;
-
-varies(end+1).conxn = 'X->R';
-varies(end).param = 'gSYN';
-varies(end).range = 0.05;
+% xrNetcons(4,1) = 1;
+% 
+% varies(end+1).conxn = 'X->R';
+% varies(end).param = 'gSYN';
+% varies(end).range = 0.05;
 
 plot_rasters = 1;
 
@@ -81,14 +89,16 @@ fitFlag = 0;
 if fitFlag == 1
     subz = find(cellfun(@(x) strcmp(x(2),x(4)),{ICstruc.name})); % co-located cases
     subz = cat(2,subz,find(contains({ICstruc.name},'m0.mat'))); % target only cases
-    detail = '-manual-fit-inhib';
+    detail = '-manual-fit-inhib_V3';
 else
     subz = find(~contains({ICstruc.name},'s0'));  % all spots
-    detail = '-full-grid-inhib';
+    detail = '-full-grid-inhib_V3';
 end
 
-[simdata,DirPart] = mouseNetwork_inhib_initialize(varies,xrNetcons,Cnoise2,ICdirPath,...
-    spks_file,dataCh,plot_rasters,folder,detail,subz,[]);
+subz = subz(1:2:end);
+
+[simdata,DirPart] = mouseNetwork_inhibV2_initialize(varies,xrNetcons,Cnoise2,ICdirPath,...
+    spks_file,dataCh,plot_rasters,folder,detail,subz,restricts);
 
 %% performance grids for 4D search
 
@@ -208,12 +218,9 @@ if plot_rasters
             close;
             
             end
-            
         end
     end
 end
-
-
 
 % make spatial grid
 if length(subz) ~= 20

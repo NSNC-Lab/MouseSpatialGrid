@@ -1,4 +1,4 @@
-function simdata = mouse_network_inhib(study_dir,time_end,varies,xrNetcons,restricts)
+function simdata = mouse_network_inhibV2(study_dir,time_end,varies,xrNetcons,restricts)
 % [perf, fr, annotstr, distMat, VR] = mouse_network(study_dir,time_end,...
 %    varies,plot_rasters,plot_distances,data_spks,data_tau,restrict_vary_flag)
 
@@ -25,6 +25,10 @@ function simdata = mouse_network_inhib(study_dir,time_end,varies,xrNetcons,restr
 % 2020-6-18 - added subfunction to plot model rasters vs. data rasters and
 %             calculate VR distance between the two
 
+% @Jio Nocon, BU 2020-10-14
+% 2020-10-14 - split inputs to R and S into EIC and IIC, respectively
+
+
 %% Input check
 if ~strcmp(varies(1).param,'trial')
     error('first set of varied params should be ''trial''')
@@ -40,9 +44,13 @@ dt = 1; %ms % the IC input is currently dt=1
 nCells = 4;
 s = struct();
 
-s.populations(1).name = 'IC';
+s.populations(1).name = 'Exc';
 s.populations(1).equations = 'chouLIF';
 s.populations(1).size = nCells;
+
+s.populations(end+1).name = 'Inh';
+s.populations(end).equations = 'chouLIF';
+s.populations(end).size = nCells;
 
 s.populations(end+1).name = 'X';
 s.populations(end).equations = 'chouLIF';
@@ -52,11 +60,6 @@ s.populations(end+1).name='R';
 s.populations(end).equations = 'chouLIF';
 s.populations(end).size = nCells;
 
-s.populations(end+1).name='S';
-s.populations(end).equations = 'chouLIF';
-s.populations(end).size = nCells;
-s.populations(end).parameters = {'V_reset',-60};
-
 s.populations(end+1).name='C';
 s.populations(end).equations = 'chouLIF';
 s.populations(end).size = 1;
@@ -64,29 +67,29 @@ s.populations(end).parameters = {'tau_ad',60};
 
 %% connections
 
-s.connections(1).direction='IC->IC';
-s.connections(1).mechanism_list={'IC_V2'};
-s.connections(1).parameters={'g_postIC',0.25,'trial',1}; % 100 hz spiking
+s.connections(1).direction='Exc->Exc';
+s.connections(1).mechanism_list={'IC_V3'};
+s.connections(1).parameters={'g_postIC',0.25,'trial',1,'label','E'}; % 100 hz spiking
 
-s.connections(end+1).direction='IC->X';
+s.connections(end+1).direction='Inh->Inh';
+s.connections(end).mechanism_list={'IC_V3'};
+s.connections(end).parameters={'g_postIC',0.25,'trial',1,'label','I'}; % 100 hz spiking
+
+s.connections(end+1).direction='R->X';
 s.connections(end).mechanism_list={'synDoubleExp'};
 s.connections(end).parameters={'gSYN',0.18, 'tauR',0.3, 'tauD',1.5, 'netcons', diag(ones(1,nCells))}; 
 
-s.connections(end+1).direction='IC->S';
+s.connections(end+1).direction='Inh->R';
 s.connections(end).mechanism_list={'synDoubleExp'};
-s.connections(end).parameters={'gSYN',0.06, 'tauR',0.3, 'tauD',1.5, 'netcons', diag([1 1 1 1])}; 
+s.connections(end).parameters={'gSYN',0.18, 'tauR',0.3, 'tauD',1.5, 'netcons', diag(ones(1,nCells)),'ESYN',-80}; 
 
-s.connections(end+1).direction='IC->R';
+s.connections(end+1).direction='Exc->R';
 s.connections(end).mechanism_list={'synDoubleExp'};
 s.connections(end).parameters={'gSYN',0.18, 'tauR',0.3, 'tauD',1.5, 'netcons', diag(ones(1,nCells))}; 
 
 s.connections(end+1).direction='X->R';
 s.connections(end).mechanism_list={'synDoubleExp'};
 s.connections(end).parameters={'gSYN',0.12, 'tauR',2, 'tauD',10, 'netcons',xrNetcons, 'ESYN',-80}; 
-
-s.connections(end+1).direction='S->R';
-s.connections(end).mechanism_list={'synDoubleExp'};
-s.connections(end).parameters={'gSYN',0.18, 'tauR',1.5, 'tauD',5, 'netcons', diag([0 0 0 0]),'ESYN',-80,'delay',3}; 
 
 s.connections(end+1).direction='R->C';
 s.connections(end).mechanism_list={'synDoubleExp_V2'};
@@ -107,7 +110,7 @@ simdata = dsSimulate(s,'tspan',[dt time_end], 'solver',solverType, 'dt',dt,...
   'study_dir',study_dir, 'vary',vary, 'debug_flag', 0, 'verbose_flag',0,...
   'restricts',restricts);
 
-simdata = rmfield(simdata,{'IC_V','R_V','labels','simulator_options','model'});
+simdata = rmfield(simdata,{'Exc_V','Inh_V','R_V','labels','simulator_options','model'});
 
 % save(fullfile(study_dir,'simulation_results.mat'),'simdata','-v7.3');
 
