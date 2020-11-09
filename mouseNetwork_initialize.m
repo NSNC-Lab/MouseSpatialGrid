@@ -18,7 +18,8 @@ for z = subz
     load([ICdirPath ICstruc(z).name],'t_spiketimes');
     tmat = cellfun(@max,t_spiketimes,'UniformOutput',false);
     tmax = max([tmat{:}]);
-    spks = zeros(20,4,tmax); %I'm storing spikes in a slightly different way...
+    ntrials = size(t_spiketimes,1);
+    spks = zeros(2*ntrials,4,tmax); %I'm storing spikes in a slightly different way...
     for j = 1:size(t_spiketimes,1) %trials [1:10]
         for k = 1:size(t_spiketimes,2) %neurons [(1:4),(1:4)]
             if k < 5 %song 1

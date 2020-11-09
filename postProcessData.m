@@ -3,7 +3,7 @@
 
 numTrials = length(varies(1).range);
 
-jump = length(find([data.IC_IC_trial]==1));
+jump = length(find([data.Inh_Inh_trial]==1));
 
 STRFgain = extractBetween(ICdirPath,'gain','_2020');
 
@@ -28,7 +28,7 @@ for vv = 1:jump % for each varied parameter
     Cspks = zeros(numTrials,time_end);
     for i = 1:numTrials
         for j = 1:4
-            ICspks(i,j,:) = subData(i).IC_V_spikes(:,j);
+            ICspks(i,j,:) = subData(i).Exc_V_spikes(:,j);
             %Sspks(i,j,:) = subData(i).S_V_spikes(:,j);
             Rspks(i,j,:) = subData(i).R_V_spikes(:,j);
         end
@@ -155,7 +155,9 @@ end
 
 function annot = createAnnotStr(data,STRFgain,xrNetcon)
 
-paramstr = {data(1).varied{2:end}};
+temp = find(strcmp(data(1).varied,'C_noise'),1);
+
+paramstr = {data(1).varied{temp:end}};
 gSYNs = []; gs = 1;
 i = 1;
 for aa = 1:length(paramstr)

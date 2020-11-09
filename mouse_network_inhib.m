@@ -1,4 +1,4 @@
-function simdata = mouse_network_inhib(study_dir,time_end,varies,xrNetcon,restricts)
+function simdata = mouse_network_inhib(study_dir,time_end,varies,xrNetcons,restricts)
 % [perf, fr, annotstr, distMat, VR] = mouse_network(study_dir,time_end,...
 %    varies,plot_rasters,plot_distances,data_spks,data_tau,restrict_vary_flag)
 
@@ -58,7 +58,7 @@ s.populations(end).size = nCells;
 s.populations(end).parameters = {'V_reset',-60};
 
 s.populations(end+1).name='C';
-s.populations(end).equations = 'chouLIF_adapt';
+s.populations(end).equations = 'chouLIF';
 s.populations(end).size = 1;
 s.populations(end).parameters = {'tau_ad',60};
 
@@ -70,23 +70,23 @@ s.connections(1).parameters={'g_postIC',0.25,'trial',1}; % 100 hz spiking
 
 s.connections(end+1).direction='IC->X';
 s.connections(end).mechanism_list={'synDoubleExp'};
-s.connections(end).parameters={'gSYN',0.18, 'tauR',0.3, 'tauD',1.5, 'netcon', diag(ones(1,nCells))}; 
+s.connections(end).parameters={'gSYN',0.18, 'tauR',0.3, 'tauD',1.5, 'netcons', diag(ones(1,nCells))}; 
 
 s.connections(end+1).direction='IC->S';
 s.connections(end).mechanism_list={'synDoubleExp'};
-s.connections(end).parameters={'gSYN',0.08, 'tauR',0.3, 'tauD',1.5, 'netcon', diag([1 1 1 1])}; 
+s.connections(end).parameters={'gSYN',0.06, 'tauR',0.3, 'tauD',1.5, 'netcons', diag([1 1 1 1])}; 
 
 s.connections(end+1).direction='IC->R';
 s.connections(end).mechanism_list={'synDoubleExp'};
-s.connections(end).parameters={'gSYN',0.18, 'tauR',0.3, 'tauD',1.5, 'netcon', diag(ones(1,nCells))}; 
+s.connections(end).parameters={'gSYN',0.18, 'tauR',0.3, 'tauD',1.5, 'netcons', diag(ones(1,nCells))}; 
 
 s.connections(end+1).direction='X->R';
 s.connections(end).mechanism_list={'synDoubleExp'};
-s.connections(end).parameters={'gSYN',0.12, 'tauR',2, 'tauD',10, 'netcon',xrNetcon, 'ESYN',-80}; 
+s.connections(end).parameters={'gSYN',0.12, 'tauR',2, 'tauD',10, 'netcons',xrNetcons, 'ESYN',-80}; 
 
 s.connections(end+1).direction='S->R';
 s.connections(end).mechanism_list={'synDoubleExp'};
-s.connections(end).parameters={'gSYN',0.18, 'tauR',1.5, 'tauD',5, 'netcon', diag([1 0 0 1]),'ESYN',-80,'delay',3}; 
+s.connections(end).parameters={'gSYN',0.18, 'tauR',1.5, 'tauD',5, 'netcons', diag([0 0 0 0]),'ESYN',-80,'delay',3}; 
 
 s.connections(end+1).direction='R->C';
 s.connections(end).mechanism_list={'synDoubleExp_V2'};

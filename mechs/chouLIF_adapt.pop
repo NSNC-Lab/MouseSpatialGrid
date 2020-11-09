@@ -13,7 +13,7 @@ if(any(t==tspike,1))(V = V_spike) % insert spike
 if(any(t==tspike,1))(g_ad = g_ad + Ad_inc)  % implement spike rate adaptation
 if(any(t==tspike+t_ref,1))(V = V_reset) % implement refractory period
 
-Ad_inc = 0.001;
+Ad_inc = 0;
 Ad_tau = 175;
 E_k = -70; % adaptation channel
 

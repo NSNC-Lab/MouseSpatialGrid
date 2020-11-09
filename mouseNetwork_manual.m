@@ -19,6 +19,7 @@ perf_file = '9-21-2016_0dB_removed_trials_performance.mat';
 dataCh = 25;
 
 fitFlag = 0;    % if only want to generate clean and co-located spots, =1
+plot_rasters = 1;
 
 %%%%%%%%
 
@@ -27,6 +28,11 @@ folder = ['Data-fitting' filesep subject];
 
 load(fullfile(folder,'default_parameters.mat'));
 
+% manually choose strf instead of using the saved ICdir!
+ICdir = uigetdir('STRFs/BW_0.009_BTM_3.8_t0_0.1_phase0.4985/');
+if ICdir == 0
+   load(fullfile(folder,'default_parameters.mat'),'ICdir');
+end
 ICdirPath = [ICdir filesep];
 
 %% Initiate varies
@@ -39,13 +45,13 @@ varies(1).range = 1:40;%[1:10 21:30]; %
 
 varies(end+1).conxn = 'C';
 varies(end).param = 'noise';
-varies(end).range = 1.5;
+varies(end).range = 0;%1.5;
 
-Cnoise2 = 1; % additional noise, so colocated noise = Cnoise2 + varies(2).range
+Cnoise2 = 0;%1; % additional noise, so colocated noise = Cnoise2 + varies(2).range
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN1';
-varies(end).range = 0.1;
+varies(end).range = 0.08;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN2';
@@ -63,15 +69,18 @@ varies(end).range = 0;
 % varies(end).param = 'Dep1_tau';
 % varies(end).range = 60;
 
-varies(end+1).conxn = 'C';
-varies(end).param = 'Ad_tau';
-varies(end).range = 90:60:350;
+varies(end+1).conxn = 'R->C';
+varies(end).param = 'Dep1_tau';
+varies(end).range = 90;
 
-varies(end+1).conxn = 'C';
-varies(end).param = 'Ad_inc';
-varies(end).range = 0.01;
+varies(end+1).conxn = 'R->C';
+varies(end).param = 'Dep1_inc';
+varies(end).range = 0.9:0.02:1;%0.001:0.001:0.003;
 
-plot_rasters = 0;
+restricts = [];
+% restricts(1).conxn = 'R->C';
+% restricts(1).param = 'gSYN';
+% restricts(1).range = [0.09 0.11];%0.001:0.001:0.003;
 
 ICstruc = dir([ICdirPath '*.mat']);
 
@@ -85,7 +94,7 @@ else
 end
 
 [simdata,DirPart] = mouseNetwork_initialize(varies,Cnoise2,ICdirPath,spks_file,dataCh,plot_rasters,...
-    folder,detail,subz,[]);
+    folder,detail,subz,restricts);
 
 %% performance grids for 4D search
 
@@ -102,6 +111,8 @@ perf_clean = [];
 for i = 1:length(targetIdx)
     perf_clean(:,i) = simdata(targetIdx(i)).perf.C;
 end
+
+makeParallelPlot_adapt(simdata,data_perf(1:4),data_perf(5:end),DirPart);
 
 [y1,~] = audioread('stimuli-fixed-V2/200k_target1.wav');
 [y2,fs] = audioread('stimuli-fixed-V2/200k_target2.wav');
@@ -143,57 +154,57 @@ if plot_rasters
             close;
         end
         
-        % find mixed spots with the same target location
-        for m = 1:4
+%         % find mixed spots with the same target location
+%         for m = 1:4
+% %             
+% %             cleanPSTH = simdata(targetIdx(i)).PSTH;
+% %             mixedPSTH = simdata(targetIdx(i)+m).PSTH;
+% %             t_vec1 = 0:0.02:(size(cleanPSTH,2)-1)*0.02;
+% %             t_vec2 = 0:0.02:(size(mixedPSTH,2)-1)*0.02;   
 %             
-%             cleanPSTH = simdata(targetIdx(i)).PSTH;
-%             mixedPSTH = simdata(targetIdx(i)+m).PSTH;
-%             t_vec1 = 0:0.02:(size(cleanPSTH,2)-1)*0.02;
-%             t_vec2 = 0:0.02:(size(mixedPSTH,2)-1)*0.02;   
-            
-            % find all rasters for given spatial grid spot
-            varied = find((cellfun(@(x) x(4),temp) == num2str(m) & (cellfun(@(x) x(2),temp) == num2str(i))));
-            
-            for n = varied
-
-            openfig([DirPart filesep temp{n}],'invisible');
-            
-            subplot('position',[0.08 0.8 0.22 0.15]); hold off;
-            plot((0:length(y1)-1)/fs,y1 + mask); hold on;
-            plot((0:length(y2)-1)/fs,y2 + mask + 2);
-            plot([0 (length(y1)-1)/fs],[1 1],'k');
-            set(gca,'xtick',[]);
-            set(gca,'ytick',[]);
-            
-            subplot('position',[0.38 0.8 0.22 0.15]); hold off;
-            plot((0:length(y1)-1)/fs,y1 + mask); hold on; 
-            plot((0:length(y2)-1)/fs,y2 + mask + 2);
-            plot([0 (length(y1)-1)/fs],[1 1],'k');
-            set(gca,'xtick',[]);
-            set(gca,'ytick',[]);
-            
-            % plot clean and masked PSTHs on top of each other in separate
-            % subplot
-            
-%             subplot('position',[0.68 0.05 0.22 0.25]);
-%             hold off;
-%             mixed = plot(t_vec2,2*50*mixedPSTH(1,:)/size(varies(1).range,2) + 150); hold on;
-%             plot(t_vec2,2*50*mixedPSTH(2,:)/size(varies(1).range,2));
+%             % find all rasters for given spatial grid spot
+%             varied = find((cellfun(@(x) x(4),temp) == num2str(m) & (cellfun(@(x) x(2),temp) == num2str(i))));
 %             
-%             plot([0 3],[150 150],'k');
+%             for n = varied
+% 
+%             openfig([DirPart filesep temp{n}],'invisible');
 %             
-%             clean = plot(t_vec1,(2*50*cleanPSTH(1,:))/size(varies(1).range,2) + 150);
-%             plot(t_vec1,2*50*cleanPSTH(2,:)/size(varies(1).range,2));
-%             legend(mixed,clean,'Mixed','Clean');
-%             ylim([0 300]);
-
-            savefig([DirPart filesep temp{n}]);
-            saveas(gcf,[DirPart filesep temp{n}(1:end-4) '.png']);
-            close;
-            
-            end
-            
-        end
+%             subplot('position',[0.08 0.8 0.22 0.15]); hold off;
+%             plot((0:length(y1)-1)/fs,y1 + mask); hold on;
+%             plot((0:length(y2)-1)/fs,y2 + mask + 2);
+%             plot([0 (length(y1)-1)/fs],[1 1],'k');
+%             set(gca,'xtick',[]);
+%             set(gca,'ytick',[]);
+%             
+%             subplot('position',[0.38 0.8 0.22 0.15]); hold off;
+%             plot((0:length(y1)-1)/fs,y1 + mask); hold on; 
+%             plot((0:length(y2)-1)/fs,y2 + mask + 2);
+%             plot([0 (length(y1)-1)/fs],[1 1],'k');
+%             set(gca,'xtick',[]);
+%             set(gca,'ytick',[]);
+%             
+%             % plot clean and masked PSTHs on top of each other in separate
+%             % subplot
+%             
+% %             subplot('position',[0.68 0.05 0.22 0.25]);
+% %             hold off;
+% %             mixed = plot(t_vec2,2*50*mixedPSTH(1,:)/size(varies(1).range,2) + 150); hold on;
+% %             plot(t_vec2,2*50*mixedPSTH(2,:)/size(varies(1).range,2));
+% %             
+% %             plot([0 3],[150 150],'k');
+% %             
+% %             clean = plot(t_vec1,(2*50*cleanPSTH(1,:))/size(varies(1).range,2) + 150);
+% %             plot(t_vec1,2*50*cleanPSTH(2,:)/size(varies(1).range,2));
+% %             legend(mixed,clean,'Mixed','Clean');
+% %             ylim([0 300]);
+% 
+%             savefig([DirPart filesep temp{n}]);
+%             saveas(gcf,[DirPart filesep temp{n}(1:end-4) '.png']);
+%             close;
+%             
+%             end
+%             
+%         end
     end
 end
 
