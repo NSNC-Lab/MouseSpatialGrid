@@ -1,11 +1,6 @@
-% Simulate spike times based on a model neuron with a (1) STRF and a (2)
-% spatial tuning curve. I.e. this neuron has both spatial and
-% spectral-temporal tuning.
+function [fileloc] = InputGaussianSTRF_fitting(gain)
 
-% note:
-% large bottleneck lies in r/w to network drive
-
-clearvars;clc;close all
+close all
 addpath(genpath('ICSimStim/strflab_v1.45'))
 addpath('genlib')
 addpath('stimuli-fixed-V2')
@@ -24,7 +19,7 @@ if strcmp(tuning,'Mouse')
     [song1,~] = audioread('200k_target1.wav');
     [song2,~] = audioread('200k_target2.wav');
     
-    for trial = 1:20
+    for trial = 1:10
         [masker,fs] = audioread(['200k_masker' num2str(ceil(trial/2)) '.wav']);
         [spec,~,~]=STRFspectrogram(masker/rms(masker)*maskerlvl,fs);
         masker_specs{trial} = spec;
@@ -39,7 +34,7 @@ if strcmp(tuning,'Mouse')
     paramG.BSM = 5.00E-05; % 1/Hz=s best spectral modulation
     paramG.f0 = 4300;
     
-    strfGain = 10.88; %1.5 gain ~ 16 Hz, 4.5 gain ~ 50 Hz FR
+    strfGain = gain; %1.5 gain ~ 16 Hz, 4.5 gain ~ 50 Hz FR
     
 elseif strcmp(tuning,'bird')
     % stimuli
@@ -68,7 +63,7 @@ specs.f = f;
 strf=STRFgen(paramH,paramG,f,t(2)-t(1));
 strf.w1 = strf.w1*strfGain;
 % ============ log message (manual entry?) ============
-saveName = [sprintf('BW_%0.3f_BTM_%0.1f_t0_%0.1f_phase%0.4f/s%0.0f_STRFgain%0.2f',...
+saveName = [sprintf('shiftedsigs_BW_%0.3f_BTM_%0.1f_t0_%0.1f_phase%0.4f/s%0.0f_STRFgain%0.2f',...
                 paramH.BW,paramH.BTM,paramH.t0,paramH.phase/pi,sigma,strfGain),'_2020'];
 saveFlag = 0;
 
@@ -89,7 +84,12 @@ maskerLocs = 1:4;
 
 saveParam.flag = 1;
 saveParam.fileLoc = [dataSaveLoc filesep saveName];
-if ~exist(saveParam.fileLoc,'dir'), mkdir(saveParam.fileLoc); end
+if ~exist(saveParam.fileLoc,'dir')
+    mkdir(saveParam.fileLoc); 
+else
+    fileloc = saveParam.fileLoc;
+    return
+end
 tuningParam.strf = strf;
 tuningParam.type = tuning;
 tuningParam.sigma = sigma;
@@ -101,10 +101,10 @@ for songloc = songLocs
     close all
     maskerloc=0;
     
-    t_spiketimes = InputGaussianSTRF_v2(specs,songloc,maskerloc,tuningParam,saveParam,mean_rate,stimGain,maxWeight);
-    %t_spiketimes = InputGaussianSTRF_v2(specs,maskerloc,songloc,tuningParam,saveParam,mean_rate,stimGain,maxWeight);
+    t_spiketimes = InputGaussianSTRF_v3(specs,songloc,maskerloc,tuningParam,saveParam,mean_rate,stimGain,maxWeight);
+    % t_spiketimes = InputGaussianSTRF_v3(specs,maskerloc,songloc,tuningParam,saveParam,mean_rate,stimGain,maxWeight);
     for maskerloc = maskerLocs
-        t_spiketimes = InputGaussianSTRF_v2(specs,songloc,maskerloc,tuningParam,saveParam,mean_rate,stimGain,maxWeight);
+        t_spiketimes = InputGaussianSTRF_v3(specs,songloc,maskerloc,tuningParam,saveParam,mean_rate,stimGain,maxWeight);
     end
 end
 set(0, 'DefaultFigureVisible', 'on')
@@ -118,34 +118,6 @@ end
 for k=1:length(msg), fprintf(fid, '%s: %s\n', datestr(now, 0), msg{k}); end
 fclose(fid);
 
-%% Grids for each neuron
 fileloc = [saveParam.fileLoc];
-allfiles = dir([fileloc filesep '*.mat'])
-tgtalone = dir([fileloc filesep '*m0.mat'])
-mskalone = dir([fileloc filesep 's0*.mat'])
-mixedfiles = setdiff({allfiles.name},[{tgtalone.name};{mskalone.name}])
-for i = 1:16
-    data = load([fileloc filesep mixedfiles{i}]);
-    perf(i,:) = data.disc;
-end
 
-neurons = {'cont sigmoid','u','gaussian','ipsi sigmoid'};
-[X,Y] = meshgrid(songLocs,fliplr(maskerLocs));
-figure;
-for i = 1:length(neurons)
-    subplot(2,2,i)
-    neuronPerf = perf(:,i);
-    str = cellstr(num2str(round(neuronPerf)));
-    neuronPerf = reshape(neuronPerf,4,4);
-    imagesc(flipud(neuronPerf));
-    colormap('parula');
-    xticks([1:4]); xticklabels(fliplr({'-90','0','45','90'}))
-    yticks([1:4]); yticklabels({'-90','0','45','90'})
-    title(neurons(i))
-    text(X(:)-0.2,Y(:),str,'Fontsize',12)
-    caxis([50,100])
-    xlabel('Song Location')
-    ylabel('Masker Location')
-    set(gca,'fontsize',12)
 end
-saveas(gca,[fileloc filesep 'performance_grid.tiff'])

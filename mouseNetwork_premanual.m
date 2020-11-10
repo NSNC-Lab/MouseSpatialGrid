@@ -17,7 +17,7 @@ dataCh = 23;
 %%%%%%%% end of user inputs
 
 subject = [extractBefore(perf_file,'_performance') '-Ch' num2str(dataCh)];
-folder = ['Data-fitting' filesep subject];
+folder = fullfile('Data-fitting',subject);
 
 %% load experimental data to optimize model to
 
@@ -72,7 +72,8 @@ t_vec = -1:1/50:4;
 t_inds = t_vec >= 0 & t_vec < 3;
 
 % calculate STRF gain based on average FR
-gain = ((data_FR(best_loc)-mean(FR_r0))/12.4832)^(1/0.7172);
+% double the gain to account for EI at input
+gain = 2*((data_FR(best_loc)-mean(FR_r0))/12.4832)^(1/0.7172);
 
 ICdir = InputGaussianSTRF_fitting(gain);
 
@@ -96,8 +97,6 @@ gsyn_sum = max([frac_coloc*0.18 frac_clean*0.18]);
 
 %% Estimate cortical noise for co-located trials
 
-varies = struct;
-
 ranges = cell(1,4);
 for c = 1:4
     if c == best_loc
@@ -107,9 +106,19 @@ for c = 1:4
     end
 end
 
-varies(1).conxn = '(IC->IC)';
+restricts(1).conxn = {'Exc->Exc','Inh->Inh'};
+restricts(1).param = 'trial';
+restricts(1).range = 1:20;
+
+varies = struct;
+
+varies(1).conxn = 'Exc->Exc';
 varies(1).param = 'trial';
-varies(1).range = 1:40;
+varies(1).range = 1:20;
+
+varies(end+1).conxn = 'Inh->Inh';
+varies(end).param = 'trial';
+varies(end).range = 1:20;
 
 varies(end+1).conxn = 'C';
 varies(end).param = 'noise';
@@ -131,11 +140,21 @@ varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN4';
 varies(end).range = ranges{4};
 
-subz = find(contains({ICstruc.name},['s' num2str(best_loc) 'm' num2str(best_loc)])); % co-located cases
+% row: origin (does the inhibition)
+% column: destination (to be inhibited)
+xrNetcons = zeros(4);
+
 plot_rasters = 0;
 
-[simdata] = mouseNetwork_initialize(varies,0,ICdirPath,...
-    spks_file,dataCh,plot_rasters,folder,'-collocated-noise',subz,[]);
+ICstruc = dir([ICdirPath '*.mat']);
+
+subz = find(cellfun(@(x) strcmp(x(2),x(4)),{ICstruc.name})); % co-located cases
+subz = cat(2,subz,find(contains({ICstruc.name},'m0'))); % target only cases
+
+subz = subz(1:2:end);
+
+simdata = mouseNetwork_inhibV2_initialize(varies,xrNetcons,0,ICdirPath,...
+    spks_file,dataCh,plot_rasters,folder,'-parameter-fitting',subz,restricts);
 
 % Find best colocated cortical noise
 

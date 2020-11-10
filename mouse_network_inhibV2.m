@@ -81,7 +81,7 @@ s.connections(end).parameters={'gSYN',0.18, 'tauR',0.3, 'tauD',1.5, 'netcons', d
 
 s.connections(end+1).direction='Inh->R';
 s.connections(end).mechanism_list={'synDoubleExp'};
-s.connections(end).parameters={'gSYN',0.18, 'tauR',0.3, 'tauD',1.5, 'netcons', diag(ones(1,nCells)),'ESYN',-80}; 
+s.connections(end).parameters={'gSYN',0.18, 'tauR',0.3, 'tauD',1.5, 'netcons', diag([1 1 1 1]),'ESYN',-80}; 
 
 s.connections(end+1).direction='Exc->R';
 s.connections(end).mechanism_list={'synDoubleExp'};

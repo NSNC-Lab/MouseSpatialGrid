@@ -1,4 +1,4 @@
-function t_spiketimes=InputGaussianSTRF_v2(specs,songloc,maskerloc,tuning,saveParam,mean_rate,stimGain,maxWeight)
+function t_spiketimes=InputGaussianSTRF_v3(specs,songloc,maskerloc,tuning,saveParam,mean_rate,stimGain,maxWeight)
 % Inputs
 %   specs - spectrogram representation of stimuli, with fields
 %       .songs{2} for the two songs
@@ -44,6 +44,23 @@ dx=.02;dy=.05;
 lx=.13;ly=.1;
 azimuth=fliplr([-90 0 45 90]); %stimuli locations (flipped to match mouse data)
 figuresize(width, width*hwratio, gcf,'inches')
+
+% other parameters
+if saveParam.flag, savedir=[saveParam.fileLoc]; mkdir(savedir); end
+
+% Define spatial tuning curves & plot
+
+x = -108:108;
+tuningcurve=zeros(4,length(x));
+load('ono_curves_V2.mat','sigmoid','gauss','ushaped');
+
+inh_sigmoid = ono_sigmoid(x,3.69); % shifted sigmoid
+inh_sigmoid = inh_sigmoid/101.7883; % value of unnormalized exc. sigmoid at -90°
+
+labels = {'_E','_I'};
+
+for l = 1:2   % run script twice to do inhibitory units
+
 positionVector = [x0+dx+lx y0+dy+ly 5*lx+4*dx ly];
 subplot('Position',positionVector)
 hold on
@@ -51,36 +68,36 @@ annotation('textbox',[.375 .33 .1 .1],...
     'string',{['\sigma = ' num2str(tuning.sigma) ' deg'],['gain = ' num2str(stimGain)]},...
     'FitBoxToText','on',...
     'LineStyle','none')
-
-% other parameters
-if saveParam.flag, savedir=[saveParam.fileLoc]; mkdir(savedir); end
-
-% Define spatial tuning curves & plot
-sigma = tuning.sigma;
-switch tuning.type
-    case 'Bird'
-        x=-108:108;
-        tuningcurve=zeros(4,length(x));
-        tuningcurve(1,:)=gaussmf(x,[sigma,-90]);
-        tuningcurve(2,:)=gaussmf(x,[sigma,0]);
-        tuningcurve(3,:)=gaussmf(x,[sigma,45]);
-        tuningcurve(4,:)=gaussmf(x,[sigma,90]);
-        neuronNames = {'-90d deg','0 deg','45 deg','90 deg'};
-    case 'Mouse'
-        x=-108:108;
-        tuningcurve=zeros(4,length(x));
-        load('ono_curves_V2.mat','sigmoid','gauss','ushaped');
-        tuningcurve(1,:) = fliplr(sigmoid); % flip sigmoid so that contra(+90°) = 1
-        tuningcurve(2,:) = ushaped;
-        tuningcurve(3,:) = gauss;
-        tuningcurve(4,:) = sigmoid; % at -90°, sigmoid == 1
-
-        neuronNames = fliplr({'ipsi sigmoid','gaussian','U','contra sigmoid'});
+    
+if l == 1
+    % excitatory units
+    %tuningcurve(1,:) = fliplr(sigmf(x,[-0.08 -22.5])*0.7 + 0.2); % flip sigmoid so that contra(+90°) = 1
+    tuningcurve(1,:) = fliplr(sigmf(x,[-0.04 -32.5]));
+    %tuningcurve(1,:) = fliplr(sigmoid);
+    %tuningcurve(2,:) = ushaped;
+    tuningcurve(2,:) = fliplr(sigmf(x,[-0.08 -22.5])*0.7 + 0.2);
+    tuningcurve(3,:) = gaussmf(x,[30 0]);
+    %tuningcurve(3,:) = gauss;
+    tuningcurve(4,:) = sigmf(x,[-0.08 -30]); % at -90°, sigmoid == 1
+else
+    % inhibitory units
+    %tuningcurve(1,:) = fliplr(sigmf(x,[-0.1 -67.5])*0.78 + 0.3); % flip sigmoid so that contra(+90°) = 1
+    tuningcurve(1,:) = fliplr(sigmf(x,[-0.06 -10])*0.5);
+    %tuningcurve(1,:) = fliplr(inh_sigmoid);
+    %tuningcurve(2,:) = ushaped;
+    tuningcurve(2,:) = fliplr(sigmf(x,[-0.1 -67.5])*0.78 + 0.3);
+    %tuningcurve(3,:) = sigmf(x,[0.05 -30])*0.8+0.2; %gauss;
+    tuningcurve(3,:) = gaussmf(x,[40 0])*0.56;
+    %tuningcurve(4,:) = inh_sigmoid;
+    tuningcurve(4,:) = sigmf(x,[-0.02 -30])*0.5; % at -90°, sigmoid == 1
 end
 
-for i=1:4
+neuronNames = fliplr({'ipsi sigmoid','gaussian','U','contra sigmoid'});
+
+for i = 1:4
     plot(x,tuningcurve(i,:),'linewidth',2.5,'color',color1(i,:))
 end
+
 xlim([min(x) max(x)]);ylim([0 1.05])
 set(gca,'xtick',[-90 0 45 90],'XTickLabel',{'-90 deg', '0 deg', '45 deg', '90 deg'},'YColor','w')
 set(gca,'ytick',[0 0.50 1.0],'YTickLabel',{'0', '0.50', '1.0'},'YColor','b')
@@ -108,7 +125,8 @@ title('STRF')
 
 %%
 t_spiketimes={};
-avgSpkRate=zeros(1,4);disc=zeros(1,4);
+avgSpkRate = zeros(1,4); 
+disc = zeros(1,4);
 for songn = 1:2
     %convert sound pressure waveform to spectrogram representation
 %     songs(:,songn)=songs{songn}(1:n_length);
@@ -118,7 +136,7 @@ for songn = 1:2
     %% plot mixture process (of song1) for visualization
     stim_spec=zeros(4,specs.dims(1),specs.dims(2));
     if maskerloc
-        stim_spec(maskerloc,:,:)=masker_spec;
+        stim_spec(maskerloc,:,:) = masker_spec;
     end
 
     if songloc
@@ -149,9 +167,9 @@ for songn = 1:2
 
 
     %% mix spectrograms using Gaussian weights
-    mixedspec=zeros(size(stim_spec));
-    weight=zeros(4,4);
-    for i=1:4  % summing of each channel, i.e. neuron type 1-4
+    mixedspec = zeros(size(stim_spec));
+    weight = zeros(4,4);
+    for i = 1:4  % summing of each channel, i.e. neuron type 1-4
         
         if i > 3
             subplotloc = i+1;
@@ -159,7 +177,7 @@ for songn = 1:2
             subplotloc = i;
         end
         
-        for trial = 1:20         % for each trial, define a new random WGN masker
+        for trial = 1:10         % for each trial, define a new random WGN masker
 %             masker = wgn(1,n_length,1);
             masker_spec = specs.maskers{trial};
 
@@ -173,7 +191,7 @@ for songn = 1:2
             if maskerloc
                 weight(i,maskerloc) = tuningcurve(i,x==azimuth(maskerloc));
                 totalWeight = totalWeight + weight(i,maskerloc);
-                mixedspec(i,:,:) = squeeze(mixedspec(i,:,:)) + weight(i,maskerloc)*masker_spec;
+                mixedspec(i,:,:) = squeeze(mixedspec(i,:,:)) + weight(i,maskerloc)*masker_spec;                
             end
 
             % scale mixed spectrogram; cap total weight to maxWeight
@@ -192,7 +210,7 @@ for songn = 1:2
                 subplot('Position',positionVector)
                 imagesc(t(1:end-250),f,currspec(251:end,:)',[0 80]);colormap('parula');
                 xlim([0 max(t(1:end-249))])
-                %set(gca,'YDir','normal','xtick',[0 1],'ytick',[])
+                set(gca,'YDir','normal','ytick',[])
             end
 
             %% convolve STRF with spectrogram
@@ -202,41 +220,48 @@ for songn = 1:2
             t_spiketimes{trial,i+4*(songn-1)} = tempspk-250; %sec
         end
 
+        ntrials = size(t_spiketimes,1);
+        
         %% plot FR (of song1)
         %2nd row of plots- spectograph
         if songn == 1
             positionVector = [x0+subplotloc*(dx+lx) y0+3*(dy+ly) lx ly];
             subplot('Position',positionVector)
-            plot(t(1:end-250),rate(251:end));
+            plot(t(1:end-250),rate(251:end)); 
             xlim([0 max(t(1:end-250))])
         end
         % raster plot- first row of graphs
         positionVector = [x0+subplotloc*(dx+lx) y0+4*(dy+ly) lx ly];
         subplot('Position',positionVector);hold on
         %The below for loop codes for the first row of plots with the rasters.
-        for trial=1:20
-            raster(t_spiketimes{trial,i+4*(songn-1)},trial+20*(songn-1)) %need to change tempspk to change the raster
+        for trial=1:ntrials
+            raster(t_spiketimes{trial,i+4*(songn-1)},trial+ntrials*(songn-1)) %need to change tempspk to change the raster
         end
-        plot([0 2000],[20 20],'k')
-        ylim([0 40])
+        plot([0 2000],[ntrials ntrials],'k')
+        ylim([0 ntrials])
         xlim([0 max(t(1:end-250))*1000])
+        
         %Below section gives the whole row of top labels
+        
         if songn == 2
             distMat = calcvr([t_spiketimes(:,i) t_spiketimes(:,i+4)], 10); % using ms as units, same as ts
-            [disc(i), E, correctArray] = calcpc(distMat, 20, 2, 1,[], 'new');
-            firingRate = round(sum(cellfun(@length,t_spiketimes(:,i+4)))/(t(end)*20));
+            disc(i) = calcpc(distMat, ntrials, 2, 1,[], 'new');
+            firingRate = round(sum(cellfun(@length,t_spiketimes(:,i+4)))/(t(end)*ntrials));
             title({neuronNames{i},['disc = ', num2str(disc(i))],['FR = ',num2str(firingRate)]})
         end
 
-        fclose all;
     end
+    
+end
+
+if saveParam.flag    
+    saveas(gca,[savedir '/s' num2str(songloc) 'm' num2str(maskerloc) labels{l} '.tiff'])
+    save([savedir '/s' num2str(songloc) 'm' num2str(maskerloc) labels{l}],...
+        't_spiketimes','songloc','maskerloc','mean_rate','disc','avgSpkRate','fr')
+end
+
+clf;
 
 end
 
-if saveParam.flag
-    saveas(gca,[savedir '/s' num2str(songloc) 'm' num2str(maskerloc) '.tiff'])
-    save([savedir '/s' num2str(songloc) 'm' num2str(maskerloc)],'t_spiketimes','songloc','maskerloc',...
-        'sigma','mean_rate','disc','avgSpkRate','fr')
 end
-
-clf

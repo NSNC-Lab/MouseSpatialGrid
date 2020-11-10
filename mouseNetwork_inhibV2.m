@@ -14,9 +14,9 @@ addpath(genpath('ICSimStim'))
 
 %%%%%%%% 
 
-spks_file = '9-21-2016_0dB_removed_trials_cleaned(-1,4).mat';
-perf_file = '9-21-2016_0dB_removed_trials_performance.mat';
-dataCh = 25;
+spks_file = '03_30_18_0dB_cleaned(-1,4).mat';
+perf_file = '03_30_18_0dB_performance.mat';
+dataCh = 23;
 
 fitFlag = 0;    % if only want to generate clean and co-located spots, =1
 plot_rasters = 1;
@@ -29,7 +29,7 @@ folder = ['Data-fitting' filesep subject];
 load(fullfile(folder,'default_parameters.mat'));
 
 % manually choose strf instead of using the saved ICdir!
-ICdir = uigetdir('STRFs/V3_BW_0.009_BTM_3.8_t0_0.1_phase0.4985/');
+ICdir = uigetdir('STRFs/');
 if ICdir == 0
    load(fullfile(folder,'default_parameters.mat'),'ICdir');
 end
@@ -53,25 +53,25 @@ varies(end).range = 1:20;
 
 varies(end+1).conxn = 'C';
 varies(end).param = 'noise';
-varies(end).range = 0;
+varies(end).range = Cnoise;
 
-Cnoise2 = 0; % additional noise, so colocated noise = Cnoise2 + varies(2).range
+Cnoise2 = Cnoise2; % additional noise, so colocated noise = Cnoise2 + varies(2).range
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN1';
-varies(end).range = 0.05;
+varies(end).range = 0;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN2';
-varies(end).range = 0.05;
+varies(end).range = 0.15;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN3';
-varies(end).range = 0.05;
+varies(end).range = 0;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN4';
-varies(end).range = 0.05;
+varies(end).range = 0;
 
 % row: origin (does the inhibition)
 % column: destination (to be inhibited)
@@ -88,7 +88,7 @@ ICstruc = dir([ICdirPath '*.mat']);
 fitFlag = 0;
 if fitFlag == 1
     subz = find(cellfun(@(x) strcmp(x(2),x(4)),{ICstruc.name})); % co-located cases
-    subz = cat(2,subz,find(contains({ICstruc.name},'m0.mat'))); % target only cases
+    subz = cat(2,subz,find(contains({ICstruc.name},'m0'))); % target only cases
     detail = '-manual-fit-inhib_V3';
 else
     subz = find(~contains({ICstruc.name},'s0'));  % all spots
