@@ -112,6 +112,7 @@ ushaped = ushaped/(ushaped(x1 == 90));
 sigmoid = s(By1E,x1);
 sigmoid = sigmoid/(sigmoid(x1 == -90));
 
+
 subplot(1,3,1);
 plot(x1,sigmoid*100); hold on;
 plot(x,y1E,'^-','color',cr,'markersize',8,'markerfacecolor',cr)
@@ -124,4 +125,4 @@ subplot(1,3,3);
 plot(x1,gauss*100); hold on;
 plot(x,y3E,'v-','color',cr,'markersize',8,'markerfacecolor',cr)
 
-save('ono_curves_V2.mat','sigmoid','gauss','ushaped','x1');
+%save('ono_curves_V2.mat','sigmoid','gauss','ushaped','x1');

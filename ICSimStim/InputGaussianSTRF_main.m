@@ -6,7 +6,7 @@
 % large bottleneck lies in r/w to network drive
 
 clearvars;clc;close all
-addpath(genpath('strflab_v1.45'))
+addpath(genpath('ICSimStim/strflab_v1.45'))
 addpath('genlib')
 addpath('stimuli-fixed-V2')
 dataSaveLoc = '/Users/jionocon/Documents/MATLAB/Spatial-grid-simulations/STRFs'; %local save location
@@ -39,7 +39,7 @@ if strcmp(tuning,'Mouse')
     paramG.BSM = 5.00E-05; % 1/Hz=s best spectral modulation
     paramG.f0 = 4300;
     
-    strfGain = 3; %1.5 gain ~ 16 Hz, 4.5 gain ~ 50 Hz FR
+    strfGain = 10.88; %1.5 gain ~ 16 Hz, 4.5 gain ~ 50 Hz FR
     
 elseif strcmp(tuning,'bird')
     % stimuli

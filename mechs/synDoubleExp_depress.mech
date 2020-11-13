@@ -9,9 +9,9 @@ D10 = 1
 F0 = 1
 D20 = 1
 
-Fac_inc = 0.4
-Dep1_inc = 0.8
-Dep2_inc = 0.99
+Fac_inc = 0 %0.4
+Dep1_inc = 1 %0.8
+Dep2_inc = 1 %0.99
 
 Fac_tau = 17
 Dep1_tau = 37

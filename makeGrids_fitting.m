@@ -30,7 +30,7 @@ else
     inds = best_iterations;  
 end
 
-for vv = 1:inds
+for vv = inds
             
     % CT; target only cases
     perf.CT = zeros(1,4);

@@ -140,7 +140,7 @@ for vv = 1:nvaried
         simdata(targetIdx(1)).annot{vv,1},...
         simdata(mixedIdx(1)).annot{vv,1},...
         gsyn_annot,...
-        simdata(targetIdx(1)).annot{vv,end}};
+        simdata(targetIdx(1)).annot{vv,4:end}};
     
     annotation('textbox',[0.8 .35 0.2 0.1],...
         'string',str,...
@@ -148,7 +148,7 @@ for vv = 1:nvaried
         'LineStyle','none')
     
     % save grid
-    saveas(gca,[filesep DirPart filesep 'Grid_Iteration_' num2str(vv) '.tiff'])
+    saveas(gca,[DirPart filesep 'Grid_Iteration_' num2str(vv) '.tiff'])
     clf;
     
 end

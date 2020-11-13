@@ -207,7 +207,8 @@ for songn = 1:2
         if songn == 1
             positionVector = [x0+subplotloc*(dx+lx) y0+3*(dy+ly) lx ly];
             subplot('Position',positionVector)
-            plot(t(1:end-250),rate(251:end));xlim([0 max(t(1:end-250))])
+            plot(t(1:end-250),rate(251:end));
+            xlim([0 max(t(1:end-250))])
         end
         % raster plot- first row of graphs
         positionVector = [x0+subplotloc*(dx+lx) y0+4*(dy+ly) lx ly];
@@ -217,7 +218,7 @@ for songn = 1:2
             raster(t_spiketimes{trial,i+4*(songn-1)},trial+20*(songn-1)) %need to change tempspk to change the raster
         end
         plot([0 2000],[20 20],'k')
-        ylim([0 20])
+        ylim([0 40])
         xlim([0 max(t(1:end-250))*1000])
         %Below section gives the whole row of top labels
         if songn == 2
@@ -230,10 +231,12 @@ for songn = 1:2
         fclose all;
     end
 
-    if saveParam.flag
-        saveas(gca,[savedir '/s' num2str(songloc) 'm' num2str(maskerloc) '.tiff'])
-        save([savedir '/s' num2str(songloc) 'm' num2str(maskerloc)],'t_spiketimes','songloc','maskerloc',...
-            'sigma','mean_rate','disc','avgSpkRate','fr')
-    end
 end
+
+if saveParam.flag
+    saveas(gca,[savedir '/s' num2str(songloc) 'm' num2str(maskerloc) '.tiff'])
+    save([savedir '/s' num2str(songloc) 'm' num2str(maskerloc)],'t_spiketimes','songloc','maskerloc',...
+        'sigma','mean_rate','disc','avgSpkRate','fr')
+end
+
 clf
