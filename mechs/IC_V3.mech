@@ -1,8 +1,9 @@
 % IC Input
 
 trial = 1;
+label = 'E';
 
-ICinput = genICinput_V2(trial,dt);
+ICinput = genICinput_V3(trial,dt,label);
 
 g_postIC = 0.1
 E_exc = 0
