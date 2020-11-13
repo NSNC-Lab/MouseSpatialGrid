@@ -158,12 +158,15 @@ function annot = createAnnotStr(data,STRFgain,xrNetcon)
 temp = find(strcmp(data(1).varied,'C_noise'),1);
 
 paramstr = {data(1).varied{temp:end}};
-gSYNs = []; gs = 1;
+gSYNs_RC = []; gSYNs_IR = []; gs_RC = 1; gs_IR = 1;
 i = 1;
 for aa = 1:length(paramstr)
     if contains(['data.' paramstr{aa}],'R_C_gSYN')
-        gSYNs = cat(2,gSYNs,eval(['data.' paramstr{aa}]));
-        gs = gs + 1;
+        gSYNs_RC = cat(2,gSYNs_RC,eval(['data.' paramstr{aa}]));
+        gs_RC = gs_RC + 1;
+    elseif contains(['data.' paramstr{aa}],'Inh_R_gSYN')
+        gSYNs_IR = cat(2,gSYNs_IR,eval(['data.' paramstr{aa}]));
+        gs_IR = gs_IR + 1;
     elseif contains(['data.' paramstr{aa}],'C_noise')
         annot{:,i} = sprintf('%s = %.3f',paramstr{aa},...
             eval(['data.' paramstr{aa}]));
@@ -175,8 +178,10 @@ for aa = 1:length(paramstr)
     end
 end
 % round-up gSYNs so that annotation strings don't have very long numbers
-annot{:,end+1} = ['RC_{gSYN} = ' mat2str(round(10000*gSYNs)/10000)];
+annot{:,end+1} = ['RC_{gSYN} = ' mat2str(round(10000*gSYNs_RC)/10000)];
+annot{:,end+1} = ['InhR_{gSYN} = ' mat2str(round(10000*gSYNs_IR)/10000)];
 annot{:,end+1} = ['STRF gain = ' STRFgain{1}];
+
 if ~isempty(xrNetcon)
     [r,c] = find(xrNetcon ~= 0);
     for j = 1:length(r)

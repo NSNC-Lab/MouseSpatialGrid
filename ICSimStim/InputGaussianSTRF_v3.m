@@ -72,24 +72,24 @@ annotation('textbox',[.375 .33 .1 .1],...
 if l == 1
     % excitatory units
     %tuningcurve(1,:) = fliplr(sigmf(x,[-0.08 -22.5])*0.7 + 0.2); % flip sigmoid so that contra(+90°) = 1
-    tuningcurve(1,:) = fliplr(sigmf(x,[-0.04 -32.5]));
+    tuningcurve(1,:) = fliplr(sigmf(x,[-0.06 -37.5])*0.85 + 0.2);
     %tuningcurve(1,:) = fliplr(sigmoid);
     %tuningcurve(2,:) = ushaped;
     tuningcurve(2,:) = fliplr(sigmf(x,[-0.08 -22.5])*0.7 + 0.2);
-    tuningcurve(3,:) = gaussmf(x,[30 0]);
+    tuningcurve(3,:) = gaussmf(x,[37.5 0]);
     %tuningcurve(3,:) = gauss;
-    tuningcurve(4,:) = sigmf(x,[-0.08 -30]); % at -90°, sigmoid == 1
+    tuningcurve(4,:) = sigmf(x,[-0.06 -37.5])*0.85 + 0.2; % at -90°, sigmoid == 1
 else
     % inhibitory units
     %tuningcurve(1,:) = fliplr(sigmf(x,[-0.1 -67.5])*0.78 + 0.3); % flip sigmoid so that contra(+90°) = 1
-    tuningcurve(1,:) = fliplr(sigmf(x,[-0.06 -10])*0.5);
+    tuningcurve(1,:) = fliplr(sigmf(x,[-0.08 -6])*0.42 + 0.2);
     %tuningcurve(1,:) = fliplr(inh_sigmoid);
     %tuningcurve(2,:) = ushaped;
-    tuningcurve(2,:) = fliplr(sigmf(x,[-0.1 -67.5])*0.78 + 0.3);
+    tuningcurve(2,:) = fliplr(sigmf(x,[-0.06 -67.5])*0.78 + 0.2);
     %tuningcurve(3,:) = sigmf(x,[0.05 -30])*0.8+0.2; %gauss;
-    tuningcurve(3,:) = gaussmf(x,[40 0])*0.56;
+    tuningcurve(3,:) = gaussmf(x,[92 0])*0.56;
     %tuningcurve(4,:) = inh_sigmoid;
-    tuningcurve(4,:) = sigmf(x,[-0.02 -30])*0.5; % at -90°, sigmoid == 1
+    tuningcurve(4,:) = sigmf(x,[-0.08 -6])*0.42 + 0.2; % at -90°, sigmoid == 1
 end
 
 neuronNames = fliplr({'ipsi sigmoid','gaussian','U','contra sigmoid'});

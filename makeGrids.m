@@ -19,7 +19,8 @@ lx = .16; ly = .16/hwratio;
 
 x=-108:108;
 tuningcurve = zeros(4,length(x));
-ono = load('ono_curves_V2.mat','sigmoid','gauss','ushaped');
+load('E_I_curves.mat','C');
+C(C < 0) = 0;
 
 gsyn_str = simdata(targetIdx(1)).annot(contains(simdata(targetIdx(1)).annot,'RC_{gSYN} = '));
 
@@ -49,10 +50,10 @@ for vv = 1:nvaried
     gSYNs = extractAfter(gsyn_str{vv},'RC_{gSYN} = ');
     gSYNs = str2num(gSYNs); %#ok<ST2NM>
     
-    tuningcurve(1,:) = fliplr(ono.sigmoid) * gSYNs(1)/0.21;
-    tuningcurve(2,:) = ono.ushaped * gSYNs(2)/0.21;
-    tuningcurve(3,:) = ono.gauss * gSYNs(3)/0.21;
-    tuningcurve(4,:) = ono.sigmoid * gSYNs(4)/0.21;
+    tuningcurve(1,:) = C(1,:) * gSYNs(1)/0.21;
+    tuningcurve(2,:) = C(2,:) * gSYNs(2)/0.21;
+    tuningcurve(3,:) = C(3,:) * gSYNs(3)/0.21;
+    tuningcurve(4,:) = C(4,:) * gSYNs(4)/0.21;
     
     % Show FR vs azimuth for clean data
     

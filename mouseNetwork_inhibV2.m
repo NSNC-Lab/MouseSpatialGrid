@@ -55,32 +55,51 @@ varies(end+1).conxn = 'C';
 varies(end).param = 'noise';
 varies(end).range = Cnoise;
 
-Cnoise2 = Cnoise2; % additional noise, so colocated noise = Cnoise2 + varies(2).range
+Cnoise2 = 0; % additional noise, so colocated noise = Cnoise2 + varies(2).range
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN1';
-varies(end).range = 0;
+varies(end).range = 0.08;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN2';
-varies(end).range = 0.15;
+varies(end).range = 0;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN3';
-varies(end).range = 0;
+varies(end).range = 0.18;
 
 varies(end+1).conxn = 'R->C';
 varies(end).param = 'gSYN4';
+varies(end).range = 0.08;
+
+varies(end+1).conxn = 'Inh->R';
+varies(end).param = 'gSYN1';
+varies(end).range = 0.18;
+
+varies(end+1).conxn = 'Inh->R';
+varies(end).param = 'gSYN2';
 varies(end).range = 0;
+
+varies(end+1).conxn = 'Inh->R';
+varies(end).param = 'gSYN3';
+varies(end).range = 0.18;
+
+varies(end+1).conxn = 'Inh->R';
+varies(end).param = 'gSYN4';
+varies(end).range = 0.18;
 
 % row: origin (does the inhibition)
 % column: destination (to be inhibited)
 xrNetcons = zeros(4);
-% xrNetcons(4,1) = 1;
+xrNetcons(3,4) = 1;
+%xrNetcons(2,4) = 1;
+% xrNetcons(3,1) = 1;
+% %xrNetcons(2,1) = 1;
 % 
-% varies(end+1).conxn = 'X->R';
-% varies(end).param = 'gSYN';
-% varies(end).range = 0.05;
+varies(end+1).conxn = 'X->R';
+varies(end).param = 'gSYN';
+varies(end).range = 0.12;
 
 plot_rasters = 1;
 
@@ -166,6 +185,7 @@ if plot_rasters
             set(gca,'ytick',[]);
             
             saveas(gcf,[DirPart filesep temp{n}(1:end-4) '.png']);
+            delete([DirPart filesep temp{n}]);
             close;
         end
         
@@ -213,8 +233,9 @@ if plot_rasters
 %             legend(mixed,clean,'Mixed','Clean');
 %             ylim([0 300]);
 
-            savefig([DirPart filesep temp{n}]);
+            %savefig([DirPart filesep temp{n}]);
             saveas(gcf,[DirPart filesep temp{n}(1:end-4) '.png']);
+            delete([DirPart filesep temp{n}]);
             close;
             
             end

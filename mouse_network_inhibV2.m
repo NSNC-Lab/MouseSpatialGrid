@@ -80,8 +80,8 @@ s.connections(end).mechanism_list={'synDoubleExp'};
 s.connections(end).parameters={'gSYN',0.18, 'tauR',0.3, 'tauD',1.5, 'netcons', diag(ones(1,nCells))}; 
 
 s.connections(end+1).direction='Inh->R';
-s.connections(end).mechanism_list={'synDoubleExp'};
-s.connections(end).parameters={'gSYN',0.18, 'tauR',0.3, 'tauD',1.5, 'netcons', diag([1 1 1 1]),'ESYN',-80}; 
+s.connections(end).mechanism_list={'synDoubleExp_V2'};
+s.connections(end).parameters={'tauR',0.3,'tauD',1.5,'ESYN',-80}; 
 
 s.connections(end+1).direction='Exc->R';
 s.connections(end).mechanism_list={'synDoubleExp'};
@@ -89,7 +89,7 @@ s.connections(end).parameters={'gSYN',0.18, 'tauR',0.3, 'tauD',1.5, 'netcons', d
 
 s.connections(end+1).direction='X->R';
 s.connections(end).mechanism_list={'synDoubleExp'};
-s.connections(end).parameters={'gSYN',0.12, 'tauR',2, 'tauD',10, 'netcons',xrNetcons, 'ESYN',-80}; 
+s.connections(end).parameters={'gSYN',0.12, 'tauR',0.3, 'tauD',1.5, 'netcons',xrNetcons, 'ESYN',-80}; 
 
 s.connections(end+1).direction='R->C';
 s.connections(end).mechanism_list={'synDoubleExp_V2'};
