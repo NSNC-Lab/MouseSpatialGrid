@@ -15,7 +15,6 @@ tau_ad=5;        % spike-rate adaptation time constant [ms]
 g_inc=0;         % spike-rate adaptation increment [uS]
 Imask = ones(1,N_pop) % targets specific neurons
 
-% @isyn = synaptic current [nA]
 
 % Capacitance, leak resistance, resting voltage and threshold are from 
 % Liang et al 2018, Cerebral Cortex

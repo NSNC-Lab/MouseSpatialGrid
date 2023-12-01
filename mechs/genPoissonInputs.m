@@ -1,18 +1,19 @@
 function s = genPoissonInputs(trial,locNum,label,t_ref,t_ref_rel,rec)
 
-dt = 0.1;  % ms
 type = label(2:end-1);   % dynasim reads the apostrophes as literals
-fileData = load(['IC_spks_' type '.mat'],'spks');
+fileData = load(['IC_spks_' type '.mat'],'spks','dt');
 
 temp = fileData.spks;
 loc_size = size(fileData.spks,1)/24;
-trial_rate = squeeze(temp(:,:,trial)); % time x location x cells
+trial_rate = squeeze(temp(:,:,trial)); % time x channel x cells
 
-if ~isempty(locNum)
-    rate = trial_rate(loc_size*(locNum-1)+1:loc_size*locNum,:);
-else
-    rate = trial_rate; 
-end
+% if ~isempty(locNum)
+%     rate = trial_rate(loc_size*(locNum-1)+1:loc_size*locNum,:);
+% else
+%     rate = trial_rate; 
+% end
+
+rate = trial_rate; 
 
 s = zeros(size(rate));
 

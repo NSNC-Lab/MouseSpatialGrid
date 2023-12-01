@@ -11,6 +11,8 @@ addpath('genlib'); addpath('plotting'); addpath(genpath(dynasimPath));
 addpath('cSPIKE'); InitializecSPIKE;
 addpath('plotting');
 addpath('params-AM');
+addpath('AM-code');
+addpath('subfunctions');
 
 dt = 0.1; %ms
 
