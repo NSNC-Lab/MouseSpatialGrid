@@ -38,11 +38,14 @@ elseif nPops == 9% no top down
     subplot_locs = [11 10 7 8 4 5 9 6 2];
 elseif nPops == 10 % no C neuron
     subplot_locs = [14 16 10 12 9 11 6 8 5 7 ];
+elseif nPops == 14 % 2 X neurons, 1 C neuron, 1 TD neuron
+    subplot_locs = [14 16 10 12 9 11 6 8 5 7 1 13 15 2];
 else
     subplot_locs = [14 10 11 7 8 12 9 1 2 5];%[14 13 10 11 7 8 12 9 1 2 5];
 end
 
 % locs = {'90','45','0','-90'};
+figure('unit','inches','position',[6 3 6 5]);
 
 for vv = 1:jump % for each varied parameter
     
@@ -56,7 +59,6 @@ for vv = 1:jump % for each varied parameter
     
     for ch = 1:nChans
         
-        figure('unit','inches','position',[6 3 6 5]);
         
         for currentPop = 1:nPops
             
@@ -83,12 +85,12 @@ for vv = 1:jump % for each varied parameter
         
         figName = sprintf('%s_CH%f_set%s',configName,ch,num2str(vv));
         
-        annotation('textbox',[.1 .82 .1 .1], ...
+        annotation('textbox',[.6 .82 .1 .1], ...
             'String',[annotConfig, ', CH' num2str(ch) ],'EdgeColor','none','FontSize',20)
         
         saveas(gcf,[figName '.png']);
         savefig(gcf,[figName '.fig']);
-%         clf;
+        clf
     end
 
 end
@@ -111,25 +113,23 @@ if calcPC
     
     performance = calcpcStatic(distMat, numTrials/2, 2, 0);
     pc = mean(max(performance));
-    PCstr = ['PC = ' num2str(round(pc))];
+    PCstr = ['PC = ' num2str(round(pc)) '%'];
 end
 
 % fr = round(1000*mean(sum(raster(:,3000:33000),2))/3000);
 fr = round(1000*mean(sum(raster(:,3000:18000),2))/1500);
 
-% ind2sub counts down per column first, 
+% ind2sub counts down per column first,`
 if SpatAttention
     [c,r] = ind2sub([3 5],subplot_loc);
     r = 6-r;
-        ypos = 0.06 + 0.2*(r-1);
-y = 0.10;
-
+    ypos = 0.06 + 0.2*(r-1);
+    y = 0.10;
 else
     [c,r] = ind2sub([4 4],subplot_loc);
     r = 5-r;
-    ypos = 0.06 + 0.25*(r-1);
-y = 0.12;
-
+    ypos = 0.06 + 0.215*(r-1);
+    y = 0.12;
 end
 
 xpos = 0.06 + 0.23*(c-1);
@@ -147,7 +147,7 @@ subplot('position',[xpos ypos x y]);
 % plot both targets
 plotSpikeRasterFs(flipud(logical(raster)), 'PlotType','vertline');
 xlim([0 time_end*10]); ylim([0.5 20.5]);
-title({unit,PCstr,['FR = ' num2str(fr)]}); set(gca,'xtick',[],'ytick',[])
+title({unit,[PCstr,[', FR = ' num2str(fr)]]},'fontweight','normal','fontsize',8); set(gca,'xtick',[],'ytick',[])
 line([0 time_end*10],[10.5 10.5],'color','k');
 
 end

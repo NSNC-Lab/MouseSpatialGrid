@@ -5,7 +5,9 @@ addpath('genlib'); addpath('plotting'); addpath(genpath(dynasimPath));
 addpath('cSPIKE'); InitializecSPIKE;
 addpath('plotting');
 
-[folder] = uigetdir('simData');
+
+% note to self: which ones did i call again?? -jio
+[folder] = uigetdir('simData'); 
 
 figs = dir(fullfile(folder,'*.fig'));
 figs(1:2) = [];
@@ -39,7 +41,6 @@ for n = 1:10
     end
     close;
 end
-
 
 figure('unit','inches','position',[3 3 3 1.4]);
 subplot(1,2,1);

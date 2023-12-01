@@ -7,7 +7,7 @@ if ~exist('textColorThresh','var'), textColorThresh = 70; end
 if ~exist('neuronFR','var'), neuronFR = 'n/a'; end
 
 % 2D plot (imagesc)
-if numel(neuronPerf) == 16
+if numel(neuronPerf) == 16 % mixed grid
     % 4x4 grid
     [X,Y] = meshgrid(1:4,4:-1:1);
     str = cellstr(num2str(round(neuronPerf(:))));
@@ -16,7 +16,7 @@ if numel(neuronPerf) == 16
     imagesc(flipud(neuronPerf));
     xticks([1:4]); xticklabels([])
     yticks([1:4]); yticklabels([])
-elseif numel(neuronPerf) == 8
+elseif numel(neuronPerf) == 8 % target or masker only
     % 2x4 grid
     [X,Y] = meshgrid(1:4,1:2);
     str = cellstr(num2str(round(neuronPerf(:))));
@@ -26,6 +26,14 @@ elseif numel(neuronPerf) == 8
     yticks([]);
 %     yticks(1:2); yticklabels({'target only','masker only'})
 %     ytickangle(60)
+elseif numel(neuronPerf) == 4 % target only
+    % 1x4 grid
+    [X,Y] = meshgrid(1:4,1);
+    str = cellstr(num2str(round(neuronPerf(:))));
+    str2 = cellstr(num2str(round(neuronFR(:))));
+    imagesc(neuronPerf);
+    xticks([]);
+    yticks([]);
 end
 
 title(titleString)

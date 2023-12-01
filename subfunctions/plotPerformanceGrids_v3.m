@@ -3,9 +3,6 @@ function plotPerformanceGrids_v3(data,s,annotTable,subPops,targetIdx,mixedIdx,si
 %
 % v3 changes the script into a function
 
-varied_param = simOptions.varied_param;
-varies = simOptions.varies;
-expVar = simOptions.expVar;
 subz = simOptions.subz;
 locationLabels = simOptions.locationLabels;
 
@@ -93,25 +90,27 @@ for vv = 1:numVars
                     end
                 end
                 
-                % masked grid
-                if exist('maskerIdx','var')
-                    if ~isempty(maskerIdx)
-                        for i = 1:length(maskerIdx)
-                            idx = (maskerIdx(i) == subz);
-                            perf.(popNamesM{pop})(i) = data(i).perf.(subPops{pop}).(['channel' num2str(chan)])(vv);
-                            fr.(popNamesM{pop})(i) = data(i).fr.(subPops{pop}).(['channel' num2str(chan)])(vv);
-                        end
-                    end
-                end
-                subplot('Position',[xoffset yoffset+plotheight+0.01 plotwidth plotheight*0.4])
+%                 % masked grid
+%                 if exist('maskerIdx','var')
+%                     if ~isempty(maskerIdx)
+%                         for i = 1:length(maskerIdx)
+%                             idx = (maskerIdx(i) == subz);
+%                             perf.(popNamesM{pop})(i) = data(i).perf.(subPops{pop}).(['channel' num2str(chan)])(vv);
+%                             fr.(popNamesM{pop})(i) = data(i).fr.(subPops{pop}).(['channel' num2str(chan)])(vv);
+%                         end
+%                     end
+%                 end
+                subplot('Position',[xoffset yoffset+plotheight+0.01 plotwidth plotheight*0.2])
                 %if pop == 1
-                    plotPerfGrid([perf.(popNamesT{pop});perf.(popNamesM{pop})],[fr.(popNamesT{pop});fr.(popNamesM{pop})],'');
+                    % plotPerfGrid([perf.(popNamesT{pop});perf.(popNamesM{pop})],[fr.(popNamesT{pop});fr.(popNamesM{pop})],'');
                 %end
+                plotPerfGrid([perf.(popNamesT{pop})],[fr.(popNamesT{pop})],'');
 
                 if chan == 1, ylabel(subPops{pop}); end
             end
         end
     end
+    
 %     % simulation info
 %     annotation('textbox',[xoffset+plotwidth*1.2 yoffset+plotheight*0.5 plotwidth plotheight],...
 %            'string',annotStr,...

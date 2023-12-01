@@ -4,9 +4,11 @@ results = varargin{1};
 nVaries = varargin{2}; % how much parameter sets are there, excluding the trials and number of repeat trials for laser
 
 if nargin == 3
-pop = varargin{3};
+    pop = varargin{3};
 else
-pop = 'R2On';
+    fnames = fieldnames(results);
+    pop = fnames(contains(fnames,'_V_spikes'));
+    pop = erase(pop{1},'_V_spikes');
 end
 
 nSims = length(results)/nVaries/20;

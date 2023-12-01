@@ -1,5 +1,7 @@
 function plotPerfvsParams(pop,data,varies,simDataDir)
 
+% 12-01-23: only works on single-config, need to change
+
 % numVaries = length(snn_out)/20;
 % 
 % fields = fieldnames(snn_out);
