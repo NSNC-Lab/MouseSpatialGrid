@@ -112,18 +112,18 @@ s.populations(end).parameters = {'g_L',1/100,'E_L',-57,'V_reset',-52,'t_ref',0.5
 s.populations(end+1).name='TD';
 s.populations(end).equations = 'noconLIF_currentOnly';
 s.populations(end).size = nCells;
-s.populations(end).parameters = {'Itonic',0.5};
+s.populations(end).parameters = {'Itonic',0.1,'padToTime',numel(options.locNum)};
 
 % cross-channel X units, modeled as SOM units
 s.populations(end+1).name='X1';
 s.populations(end).equations = 'noconLIF';
 s.populations(end).size = nCells;
-s.populations(end).parameters = {'g_L',1/275,'t_ref',1};
+s.populations(end).parameters = {'g_L',1/275,'t_ref',2,'V_reset',-60};
 
 s.populations(end+1).name='X2';
 s.populations(end).equations = 'noconLIF';
 s.populations(end).size = nCells;
-s.populations(end).parameters = {'g_L',1/275,'t_ref',1};
+s.populations(end).parameters = {'g_L',1/275,'t_ref',2,'V_reset',-60};
 
 % output unit
 s.populations(end+1).name='C';
@@ -134,9 +134,15 @@ s.populations(end).parameters = {'g_inc',0.0003,'tau_ad',100,'t_ref',1};
 %% connections
 
 % ms
-EE_rise = 0.7; EE_fall = 1.5; % E->E
-IE_rise = 1; IE_fall = 4.5; % PV->E 1;4
-EI_rise = 0.1; EI_fall = 1; % E->PV
+EE_rise = 0.7;  EE_fall = 1.5;   % E->E
+IE_rise = 1;    IE_fall = 4.5;   % PV->E
+EI_rise = 0.55; EI_fall = 1;     % E->PV
+XE_rise = 2.5;  XE_fall = 6;     % SOM->E
+
+% note: all rise times must be greater than dt
+if any([EE_rise,IE_rise,EI_rise,XE_rise,EE_fall,IE_fall,EI_fall,XE_fall]) <= dt
+    error('PSC time constants must be greater than simulation timestep.')
+end
 
 s.connections(1).direction='On->On';
 s.connections(1).mechanism_list={'IC'};
@@ -155,7 +161,7 @@ s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.
 
 s.connections(end+1).direction='On->S1On';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.032,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
+s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
 
 s.connections(end+1).direction='S1On->R1On';
 s.connections(end).mechanism_list={'PSC'};
@@ -168,11 +174,11 @@ s.connections(end).parameters={'gSYN',0.03,'tauR',IE_rise,'tauD',IE_fall,'ESYN',
 % cross-channel inhibition
 s.connections(end+1).direction='R1On->X1';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.01,'tauR',EI_rise,'tauD',EI_fall,'fP',0,'tauP',30};
+s.connections(end).parameters={'gSYN',0.012,'tauR',EE_rise,'tauD',EE_fall,'fP',0,'tauP',30};
 
 s.connections(end+1).direction='X1->R1On';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.01,'tauR',2,'tauD',10,'ESYN',-80,'fP',0,'tauP',30,'netcon',XRnetcon};
+s.connections(end).parameters={'gSYN',0.01,'tauR',XE_rise,'tauD',XE_fall,'ESYN',-80,'fP',0,'tauP',30,'netcon',XRnetcon};
 
 % offset channels
 s.connections(end+1).direction='Off->R1Off';
@@ -181,7 +187,7 @@ s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.
 
 s.connections(end+1).direction='Off->S1Off';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.032,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
+s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
 
 s.connections(end+1).direction='S1Off->R1On';
 s.connections(end).mechanism_list={'PSC'};
@@ -200,7 +206,7 @@ s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.
 
 s.connections(end+1).direction='R1On->S2On';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.032,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
+s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
 
 s.connections(end+1).direction='S2On->R2On';
 s.connections(end).mechanism_list={'PSC'};
@@ -217,7 +223,7 @@ s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.
 
 s.connections(end+1).direction='R1Off->S2Off';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.032,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
+s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
 
 s.connections(end+1).direction='S2Off->R2On';
 s.connections(end).mechanism_list={'PSC'};
@@ -233,20 +239,20 @@ s.connections(end).parameters={'nSYN',0.015,'tauR_N',EE_rise,'tauD_N',EE_fall,'s
 
 s.connections(end+1).direction='S2On->S2On';
 s.connections(end).mechanism_list={'iNoise_V3'};
-s.connections(end).parameters={'nSYN',0.032,'tauR_N',EI_rise,'tauD_N',EI_fall,'simlen',options.time_end / dt}; 
+s.connections(end).parameters={'nSYN',0.03,'tauR_N',EI_rise,'tauD_N',EI_fall,'simlen',options.time_end / dt}; 
 
 s.connections(end+1).direction='S2Off->S2Off';
 s.connections(end).mechanism_list={'iNoise_V3'};
-s.connections(end).parameters={'nSYN',0.032,'tauR_N',EI_rise,'tauD_N',EI_fall,'simlen',options.time_end / dt}; 
+s.connections(end).parameters={'nSYN',0.03,'tauR_N',EI_rise,'tauD_N',EI_fall,'simlen',options.time_end / dt}; 
 
 % cross-channel inhibition
 s.connections(end+1).direction='R2On->X2';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.01,'tauR',EI_rise,'tauD',EI_fall,'fP',0,'tauP',30};
+s.connections(end).parameters={'gSYN',0.012,'tauR',EE_rise,'tauD',EE_fall,'fP',0,'tauP',30};
 
 s.connections(end+1).direction='X2->R2On';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.01,'tauR',2,'tauD',10,'ESYN',-80,'fP',0,'tauP',30,'netcon',XRnetcon};
+s.connections(end).parameters={'gSYN',0.01,'tauR',XE_rise,'tauD',XE_fall,'ESYN',-80,'fP',0,'tauP',30,'netcon',XRnetcon};
 
 % convergence at output
 s.connections(end+1).direction='R2On->C';
