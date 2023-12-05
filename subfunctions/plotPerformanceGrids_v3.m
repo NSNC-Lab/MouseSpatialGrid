@@ -13,12 +13,16 @@ popNamesT = strcat({s.populations.name},'T');
 popNamesM = strcat({s.populations.name},'M');
 numPops = numel(subPops);
 popSizes = [s.populations.size];
-% popSizes = [snn_out(1).model.specification.populations.size];
 popSizes = popSizes(matches(popNames,subPops));
-onlyC = contains(subPops,'C') & length(subPops) == 1;
+onlyC = any(contains(subPops,'C')) & length(subPops) == 1;
 
-% chanLabel = {'left sig','gauss','U','right sig'};
-chanLabel = simOptions.chanLabels;
+% rearrange subPops if C is not the only thing in subPops
+if ~onlyC
+    C_ind = find(contains(subPops,'C'));
+    subPops = subPops([setdiff(1:length(subPops),C_ind) , C_ind]);
+end
+
+chanLabels = simOptions.chanLabels;
 
 % check if varied parameter is vector or matrix
 numVars = length(annotTable);
@@ -52,13 +56,10 @@ for vv = 1:numVars
             xoffset = xstart+plotwidth*(col)*1.2;
             yoffset = ystart+plotheight*1.6*row;
 
-    %         subplot('Position',[xoffset yoffset plotwidth plotheight])
-    %         subplot('Position',[xoffset yoffset+plotheight+0.01 plotwidth plotheight*0.4])
-
             % mixed cases
             if sum(ismember(subz,mixedIdx)) > 0
                 for i = 1:length(mixedIdx)
-                    idx = (mixedIdx(i) == subz);
+                    idx = subz(mixedIdx(i) == subz);
                     perf.(subPops{pop})(i) = data(idx).perf.(subPops{pop}).(['channel' num2str(chan)])(vv);
                     fr.(subPops{pop})(i) = data(idx).fr.(subPops{pop}).(['channel' num2str(chan)])(vv);
                 end
@@ -66,7 +67,7 @@ for vv = 1:numVars
                 plotPerfGrid(perf.(subPops{pop})',fr.(subPops{pop})',[]);
                 
                 % add axes
-                if sum(onlyC) || (chan==1 && pop==1)
+                if onlyC || (chan==1 && pop==1)
                     xticks(1:4); xticklabels(locationLabels)
                     yticks(1:4); yticklabels(fliplr(locationLabels))
                     xlabel('target location')
@@ -74,40 +75,28 @@ for vv = 1:numVars
                 end
             end
 
-            % target or masker only cases
+            % target-only configs
             if sum(ismember(subz,targetIdx)) > 0
                 perf.(popNamesT{pop}) = zeros(1,4);
-                perf.(popNamesM{pop}) = zeros(1,4);
                 fr.(popNamesT{pop}) = zeros(1,4);
-                fr.(popNamesM{pop}) = zeros(1,4);
                 
-                % clean grid
                 if ~isempty(targetIdx)
                     for i = 1:length(targetIdx)
-                        idx = (targetIdx(i) == subz);
+                        idx = subz(targetIdx(i) == subz);
                         perf.(popNamesT{pop})(i) = data(idx).perf.(subPops{pop}).(['channel' num2str(chan)])(vv);
                         fr.(popNamesT{pop})(i) = data(idx).fr.(subPops{pop}).(['channel' num2str(chan)])(vv);
                     end
                 end
-                
-%                 % masked grid
-%                 if exist('maskerIdx','var')
-%                     if ~isempty(maskerIdx)
-%                         for i = 1:length(maskerIdx)
-%                             idx = (maskerIdx(i) == subz);
-%                             perf.(popNamesM{pop})(i) = data(i).perf.(subPops{pop}).(['channel' num2str(chan)])(vv);
-%                             fr.(popNamesM{pop})(i) = data(i).fr.(subPops{pop}).(['channel' num2str(chan)])(vv);
-%                         end
-%                     end
-%                 end
+
                 subplot('Position',[xoffset yoffset+plotheight+0.01 plotwidth plotheight*0.2])
-                %if pop == 1
-                    % plotPerfGrid([perf.(popNamesT{pop});perf.(popNamesM{pop})],[fr.(popNamesT{pop});fr.(popNamesM{pop})],'');
-                %end
                 plotPerfGrid([perf.(popNamesT{pop})],[fr.(popNamesT{pop})],'');
 
                 if chan == 1, ylabel(subPops{pop}); end
             end
+
+            % if we're plotting the population before the C cell (R2On),
+            % add channel label titles
+            if popSizes(pop) > 1, title(chanLabels{chan},'fontweight','normal'); end
         end
     end
     

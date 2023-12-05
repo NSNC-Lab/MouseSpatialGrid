@@ -2,9 +2,10 @@ function [pc,fr] = plotParamvsPerf_1D(varargin)
 
 results = varargin{1};
 nVaries = varargin{2}; % how much parameter sets are there, excluding the trials and number of repeat trials for laser
+dt = varargin{3}; 
 
-if nargin == 3
-    pop = varargin{3};
+if nargin == 4
+    pop = varargin{4};
 else
     fnames = fieldnames(results);
     pop = fnames(contains(fnames,'_V_spikes'));
@@ -23,13 +24,11 @@ for ns = 1:nSims
 
         for ch = 1:nCh
 
-            raster = zeros(20,35000);
-
             for t = 1:20
                 raster(t,:) = subData(t).([pop '_V_spikes'])(:,ch);
             end
 
-            [pc.SPIKE(ns,n,ch),pc.ISI(ns,n,ch),pc.RISPIKE(ns,n,ch),pc.spkct(ns,n),fr(ns,n,ch)] = calcPCandFR(raster,20);
+            [pc.SPIKE(ns,n,ch),pc.ISI(ns,n,ch),pc.RISPIKE(ns,n,ch),pc.spkct(ns,n),fr(ns,n,ch)] = calcPCandFR(raster,20,dt);
 
         end
 
@@ -39,28 +38,32 @@ end
 end
 
 
-function [pc_SPIKE,pc_ISI,pc_RISPIKE,pc_spkct,fr] = calcPCandFR(raster,numTrials)
+function [pc_SPIKE,pc_ISI,pc_RISPIKE,pc_spkct,fr] = calcPCandFR(raster,numTrials,dt)
+
+start_time = 300; % [ms]
+end_time = start_time + 3000; % [ms];
 
 % spks to spiketimes in a cell array of 20x2
 spkTime = cell(numTrials,1);
-for ii = 1:numTrials, spkTime{ii} = find(raster(ii,:))/10000; end
+for ii = 1:numTrials
+    spkTime{ii} = find(raster(ii,:))*dt;
+end
 spkTime = reshape(spkTime,numTrials/2,2);
-
 input = reshape(spkTime,1,numTrials);
-STS = SpikeTrainSet(input,300/1000,(300+3000)/1000);
+fr = round(mean(cellfun(@(x) sum(x >= start_time & x < end_time) / 3,input)));
 
-distMat = STS.SPIKEdistanceMatrix(300/1000,(300+3000)/1000);
+STS = SpikeTrainSet(input,start_time,end_time);
+
+distMat = STS.SPIKEdistanceMatrix(start_time,end_time);
 pc_SPIKE = calcpcStatic(distMat, numTrials/2, 2, 0);
 
-distMat = STS.ISIdistanceMatrix(300/1000,(300+3000)/1000);
+distMat = STS.ISIdistanceMatrix(start_time,end_time);
 pc_ISI = calcpcStatic(distMat, numTrials/2, 2, 0);
 
-distMat = STS.RateIndependentSPIKEdistanceMatrix(300/1000,(300+3000)/1000);
+distMat = STS.RateIndependentSPIKEdistanceMatrix(start_time,end_time);
 pc_RISPIKE = calcpcStatic(distMat, numTrials/2, 2, 0);
 
-distMat = calcSpkCtDist(spkTime,0.3,3.3);
+distMat = calcSpkCtDist(spkTime,start_time,end_time);
 pc_spkct = calcpcStatic(distMat, numTrials/2, 2, 0);
-
-fr = mean(sum(raster(:,3001:33000),2))/3;
 
 end

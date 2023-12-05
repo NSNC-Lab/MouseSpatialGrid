@@ -12,6 +12,7 @@ function [perf,fr,spks] = postProcessData_new(data,s,trialStart,trialEnd,configN
 
 time_end = options.time_end;
 plot_rasters = options.plotRasters;
+dt = options.dt;
 fields = fieldnames(data);
 ind = find(contains(fields,'_trial'),1);
 jump = length(find([data.(fields{ind})]==1));  % number of variations/parameter sets
@@ -28,9 +29,9 @@ fieldNames = strcat(popNames,'_V_spikes');
 tstart = trialStart;
 tend = trialEnd;
 
-[y1,fs] = audioread('200k_target1.wav');
+[y1,fs_stim] = audioread('200k_target1.wav');
 y2 = audioread('200k_target2.wav');
-t = (0:(length(y1)-1))/fs;
+t = (0:(length(y1)-1))/fs_stim;
 
 % visualize spikes for specified populations
 if ~isfield(options,'subPops'), options.subPops = popNames; end
@@ -78,7 +79,7 @@ for vv = 1:jump % for each varied parameter
             
             [perf.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv),...
                 fr.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv)] = ...
-                calcPCandPlot(channel(channelNum).popSpks,time_end,1,numTrials,plot_rasters_final,y1,y2,t,figName);
+                calcPCandPlot(channel(channelNum).popSpks,time_end,1,numTrials,dt,plot_rasters_final,y1,y2,t,figName);
             
         end
     end
@@ -86,27 +87,43 @@ end
 
 end
 
-function [pc,fr] = calcPCandPlot(raster,time_end,calcPC,numTrials,plot_rasters,y1,y2,t,figName)
+function [pc,fr] = calcPCandPlot(raster,time_end,calcPC,numTrials,dt,plot_rasters,y1,y2,t,figName)
+
+% inputs:
+% raster - 0s and 1s with size [trials x samples]
+% time_end - simulation time in [ms]
+% calcPC - if performance is calculated == 1
+% numTrials - # trials per target ( #rows in raster / 2 )
+% dt - timestep [in ms]
+% plot_rasters - if plotting config/unit, == 1
+% y1 and y2 - target waveforms
+% t - target time vector
+% figName - figure name
 
 PCstr = '';
 
+% use dt to calculate indexes for stimulus response
+start_time = 300; % in [ms]
+end_time = start_time + 3000; % in [ms]
+
+% spks to spiketimes in a cell array of 20x2
+spkTimes = cell(numTrials,1);
+for ii = 1:numTrials
+    % convert raster spike indexes to ms
+    spkTimes{ii} = find(raster(ii,:))*dt;
+end
+spkTimes = reshape(spkTimes,numTrials/2,2);
+input = reshape(spkTimes,1,numTrials);
+fr = round(mean(cellfun(@(x) sum(x >= start_time & x < end_time) / 3,input)));
+
 if calcPC
-    % spks to spiketimes in a cell array of 20x2
-    spkTime = cell(numTrials,1);
-    for ii = 1:numTrials, spkTime{ii} = find(raster(ii,:)); end
-    spkTime = reshape(spkTime,numTrials/2,2);
-    
-    input = reshape(spkTime,1,numTrials);
-    STS = SpikeTrainSet(input,300*10,(300+3000)*10);
-    distMat = STS.SPIKEdistanceMatrix(300*10,(300+3000)*10);
-    
+    STS = SpikeTrainSet(input,start_time,end_time);
+    distMat = STS.SPIKEdistanceMatrix(start_time,end_time);
+
     performance = calcpcStatic(distMat, numTrials/2, 2, 0);
     pc = mean(max(performance));
-    PCstr = ['PC = ' num2str(pc)];
+    PCstr = ['PC = ' num2str(round(pc)) '%'];
 end
-
-% fr = 1000*mean(sum(raster(:,[2500:32500]),2))/3000;
-fr = 1000*mean(sum(raster(:,[2500:17500]),2))/1500;
 
 %plot
 x = 0.86;
@@ -116,6 +133,7 @@ y_psth = 0.12;
 dy = 0.01;
 x0 = 0.1;
 
+% plot rasters and PSTHs (in seconds)
 if plot_rasters
     clf
     
@@ -126,17 +144,17 @@ if plot_rasters
     
     ypos = ypos - dy - y_psth;
     subplot('position',[x0 ypos x y_psth]);
-    plotPSTH(raster(numTrials/2+1:end,:)); set(gca,'xtick',[])
+    plotPSTH(raster(numTrials/2+1:end,:),dt); set(gca,'xtick',[])
     
     ypos = ypos - dy - y_raster;
     subplot('position',[x0 ypos x y_raster]);
     plotSpikeRasterFs(flipud(logical(raster)), 'PlotType','vertline');
-    xlim([0 time_end*10]);
-    line([0,time_end*10],[numTrials/2 + 0.5,numTrials/2 + 0.5],'color',[0.3 0.3 0.3]); set(gca,'xtick',[],'ytick',[])
+    xlim([0 time_end/dt]);
+    line([0,time_end/dt],[numTrials/2 + 0.5,numTrials/2 + 0.5],'color',[0.3 0.3 0.3]); set(gca,'xtick',[],'ytick',[])
     
     ypos = ypos - dy - y_psth;
     subplot('position',[x0 ypos x y_psth]);
-    plotPSTH(raster(1:numTrials/2,:)); set(gca,'xtick',[])
+    plotPSTH(raster(1:numTrials/2,:),dt); set(gca,'xtick',[])
 
     ypos = ypos - dy - y_stim;
     subplot('position',[x0 ypos x y_stim]); % target 1
@@ -147,11 +165,15 @@ end
     
 end
 
-function plotPSTH(raster)
+function plotPSTH(raster,dt)
 
-t_vec = (0:200:35000)/10000;
-[~,temp] = find(raster);
-psth = histcounts(temp/10000,t_vec);
+% plots PSTH (in seconds)
+
+t_vec = 0:0.02:3.5;
+[~,inds] = find(raster);
+spktimes = inds*dt/1000;
+
+psth = histcounts(spktimes,t_vec);
 psth(end+1) = 0;
 
 bar(t_vec,psth,'k');

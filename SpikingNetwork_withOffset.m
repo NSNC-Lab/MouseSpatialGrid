@@ -1,8 +1,9 @@
 %% Initialize
 
+% change current directory to folder where this script is stored
 mfileinfo = mfilename('fullpath');
-mfiledir = fileparts(mfileinfo);
-% cd(mfiledir);
+mfiledir = strsplit(mfileinfo,filesep);
+cd(fullfile(mfiledir{1:end-1}));
 
 dynasimPath = '../DynaSim';
 
@@ -15,20 +16,8 @@ addpath('cSPIKE'); InitializecSPIKE;
 addpath('plotting');
 addpath('subfunctions');
 
-load('default_STRF_with_offset_200k.mat');
-dt = 0.2; %ms
-
-% what if we wanted to downsample the firing rates?
-if dt ~= 0.1
-    dsamp_fac = dt/0.1;
-    for m = 1:10
-        fr_masker{m} = downsample(fr_masker{m},dsamp_fac);
-    end
-    for t = 1:2
-    fr_target_on{t} = downsample(fr_target_on{t},dsamp_fac);
-    fr_target_off{t} = downsample(fr_target_off{t},dsamp_fac);
-    end
-end
+%% user inputs
+dt = 0.5; %ms
 
 % study_dir: folder under 'run' where m files and input spikes for simulations are written and saved
 study_dir = fullfile(pwd,'run','3-channel');
@@ -37,39 +26,60 @@ if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
 mkdir(fullfile(study_dir, 'solve'));
 
 % expName: folder under 'simData' where results are saved
-expName = '12-01-23 3-channel test V2';
-
-newStrfGain = strfGain;
+expName = '12-05-23 3-channel full grid at 2000 Hz, with cross-channel';
 simDataDir = [pwd filesep 'simData' filesep expName];
-
 if ~exist(simDataDir,'dir'), mkdir(simDataDir); end
 
 %% Run .m file to generate options and varies structs for simulations
 addpath('params-3-channel');
 params_3channel_Full;
+% params_3channel;
 
-% for figures in paper
-
+% To re-create figures in paper, look at 'params' directory
+% (other 'params' m files are for masked configs)
 % addpath('params');
-%Figure 4a, params_4a;
-%Figure 4b, params_4b;
-% Figure 4c, params_4c;
 
-% For Figure 5, params_5
-% For Figure 6, params_6
-% For Figure 7, params_7
-% for Figure 8, params_8
+%% create spatially-tuned channels based on options.nCells
 
-% for masked params i don't know what to do with
-% params_MaskedPerf;
-% params_Masked_varyOnsetPV;
-% params_Masked_varyOnsetNoise;
-% params_DepressiveStr;
-% params_ExpFig3;
+[azi,spatialCurves,chanLabels] = genSpatiallyTunedChans(options.nCells);
+
+%% load input stimuli (targets and maskers) from ICSimStim
+load('default_STRF_with_offset_200k.mat');
+
+% firing rates were generated with sampling rate of 10000 Hz to match old
+% simulation time step, downsample if dt's don't match
+if dt ~= 0.1
+    dsamp_fac = dt/0.1;
+    for m = 1:10
+        fr_masker{m} = downsample(fr_masker{m},dsamp_fac);
+    end
+    for t = 1:2
+        fr_target_on{t} = downsample(fr_target_on{t},dsamp_fac);
+        fr_target_off{t} = downsample(fr_target_off{t},dsamp_fac);
+    end
+end
+
+% edit this if you want to rescale firing rate at inputs
+newStrfGain = strfGain;
 
 %% create input spikes from STRFs
-% concatenate spike-time matrices, save to study dir
 
+padToTime = 3500; % [ms]
+
+% ICfiles.mat contains names of spatial grid configs: s[targetloc]m[maskerloc]
+% See 'config_idx_reference.JPG' for indexes
+
+% options.locNum is defined in params .m file
+% if it's empty, default to running all 24 configs (including masker-only
+% trials)
+
+if ~isempty(options.locNum)
+    subz = options.locNum;
+else
+    subz = 1:24;
+end
+
+% concatenate spike-time matrices, save to study_dir
 prepInputData;
 
 %% run simulation
@@ -77,8 +87,8 @@ prepInputData;
 options.strfGain = newStrfGain;
 options.dt = dt;
 
-if isempty(options.locNum), options.time_end = size(spks,1)*dt; %ms;
-else, options.time_end = padToTime * numel(options.locNum); end
+if isempty(options.locNum), options.time_end = size(spks,1)*dt; % [ms];
+else, options.time_end = padToTime*numel(options.locNum); end
 [snn_out,s] = columnNetwork_V2(study_dir,varies,options,netcons);
 
 %% post-process for performance and firing results

@@ -12,6 +12,7 @@ function [perf,fr,spks] = plotPSTHTree(snn_out,s,tstart,tend,configName,options)
 
 time_end = options.time_end;
 fields = fieldnames(snn_out);
+dt = options.dt;
 ind = find(contains(fields,'_trial'),1);
 jump = length(find([snn_out.(fields{ind})]==1));
 numTrials = length(snn_out)/jump; % # total trials (20 for single parameter set)
@@ -77,7 +78,7 @@ for vv = 1:jump % for each varied parameter
             
             [perf.(popNames{currentPop}).channel(vv),...
                 fr.(popNames{currentPop}).channel(vv)] = ...
-                calcPCandPlot(popSpks,time_end,1,numTrials,popNames{currentPop},...
+                calcPCandPlot(popSpks,time_end,1,numTrials,dt,popNames{currentPop},...
                 subplot_locs(currentPop),SpatAttention);
             
         end
@@ -104,27 +105,32 @@ end
 
 end
 
-function [pc,fr] = calcPCandPlot(raster,time_end,calcPC,numTrials,unit,subplot_loc,SpatAttention)
+function [pc,fr] = calcPCandPlot(raster,time_end,calcPC,numTrials,dt,unit,subplot_loc,SpatAttention)
 
 PCstr = '';
 
+% use dt to calculate indexes for stimulus response
+start_time = 300; % in [ms]
+end_time = start_time + 3000; % in [ms]
+
+% spks to spiketimes in a cell array of 20x2
+spkTimes = cell(numTrials,1);
+for ii = 1:numTrials
+    % convert raster spike indexes to ms
+    spkTimes{ii} = find(raster(ii,:))*dt;
+end
+spkTimes = reshape(spkTimes,numTrials/2,2);
+input = reshape(spkTimes,1,numTrials);
+fr = round(mean(cellfun(@(x) sum(x >= start_time & x < end_time) / 3,input)));
+
 if calcPC
-    % spks to spiketimes in a cell array of 20x2
-    spkTime = cell(numTrials,1);
-    for ii = 1:numTrials, spkTime{ii} = find(raster(ii,:)); end
-    spkTime = reshape(spkTime,numTrials/2,2);
-    
-    input = reshape(spkTime,1,numTrials);
-    STS = SpikeTrainSet(input,300*10,(300+3000)*10);
-    distMat = STS.SPIKEdistanceMatrix(300*10,(300+3000)*10);
-    
+    STS = SpikeTrainSet(input,start_time,end_time);
+    distMat = STS.SPIKEdistanceMatrix(start_time,end_time);
+
     performance = calcpcStatic(distMat, numTrials/2, 2, 0);
     pc = mean(max(performance));
     PCstr = ['PC = ' num2str(round(pc)) '%'];
 end
-
-% fr = round(1000*mean(sum(raster(:,3000:33000),2))/3000);
-fr = round(1000*mean(sum(raster(:,3000:18000),2))/1500);
 
 % ind2sub counts down per column first, 
 if SpatAttention
@@ -146,16 +152,16 @@ x = 0.22;
 
 subplot('position',[xpos ypos x y]); hold on;
 
-% plot %target 1
-t_bin = 200; % 20 ms = 200 indices
-t_vec = 0:t_bin:(time_end*10);
+% plot target responses on top of each other
+t_bin = 20; % in [ms] 
+t_vec = 0:t_bin:time_end;
 colors = {'k','r'};
 for tid = 1:2
-    spkTimeIDs = cellfun(@(x) histcounts(x,t_vec),spkTime(:,tid),'UniformOutput',false);
+    spkTimeIDs = cellfun(@(x) histcounts(x,t_vec),spkTimes(:,tid),'UniformOutput',false);
     PSTH = sum(vertcat(spkTimeIDs{:}));
     plot(t_vec(1:end-1),PSTH,colors{tid});
 end
-xlim([0 time_end*10]);
+xlim([0 time_end]);
 title({unit,[PCstr,[', FR = ' num2str(fr)]]},'fontweight','normal','fontsize',8); set(gca,'xtick',[],'ytick',[])
 
 end

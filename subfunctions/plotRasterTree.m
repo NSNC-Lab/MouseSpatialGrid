@@ -11,6 +11,7 @@ function [perf,fr,spks] = plotRasterTree(snn_out,s,tstart,tend,configName,option
 % no plotting function for now
 
 time_end = options.time_end;
+dt = options.dt;
 fields = fieldnames(snn_out);
 ind = find(contains(fields,'_trial'),1);
 jump = length(find([snn_out.(fields{ind})]==1));
@@ -78,7 +79,7 @@ for vv = 1:jump % for each varied parameter
             
             [perf.(popNames{currentPop}).channel(vv),...
                 fr.(popNames{currentPop}).channel(vv)] = ...
-                calcPCandPlot(popSpks,time_end,1,numTrials,popNames{currentPop},...
+                calcPCandPlot(popSpks,time_end,1,numTrials,dt,popNames{currentPop},...
                 subplot_locs(currentPop),SpatAttention);
             
         end
@@ -97,27 +98,32 @@ end
 
 end
 
-function [pc,fr] = calcPCandPlot(raster,time_end,calcPC,numTrials,unit,subplot_loc,SpatAttention)
+function [pc,fr] = calcPCandPlot(raster,time_end,calcPC,numTrials,dt,unit,subplot_loc,SpatAttention)
 
 PCstr = '';
 
+% use dt to calculate indexes for stimulus response
+start_time = 300; % in [ms]
+end_time = start_time + 3000; % in [ms]
+
+% spks to spiketimes in a cell array of 20x2
+spkTimes = cell(numTrials,1);
+for ii = 1:numTrials
+    % convert raster spike indexes to ms
+    spkTimes{ii} = find(raster(ii,:))*dt;
+end
+spkTimes = reshape(spkTimes,numTrials/2,2);
+input = reshape(spkTimes,1,numTrials);
+fr = round(mean(cellfun(@(x) sum(x >= start_time & x < end_time) / 3,input)));
+
 if calcPC
-    % spks to spiketimes in a cell array of 20x2
-    spkTime = cell(numTrials,1);
-    for ii = 1:numTrials, spkTime{ii} = find(raster(ii,:)); end
-    spkTime = reshape(spkTime,numTrials/2,2);
-    
-    input = reshape(spkTime,1,numTrials);
-    STS = SpikeTrainSet(input,300*10,(300+3000)*10);
-    distMat = STS.SPIKEdistanceMatrix(300*10,(300+3000)*10);
-    
+    STS = SpikeTrainSet(input,start_time,end_time);
+    distMat = STS.SPIKEdistanceMatrix(start_time,end_time);
+
     performance = calcpcStatic(distMat, numTrials/2, 2, 0);
     pc = mean(max(performance));
     PCstr = ['PC = ' num2str(round(pc)) '%'];
 end
-
-% fr = round(1000*mean(sum(raster(:,3000:33000),2))/3000);
-fr = round(1000*mean(sum(raster(:,3000:18000),2))/1500);
 
 % ind2sub counts down per column first,`
 if SpatAttention
@@ -137,17 +143,10 @@ x = 0.22;
 
 subplot('position',[xpos ypos x y]);
 
-% raster = raster(1:10,:);
-
-% % plot only target 1 response
-% plotSpikeRasterFs(flipud(logical(raster)), 'PlotType','vertline');
-% xlim([0 time_end*10]); ylim([0.5 10.5]);
-% title({unit,PCstr,['FR = ' num2str(fr)]}); set(gca,'xtick',[],'ytick',[])
-
 % plot both targets
 plotSpikeRasterFs(flipud(logical(raster)), 'PlotType','vertline');
-xlim([0 time_end*10]); ylim([0.5 20.5]);
+xlim([0 time_end/dt]); ylim([0.5 20.5]);
 title({unit,[PCstr,[', FR = ' num2str(fr)]]},'fontweight','normal','fontsize',8); set(gca,'xtick',[],'ytick',[])
-line([0 time_end*10],[10.5 10.5],'color','k');
+line([0 time_end/dt],[10.5 10.5],'color','k');
 
 end
