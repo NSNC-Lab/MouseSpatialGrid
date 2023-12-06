@@ -46,6 +46,34 @@ xlabel('\leftarrow contralateral side; azimuths (degrees).')
 ylabel('normalized responses (%\DeltaF/F)')
 title('fit to Panniello et al., 2018')
 
+% -Jio Nocon - use these fits for the inputs to model (12-06-2023)
+
+% ipsi and contra-preferring fits: exponential functions
+% ipsi - B1, contra - B2
+% center-tuned: either a piece-wise function (B3,B4) or a gaussian (B5)
+
+% store all of this in a struct for ease of use
+spatial_fits = struct;
+
+azi = -108:108;
+labels = {'contra','45pref','center','ipsi'};
+eqns = {f1,f1,{f1 f1},{f1 f1}};
+params = {B1,B2,[B3 B4],[B3 B4] + [0;0;-45;0]};
+
+for i = 1:length(labels)
+    spatial_fits(i).params = params{i};
+    % spatial_fits(i).eqn = eqns{i};
+    spatial_fits(i).label = labels{i};
+end
+
+% the fits have contra as negative; flip here to match our experiments
+spatial_fits(4).curve = fliplr(f1(B1,azi)); % ipsi
+spatial_fits(1).curve = fliplr(f1(B2,azi)); % contra
+spatial_fits(3).curve = fliplr([f1(B3,-108:0) f1(B4,1:108)]);  % center
+spatial_fits(2).curve = fliplr([f1(B3 + [0;0;-45;0],-108:-46)   f1(B4 + [0;0;-45;0],-45:108)]); % 45pref
+
+save('Panniello_fits.mat','spatial_fits','azi');
+
 %% data from Ono and Oliver 2014 (IC)
 x = [-90 -61 -10 0 18 61 90];
 y1I = [95 85 85 80 65 50 48]; % fig 4B
