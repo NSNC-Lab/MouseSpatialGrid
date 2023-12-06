@@ -20,19 +20,19 @@ addpath('subfunctions');
 dt = 0.5; %ms
 
 % study_dir: folder under 'run' where m files and input spikes for simulations are written and saved
-study_dir = fullfile(pwd,'run','3-channel');
+study_dir = fullfile(pwd,'run','3-channel-simple');
 
 if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
 mkdir(fullfile(study_dir, 'solve'));
 
 % expName: folder under 'simData' where results are saved
-expName = '12-05-23 3-channel full grid at 2000 Hz, with cross-channel';
+expName = '12-06-23 longer SOM PSCs';
 simDataDir = [pwd filesep 'simData' filesep expName];
 if ~exist(simDataDir,'dir'), mkdir(simDataDir); end
 
 %% Run .m file to generate options and varies structs for simulations
 addpath('params-3-channel');
-params_3channel_Full;
+params_3simplechannel_weaker;
 % params_3channel;
 
 % To re-create figures in paper, look at 'params' directory
@@ -89,7 +89,8 @@ options.dt = dt;
 
 if isempty(options.locNum), options.time_end = size(spks,1)*dt; % [ms];
 else, options.time_end = padToTime*numel(options.locNum); end
-[snn_out,s] = columnNetwork_V2(study_dir,varies,options,netcons);
+ % [snn_out,s] = columnNetwork_V2(study_dir,varies,options,netcons);
+[snn_out,s] = columnNetwork_simpler(study_dir,varies,options,netcons);
 
 %% post-process for performance and firing results
 
