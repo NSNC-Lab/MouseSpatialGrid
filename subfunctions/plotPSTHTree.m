@@ -1,4 +1,4 @@
-function [perf,fr,spks] = plotPSTHTree(snn_out,s,tstart,tend,configName,options)
+function plotPSTHTree(data,configName,options)
 % calculate performance and FR for *a single spot on the spatial grid*
 % input:
 %   data structure with length = #sims, containing voltage information of
@@ -10,77 +10,54 @@ function [perf,fr,spks] = plotPSTHTree(snn_out,s,tstart,tend,configName,options)
 %       spatial channels,trials,time
 % no plotting function for now
 
-time_end = options.time_end;
-fields = fieldnames(snn_out);
+trial_length = options.trial_length;
 dt = options.dt;
-ind = find(contains(fields,'_trial'),1);
-jump = length(find([snn_out.(fields{ind})]==1));
-numTrials = length(snn_out)/jump; % # total trials (20 for single parameter set)
+
+jump = length(data.spks.On);
 SpatAttention = options.SpatialAttention;
 
 % network properties
-popNames = {s.populations.name};
+popNames = fieldnames(data.fr);
 nPops = numel(popNames); 
-fieldNames = strcat(popNames,'_V_spikes');
 
-nChans = size(snn_out(1).R1On_V,2);
-
-if isempty(options.locNum), annotConfig = configName(end-7:end-4);
-else, annotConfig = configName(end-3:end);
-end
+nChans = length(fieldnames(data.perf.On));
+annotConfig = configName(end-3:end);
 
 % visualize spikes for specified populations
 if ~isfield(options,'subPops'), options.subPops = popNames; end
 
 % in same order as popNames
-if nPops == 8% no top down
+if nPops == 8 % no top down
     subplot_locs = [11 12 7 9 8 4 5 2]; %[11 7 8 4 5 9 6 2];
-elseif nPops == 9% no top down
+elseif nPops == 9 % no top down
     subplot_locs = [11 10 7 8 4 5 9 6 2];
 elseif nPops == 10 % no C neuron
     subplot_locs = [14 16 10 12 9 11 6 8 5 7 ];
 elseif nPops == 14 % 2 X neurons, 1 C neuron, 1 TD neuron
     subplot_locs = [14 16 10 12 9 11 6 8 5 7 1 13 15 2];
 else
-    subplot_locs = [14 10 11 7 8 12 9 1 2 5];%[14 13 10 11 7 8 12 9 1 2 5];
+    subplot_locs = [14 10 11 7 8 12 9 1 2 5];
 end
 
-% locs = {'90','45','0','-90'};
-        figure('unit','inches','position',[6 3 6 5]);
+figure('unit','inches','position',[6 3 6 5]);
+
 for vv = 1:jump % for each varied parameter
-    
-    subData = snn_out(vv:jump:length(snn_out)); %grab data for this param variation
-    
-    try
-        variedParamVal = mode([subData.(options.variedField)]); % should all be the same
-    catch
-        variedParamVal = 0;
-    end
+        
+    subSpks = data.spks(vv);
+    subPC = data.perf(vv);
+    subFR = data.fr(vv);
     
     for ch = 1:nChans
-        
-        
+
         for currentPop = 1:nPops
-            
-            popSpks = [];
-            
-            % for each trial
-            for trial = 1:numTrials
-                
-                if strcmp(fieldNames{currentPop},'C_V_spikes')
-                    popSpks(trial,:) = subData(trial).(fieldNames{currentPop})(tstart:tend);
-                else
-                    popSpks(trial,:) = subData(trial).(fieldNames{currentPop})(tstart:tend,ch);
-                end
-                
-            end
-            % spks.(popNames{currentPop})(vv).channel = popSpks;
-            
-            [perf.(popNames{currentPop}).channel(vv),...
-                fr.(popNames{currentPop}).channel(vv)] = ...
-                calcPCandPlot(popSpks,time_end,1,numTrials,dt,popNames{currentPop},...
-                subplot_locs(currentPop),SpatAttention);
-            
+
+            if strcmp(popNames{currentPop},'C'), ch_num = 1;
+            else, ch_num = ch; end
+
+            plotSubPSTH(subSpks.(popNames{currentPop}).(['channel' num2str(ch_num)]),...
+                subPC.(popNames{currentPop}).(['channel' num2str(ch_num)]),...
+                subFR.(popNames{currentPop}).(['channel' num2str(ch_num)]),...
+                trial_length,dt,popNames{currentPop},subplot_locs(currentPop),SpatAttention);
         end
 
         % make ylim the same across all subplots
@@ -97,7 +74,7 @@ for vv = 1:jump % for each varied parameter
             'String',[annotConfig, ', CH' num2str(ch) ],'EdgeColor','none','FontSize',20)
         
         saveas(gcf,[figName '.png']);
-        savefig(gcf,[figName '.fig']);
+        % savefig(gcf,[figName '.fig']);
         clf;
     end
 
@@ -105,32 +82,9 @@ end
 
 end
 
-function [pc,fr] = calcPCandPlot(raster,time_end,calcPC,numTrials,dt,unit,subplot_loc,SpatAttention)
+function plotSubPSTH(raster,pc,fr,trial_length,dt,unit,subplot_loc,SpatAttention)
 
-PCstr = '';
-
-% use dt to calculate indexes for stimulus response
-start_time = 300; % in [ms]
-end_time = start_time + 3000; % in [ms]
-
-% spks to spiketimes in a cell array of 20x2
-spkTimes = cell(numTrials,1);
-for ii = 1:numTrials
-    % convert raster spike indexes to ms
-    spkTimes{ii} = find(raster(ii,:))*dt;
-end
-spkTimes = reshape(spkTimes,numTrials/2,2);
-input = reshape(spkTimes,1,numTrials);
-fr = round(mean(cellfun(@(x) sum(x >= start_time & x < end_time) / 3,input)));
-
-if calcPC
-    STS = SpikeTrainSet(input,start_time,end_time);
-    distMat = STS.SPIKEdistanceMatrix(start_time,end_time);
-
-    performance = calcpcStatic(distMat, numTrials/2, 2, 0);
-    pc = mean(max(performance));
-    PCstr = ['PC = ' num2str(round(pc)) '%'];
-end
+PCstr = ['PC = ' num2str(round(pc)) '%'];
 
 % ind2sub counts down per column first, 
 if SpatAttention
@@ -153,15 +107,17 @@ x = 0.22;
 subplot('position',[xpos ypos x y]); hold on;
 
 % plot target responses on top of each other
+
 t_bin = 20; % in [ms] 
-t_vec = 0:t_bin:time_end;
+t_vec = (0:t_bin:trial_length)/dt;
+
 colors = {'k','r'};
 for tid = 1:2
-    spkTimeIDs = cellfun(@(x) histcounts(x,t_vec),spkTimes(:,tid),'UniformOutput',false);
-    PSTH = sum(vertcat(spkTimeIDs{:}));
-    plot(t_vec(1:end-1),PSTH,colors{tid});
+    [~,spk_inds] = find(raster((1:10) + 10*(tid-1),:));
+    PSTH = histcounts(spk_inds,t_vec);
+    plot(dt*t_vec(1:end-1),PSTH,colors{tid});
 end
-xlim([0 time_end]);
+xlim([0 t_vec(end)*dt]);
 title({unit,[PCstr,[', FR = ' num2str(fr)]]},'fontweight','normal','fontsize',8); set(gca,'xtick',[],'ytick',[])
 
 end

@@ -7,9 +7,9 @@ for i = 1:length(subz)
 end
 
 % start slicing data by trial lengths
-options.time_end = padToTime; % [ms]
+options.trial_length = padToTime; % [ms]
 PPtrialStartTimes = [1 cumsum(trialStartTimes)/dt+1]; % in [samples]
-PPtrialEndTimes = PPtrialStartTimes(2:end)-(padToTime/dt-options.time_end/dt+1);
+PPtrialEndTimes = PPtrialStartTimes(2:end)-(padToTime/dt-padToTime/dt+1);
 
 % ICfiles contains names for spatial grid configs
 load('ICfiles.mat','ICfiles');
@@ -42,14 +42,24 @@ for i = 1:length(subz)
     trialStart = PPtrialStartTimes(i); trialEnd = PPtrialEndTimes(i);
 
     figName = [simDataDir filesep configName{subz(i)}];
-    [data(subz(i)).perf,data(subz(i)).fr] = postProcessData_new(snn_out,s,trialStart,trialEnd,figName,options);
+    [data(subz(i)).perf , data(subz(i)).fr , data(subz(i)).spks] = ...
+        postProcessData_new(snn_out,s,trialStart,trialEnd,figName,options);
     data(subz(i)).config = configName{subz(i)};
 
     % tree-plotting functions: makes figures for all units for each config
 
-    %plotRasterTree(snn_out,s,trialStart,trialEnd,figName,options); close;
-    %plotPSTHTree(snn_out,s,trialStart,trialEnd,figName,options); close;
+    plotRasterTree(data(subz(i)),figName,options); close;
+    % plotPSTHTree(data(subz(i)),figName,options); close; 
 
+    % make PSTH from spks
+
+    t_bin = 20; % in [ms]
+    psth_vec = (300:t_bin:(300 + 3000))/dt;
+    for tid = 1:2
+        raster = data(subz(i)).spks.C.channel1((1:10) + 10*(tid-1),:);
+        [~,spk_inds] = find(raster);
+        data(subz(i)).output_PSTH(tid,:) = histcounts(spk_inds,psth_vec);
+    end    
 end
 toc;
 
@@ -73,21 +83,21 @@ if nVaried >= 10
     close all;
 end
 
-% calculate trial similarity and RMS difference
-clearvars TS RMS
-
-for nS = 1:nSims
-    for nV = 1:nVaried
-        outputSpks = {snn_out((nV + (nS-1)*nVaried) : nVaried*nSims : end).C_V_spikes};
-        for n = 1:20
-            outputSpks{n} = find(outputSpks{n})/10000 - 0.3;
-        end
-        outputSpks = reshape(outputSpks,10,2);
-        [TS(nV,nS),RMS(nV,nS)] = calcTrialSim(outputSpks);
-    end
-end
-
-save([simDataDir filesep 'TS_RMS_C.mat'],'TS','RMS');
+% % calculate trial similarity and RMS difference
+% clearvars TS RMS
+% 
+% for nS = 1:nSims
+%     for nV = 1:nVaried
+%         outputSpks = {snn_out((nV + (nS-1)*nVaried) : nVaried*nSims : end).C_V_spikes};
+%         for n = 1:20
+%             outputSpks{n} = find(outputSpks{n})*dt/1000 - 0.3;
+%         end
+%         outputSpks = reshape(outputSpks,10,2);
+%         [TS(nV,nS),RMS(nV,nS)] = calcTrialSim(outputSpks);
+%     end
+% end
+% 
+% save([simDataDir filesep 'TS_RMS_C.mat'],'TS','RMS');
 
 %% Make full grid if we ran all spatial grid configurations
 
@@ -102,7 +112,7 @@ if isempty(options.locNum) || all(ismember(5:24,options.locNum))
     simOptions.locationLabels = strtrim(cellstr(num2str(locs'))');
     simOptions.chanLabels = chanLabels;
 
-    subPops = {'C','R2On'};
+    subPops = {'C','ROn'};
     targetIdx = 5:5:20;
     mixedIdx = setdiff(1:24,[1:4 targetIdx]);
 

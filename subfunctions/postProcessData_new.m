@@ -10,7 +10,7 @@ function [perf,fr,spks] = postProcessData_new(data,s,trialStart,trialEnd,configN
 %       spatial channels,trials,time
 % no plotting function for now
 
-time_end = options.time_end;
+trial_length = options.trial_length;
 plot_rasters = options.plotRasters;
 dt = options.dt;
 fields = fieldnames(data);
@@ -79,7 +79,7 @@ for vv = 1:jump % for each varied parameter
             
             [perf.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv),...
                 fr.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv)] = ...
-                calcPCandPlot(channel(channelNum).popSpks,time_end,1,numTrials,dt,plot_rasters_final,y1,y2,t,figName);
+                calcPCandPlot(channel(channelNum).popSpks,trial_length,numTrials,dt,plot_rasters_final,y1,y2,t,figName);
             
         end
     end
@@ -87,11 +87,11 @@ end
 
 end
 
-function [pc,fr] = calcPCandPlot(raster,time_end,calcPC,numTrials,dt,plot_rasters,y1,y2,t,figName)
+function [pc,fr,psth] = calcPCandPlot(raster,trial_length,numTrials,dt,plot_rasters,y1,y2,t,figName)
 
 % inputs:
 % raster - 0s and 1s with size [trials x samples]
-% time_end - simulation time in [ms]
+% trial_length - simulation time in [ms]
 % calcPC - if performance is calculated == 1
 % numTrials - # trials per target ( #rows in raster / 2 )
 % dt - timestep [in ms]
@@ -116,14 +116,13 @@ spkTimes = reshape(spkTimes,numTrials/2,2);
 input = reshape(spkTimes,1,numTrials);
 fr = round(mean(cellfun(@(x) sum(x >= start_time & x < end_time) / 3,input)));
 
-if calcPC
-    STS = SpikeTrainSet(input,start_time,end_time);
-    distMat = STS.SPIKEdistanceMatrix(start_time,end_time);
+% claculate performance
+STS = SpikeTrainSet(input,start_time,end_time);
+distMat = STS.SPIKEdistanceMatrix(start_time,end_time);
 
-    performance = calcpcStatic(distMat, numTrials/2, 2, 0);
-    pc = mean(max(performance));
-    PCstr = ['PC = ' num2str(round(pc)) '%'];
-end
+performance = calcpcStatic(distMat, numTrials/2, 2, 0);
+pc = mean(max(performance));
+PCstr = ['PC = ' num2str(round(pc)) '%'];
 
 %plot
 x = 0.86;
@@ -139,7 +138,7 @@ if plot_rasters
     
     ypos = 0.91 - y_stim;
     subplot('position',[x0 ypos x y_stim]); % target 2
-    plot(t,y2,'k'); xlim([0 time_end/1000]);
+    plot(t,y2,'k'); xlim([0 trial_length/1000]);
     title({PCstr,['FR = ' num2str(fr)]}); set(gca,'xtick',[],'ytick',[])
     
     ypos = ypos - dy - y_psth;
@@ -149,8 +148,8 @@ if plot_rasters
     ypos = ypos - dy - y_raster;
     subplot('position',[x0 ypos x y_raster]);
     plotSpikeRasterFs(flipud(logical(raster)), 'PlotType','vertline');
-    xlim([0 time_end/dt]);
-    line([0,time_end/dt],[numTrials/2 + 0.5,numTrials/2 + 0.5],'color',[0.3 0.3 0.3]); set(gca,'xtick',[],'ytick',[])
+    xlim([0 trial_length/dt]);
+    line([0,trial_length/dt],[numTrials/2 + 0.5,numTrials/2 + 0.5],'color',[0.3 0.3 0.3]); set(gca,'xtick',[],'ytick',[])
     
     ypos = ypos - dy - y_psth;
     subplot('position',[x0 ypos x y_psth]);
@@ -158,7 +157,7 @@ if plot_rasters
 
     ypos = ypos - dy - y_stim;
     subplot('position',[x0 ypos x y_stim]); % target 1
-    plot(t,y1,'k'); xlim([0 time_end/1000]); set(gca,'ytick',[]); 
+    plot(t,y1,'k'); xlim([0 trial_length/1000]); set(gca,'ytick',[]); 
     
     saveas(gcf,[figName '.png'])
 end
