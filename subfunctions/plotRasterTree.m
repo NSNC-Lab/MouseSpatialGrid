@@ -58,7 +58,7 @@ for vv = 1:jump % for each varied parameter
                 trial_length,dt,popNames{currentPop},subplot_locs(currentPop),SpatAttention);
         end
 
-        figName = sprintf('%s_CH%f_set%s',configName,ch,num2str(vv));
+        figName = sprintf('%s_CH%i_set%s',configName,ch,num2str(vv));
 
         annotation('textbox',[.6 .82 .1 .1], ...
             'String',[annotConfig, ', CH' num2str(ch)],'EdgeColor','none','FontSize',20)

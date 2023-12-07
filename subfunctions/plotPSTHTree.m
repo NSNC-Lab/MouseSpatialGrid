@@ -68,7 +68,7 @@ for vv = 1:jump % for each varied parameter
             plts(p).YLim = [0 ymax];
         end
 
-        figName = sprintf('%s_CH%f_set%s_PSTH',configName,ch,num2str(vv));
+        figName = sprintf('%s_CH%i_set%s_PSTH',configName,ch,num2str(vv));
         
         annotation('textbox',[.6 .82 .1 .1], ...
             'String',[annotConfig, ', CH' num2str(ch) ],'EdgeColor','none','FontSize',20)
