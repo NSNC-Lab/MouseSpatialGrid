@@ -34,6 +34,7 @@ s = struct();
 
 XRnetcon = netcons.XRnetcon;
 RCnetcon = netcons.RCnetcon;
+PEnetcon = netcons.PEnetcon;
 
 % onset column
 
@@ -121,11 +122,11 @@ s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.
 
 s.connections(end+1).direction='SOn->ROn';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.4,'tauP',100}; 
+s.connections(end).parameters={'gSYN',0.03,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.4,'tauP',100,'netcon',PEnetcon}; 
 
 s.connections(end+1).direction='SOn->ROff';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.4,'tauP',100}; 
+s.connections(end).parameters={'gSYN',0.03,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.4,'tauP',100,'netcon',PEnetcon}; 
 
 % offset channels
 s.connections(end+1).direction='Off->ROff';
@@ -138,11 +139,11 @@ s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.
 
 s.connections(end+1).direction='SOff->ROn';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.4,'tauP',100}; 
+s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.4,'tauP',100,'netcon',PEnetcon}; 
 
 s.connections(end+1).direction='SOff->ROff';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.4,'tauP',100}; 
+s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.4,'tauP',100,'netcon',PEnetcon}; 
 
 % noise at relays
 s.connections(end+1).direction='ROn->ROn';
