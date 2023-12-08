@@ -60,5 +60,4 @@ varies(end).range = [0.016 ; 6; 12 ; 0.1 ; 120];
 % noise at intermediate neurons
 varies(end+1).conxn = 'ROn->ROn';
 varies(end).param = 'FR';
-varies(end).range = [8/options.nCells];
-
+varies(end).range = 8/options.nCells;
