@@ -1,5 +1,9 @@
 function [pc,fr] = plotParamvsPerf_1D(varargin)
 
+% calculates performance not only based on SPIKE-distance (already
+% calculated in postProcessData_new), but also the other Kreuz distances
+% (ISI, RI-SPIKE) and spike count distance
+
 results = varargin{1};
 nVaries = varargin{2}; % how much parameter sets are there, excluding the trials and number of repeat trials for laser
 dt = varargin{3}; 

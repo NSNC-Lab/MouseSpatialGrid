@@ -23,18 +23,18 @@ for ch = 1:nCells
     perf = reshape(data.perf.(pop).(['channel' num2str(ch)]),[numel(y) numel(x)]);
     
     figure('unit','inches','position',[4 4 11 4.5]);
-    ax1=subplot(1,2,1);
+    ax1 = subplot(1,2,1);
     imagesc(x,y,perf);
     xlabel([paramConxns{1}  '_{' paramNames{1} '}']);
     ylabel([paramConxns{2}  '_{' paramNames{2} '}']);
     set(gca,'ydir','normal','xtick',x,'ytick',y,'fontsize',10);
     title(['Performance vs. ' paramNames{1}]);
     cc = colorbar; cc.Label.String = 'Performance';
-    caxis([50 max(perf,[],'all')]);
+    clim([50 max(perf,[],'all')]);
     
     FR = reshape(data.fr.(pop).channel1,[numel(y) numel(x)]);
     
-    ax2=subplot(1,2,2);
+    ax2 = subplot(1,2,2);
     imagesc(x,y,FR);
     xlabel([paramConxns{1} '_{' paramNames{1} '}']);
     ylabel([paramConxns{2} '_{' paramNames{2} '}']);
@@ -42,7 +42,7 @@ for ch = 1:nCells
     title(['FR vs. ' paramNames{1}]);
     cc = colorbar; cc.Label.String = 'Firing rate (Hz)';
     colormap(ax2,'gray');
-    caxis([0 max(FR,[],'all')]);
+    clim([0 max(FR,[],'all')]);
     titleStr = [pop ', CH' num2str(ch)];
     sgtitle(titleStr);
     
