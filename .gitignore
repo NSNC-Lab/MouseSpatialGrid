@@ -60,6 +60,10 @@ ICSimStim/temp/preprocessed_stim_1.mat
 ICSimStim/preprocessed_stims.mat
 dontusethese.m
 *.mat
+!ICSimStim/Panniello_fits.mat
+!Panniello_fits.mat
+!ICfiles.mat
+!default_STRF_with_offset_200k.mat
 !ICSimStim/default_STRF_with_offset_200k.mat
 *.tmp
 Ince et al.pdf
