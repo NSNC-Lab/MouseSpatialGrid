@@ -49,7 +49,7 @@ for i = 1:length(subz)
     % tree-plotting functions: makes figures for all units for each config
 
     plotRasterTree(data(subz(i)),figName,options); close;
-    % plotPSTHTree(data(subz(i)),figName,options); close; 
+    plotPSTHTree(data(subz(i)),figName,options); close; 
 
     % make PSTH from spks
 
@@ -107,7 +107,7 @@ end
 % the second condition is if we run all configurations that have a target
 % playing (will need to implement cases where locNum is an array instead of
 % a single value)
-if isempty(options.locNum) || all(ismember(5:24,options.locNum))
+if numel(subz) > 1
     simOptions.subz = subz;
     simOptions.locationLabels = strtrim(cellstr(num2str(locs'))');
     simOptions.chanLabels = chanLabels;

@@ -8,6 +8,8 @@ options.mex_flag = 0;
 options.parfor_flag = 0;
 options.plotRasters = 0;
 
+% locations of speakers: [90 45 0 -90];
+
 % locNum should be empty for full grids
 options.locNum = [5 10 15 20];
 options.SpatialAttention = 0;
@@ -31,7 +33,7 @@ varies(end).param = 'gSYN';
 varies(end).range = 0.018;
 
 % E->E connections
-varies(end+1).conxn = '(ROn->C)';
+varies(end+1).conxn = 'ROn->C';
 varies(end).param = 'gSYN';
 varies(end).range = 0.013;
 
@@ -58,5 +60,5 @@ varies(end).range = [0.016 ; 6; 12 ; 0.1 ; 120];
 % noise at intermediate neurons
 varies(end+1).conxn = 'ROn->ROn';
 varies(end).param = 'FR';
-varies(end).range = 8/options.nCells;
+varies(end).range = [8/options.nCells];
 

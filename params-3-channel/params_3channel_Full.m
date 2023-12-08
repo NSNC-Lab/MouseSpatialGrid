@@ -1,7 +1,7 @@
 %% Options struct
 
 options = struct;
-options.nCells = 3;
+options.nCells = 3; % <----- 
 options.opto = 0;
 
 options.mex_flag = 0;
@@ -9,6 +9,8 @@ options.parfor_flag = 0;
 options.plotRasters = 0;
 
 % locNum should be empty for full grids
+
+% (see config_idx_reference.JPG for location numbers)
 options.locNum = 5:24;
 options.SpatialAttention = 0;
 
@@ -55,7 +57,7 @@ varies(end).range = 0.01;
 % cross-channel inhibition
 varies(end+1).conxn = '(X1->R1On,X2->R2On)';
 varies(end).param = 'gSYN';
-varies(end).range = 0.013;
+varies(end).range = 0.016;
 
 % noise at intermediate neurons
 varies(end+1).conxn = 'R2On->R2On';

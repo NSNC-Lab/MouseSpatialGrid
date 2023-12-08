@@ -8,7 +8,7 @@ R=1/g_L;         % membrane resistance [Mohm]
 tau=C*R;         % membrane time constant [ms]
 E_L=-65;         % equilibrium potential/resting potential [mV]
 noise=0;         % noise [nA]
-t_ref=3;         % refractory period [ms]
+t_ref=1;         % refractory period [ms]
 
 E_k=-80;         % spike-rate adaptation potential [mV]
 tau_ad=5;        % spike-rate adaptation time constant [ms]

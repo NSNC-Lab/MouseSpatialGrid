@@ -3,7 +3,7 @@
 % change current directory to folder where this script is stored
 mfileinfo = mfilename('fullpath');
 mfiledir = strsplit(mfileinfo,filesep);
-cd(fullfile(mfiledir{1:end-1}));
+% cd(fullfile(mfiledir{1:end-1}));
 
 dynasimPath = '../DynaSim';
 
@@ -16,8 +16,12 @@ addpath('cSPIKE'); InitializecSPIKE;
 addpath('plotting');
 addpath('subfunctions');
 
+%% Make ICfiles.mat if it's not in your directory
+
+if ~isfile('ICfiles.mat'), makeICfiles; end
+
 %% user inputs
-dt = 0.5; %ms
+dt = 0.5; %ms, should be a multiple of 0.1 ms
 
 % study_dir: folder under 'run' where m files and input spikes for simulations are written and saved
 study_dir = fullfile(pwd,'run','4-channel-simple');
@@ -26,7 +30,7 @@ if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
 mkdir(fullfile(study_dir, 'solve'));
 
 % expName: folder under 'simData' where results are saved
-expName = '12-08-23 4 channel clean only, with TD inhib, EE EC weaker';
+expName = '12-08-23 example';
 simDataDir = [pwd filesep 'simData' filesep expName];
 if ~exist(simDataDir,'dir'), mkdir(simDataDir); end
 
