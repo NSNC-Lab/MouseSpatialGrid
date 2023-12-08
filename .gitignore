@@ -60,6 +60,7 @@ ICSimStim/temp/preprocessed_stim_1.mat
 ICSimStim/preprocessed_stims.mat
 dontusethese.m
 *.mat
+!ICSimStim/default_STRF_with_offset_200k.mat
 *.tmp
 Ince et al.pdf
 simData-AM
