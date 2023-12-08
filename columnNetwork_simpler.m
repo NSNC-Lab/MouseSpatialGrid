@@ -159,6 +159,19 @@ s.connections(end+1).direction='X->ROn';
 s.connections(end).mechanism_list={'PSC'};
 s.connections(end).parameters={'gSYN',0.01,'tauR',XE_rise,'tauD',XE_fall,'ESYN',-80,'netcon',XRnetcon};
 
+% apply TD->E and TD->S inhibition
+s.connections(end+1).direction='TD->ROn';
+s.connections(end).mechanism_list={'PSC'};
+s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80};
+
+s.connections(end+1).direction='TD->ROff';
+s.connections(end).mechanism_list={'PSC'};
+s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80};
+
+s.connections(end+1).direction='TD->X';
+s.connections(end).mechanism_list={'PSC'};
+s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80};
+
 % convergence at output from onset-responding neurons
 s.connections(end+1).direction='ROn->C';
 s.connections(end).mechanism_list={'PSC'};

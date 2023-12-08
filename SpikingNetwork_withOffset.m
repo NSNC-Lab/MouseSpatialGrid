@@ -26,7 +26,7 @@ if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
 mkdir(fullfile(study_dir, 'solve'));
 
 % expName: folder under 'simData' where results are saved
-expName = '12-07-23 4 channel clean only, weaker PV input';
+expName = '12-08-23 4 channel clean only, with TD inhib, EE EC weaker';
 simDataDir = [pwd filesep 'simData' filesep expName];
 if ~exist(simDataDir,'dir'), mkdir(simDataDir); end
 
