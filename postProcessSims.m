@@ -24,18 +24,31 @@ options.variedField = replace(expVar,'->','_');
 
 annotTable = createSimNotes(snn_out,simDataDir,options);
 
-% save C spikes and varied params to struct
+% save output spikes and varied params to struct
 names = snn_out(1).varied; results = struct;
+
+if any(strcmp({s.populations.name},'C'))
+    output_spks = 'C_V_spikes';
+    output_pop = 'C';
+else
+    output_spks = 'R2On_V_spikes';
+    output_pop = 'R2On';
+end
+
 for i = 1:length(snn_out)
-    results(i).C_V_spikes = snn_out(i).C_V_spikes;
+    results(i).(output_spks) = snn_out(i).(output_spks);
     for t = 1:length(names)
         results(i).(names{t}) = snn_out(i).(names{t});
     end
 end
-results(1).model = snn_out(1).model; save([simDataDir filesep 'C_results.mat'],'results');
+results(1).model = snn_out(1).model; save([simDataDir filesep output_pop '_results.mat'],'results');
 
 %% calculate discriminability and firing rate at each configuration
 data = struct();
+
+% calculate number of parameter sets (excluding repeats for optogenetic
+% trials)
+nVaried = length(snn_out)/(20*nSims);
 
 tic;
 for i = 1:length(subz)
@@ -55,49 +68,64 @@ for i = 1:length(subz)
 
     t_bin = 20; % in [ms]
     psth_vec = (300:t_bin:(300 + 3000))/dt;
-    for tid = 1:2
-        raster = data(subz(i)).spks.C.channel1((1:10) + 10*(tid-1),:);
-        [~,spk_inds] = find(raster);
-        data(subz(i)).output_PSTH(tid,:) = histcounts(spk_inds,psth_vec);
-    end    
+    for vv = 1:nVaried
+        for tid = 1:2
+            raster = data(subz(i)).spks.(output_pop)(vv).channel1((1:10) + 10*(tid-1),:);
+            [~,spk_inds] = find(raster);
+            data(subz(i)).output_PSTH(tid,:,vv) = histcounts(spk_inds,psth_vec);
+        end
+    end
+
+    if nVaried == 1
+        data(subz(i)).output_PSTH = squeeze(data(subz(i)).output_PSTH);
+    end
 end
 toc;
-
-% calculate number of parameter sets (excluding repeats for optogenetic
-% trials)
-nVaried = length(snn_out)/(20*nSims);
 
 % calculate control and laser performance for optogenetic trials
 if nSims == 5
     calcMeanOptoPerf(results,nVaried,simDataDir);
 end
 
-if ~isempty(options.locNum)
-    [pc,fr] = plotParamvsPerf_1D(results,nVaried,options.dt);
-    save([simDataDir filesep 'perf_fr_C.mat'],'pc','fr');
+pc = struct;
+for i = 1:length(subz)
+    [perf,FR] = calcPerfsandFR( data(subz(i)).spks , nVaried ,options.dt , output_pop);
+    pc(subz(i)).fr = FR;
+    pc(subz(i)).perf = perf;
+    pc(subz(i)).config = configName{subz(i)};
 end
+save([simDataDir filesep 'perf_fr_' output_pop '.mat'],'pc');
 
 % make surface plot for 2D parameter searches
 if nVaried >= 10
-    plotPerfvsParams('C',data,varies,simDataDir)
-    close all;
+    for i = 1:length(subz)
+        plotPerfvsParams(output_pop,data(subz(i)),varies,simDataDir,data(subz(i)).config)
+        close all;
+    end
 end
 
-% % calculate trial similarity and RMS difference
-% clearvars TS RMS
-% 
-% for nS = 1:nSims
-%     for nV = 1:nVaried
-%         outputSpks = {snn_out((nV + (nS-1)*nVaried) : nVaried*nSims : end).C_V_spikes};
-%         for n = 1:20
-%             outputSpks{n} = find(outputSpks{n})*dt/1000 - 0.3;
-%         end
-%         outputSpks = reshape(outputSpks,10,2);
-%         [TS(nV,nS),RMS(nV,nS)] = calcTrialSim(outputSpks);
-%     end
-% end
-% 
-% save([simDataDir filesep 'TS_RMS_C.mat'],'TS','RMS');
+dist_measures = struct;
+
+for i = 1:length(subz)
+   % calculate trial similarity and RMS difference at output for each
+    % config
+    clearvars outputSpks_cell
+    for vv = 1:nVaried
+        for ns = 1:nSims
+            % if the data(indexing) doesn't work replace it with the snn_out
+            % version: {snn_out((vv + (nS-1)*nVaried) : nVaried*nSims : end).C_V_spikes(trialStart:trialEnd)}
+            outputSpks = data(subz(i)).spks.(output_pop)(vv).channel1;
+            for n = 1:20
+                outputSpks_cell{n} = find(outputSpks(n,:))' * dt/1000 - 0.3;
+            end
+            outputSpks_cell = reshape(outputSpks_cell,10,2);
+            [dist_measures(subz(i)).TS(vv,ns),dist_measures(subz(i)).RMS(vv,ns)] = calcTrialSim(outputSpks_cell);
+        end
+    end
+    dist_measures(subz(i)).config = configName{subz(i)};
+end
+
+save([simDataDir filesep 'TS_RMS_' output_pop '.mat'],'dist_measures')
 
 %% Make full grid if we ran all spatial grid configurations
 

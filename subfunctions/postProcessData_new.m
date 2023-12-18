@@ -1,4 +1,4 @@
-function [perf,fr,spks] = postProcessData_new(data,s,trialStart,trialEnd,configName,options)
+function [perf,fr,spks] = postProcessData_new(snn_out,s,trialStart,trialEnd,configName,options)
 % calculate performance and FR for *a single spot on the spatial grid*
 % input:
 %   data structure with length = #sims, containing voltage information of
@@ -13,15 +13,17 @@ function [perf,fr,spks] = postProcessData_new(data,s,trialStart,trialEnd,configN
 trial_length = options.trial_length;
 plot_rasters = options.plotRasters;
 dt = options.dt;
-fields = fieldnames(data);
+fields = fieldnames(snn_out);
 ind = find(contains(fields,'_trial'),1);
-jump = length(find([data.(fields{ind})]==1));  % number of variations/parameter sets
-numTrials = length(data)/jump; %usually, 20 trials
-% numChannels = 4;
+
+% jump: # indexes between each of the 20 trials within the same parameter set
+% for opto simulations (5 sets of 20 trials each), jump = 5*#variedparams
+jump = length(find([snn_out.(fields{ind})]==1)); 
+numTrials = length(snn_out)/jump; % numTrials should be 20 trials
 
 % network properties
 popNames = {s.populations.name};
-popSizes = [data(1).model.specification.populations.size];
+popSizes = [snn_out(1).model.specification.populations.size];
 nPops = numel(popNames);
 fieldNames = strcat(popNames,'_V_spikes');
 
@@ -39,7 +41,7 @@ if plot_rasters, figure; end
 
 
 for vv = 1:jump % for each varied parameter
-    subData = data(vv:jump:length(data)); %grab data for this param variation
+    subData = snn_out(vv:jump:length(snn_out)); %grab data for this param variation
     try
         variedParamVal = mode([subData.(options.variedField)]); % should all be the same
     catch
@@ -87,7 +89,7 @@ end
 
 end
 
-function [pc,fr,psth] = calcPCandPlot(raster,trial_length,numTrials,dt,plot_rasters,y1,y2,t,figName)
+function [pc,fr] = calcPCandPlot(raster,trial_length,numTrials,dt,plot_rasters,y1,y2,t,figName)
 
 % inputs:
 % raster - 0s and 1s with size [trials x samples]
@@ -99,8 +101,6 @@ function [pc,fr,psth] = calcPCandPlot(raster,trial_length,numTrials,dt,plot_rast
 % y1 and y2 - target waveforms
 % t - target time vector
 % figName - figure name
-
-PCstr = '';
 
 % use dt to calculate indexes for stimulus response
 start_time = 300; % in [ms]
@@ -120,8 +120,7 @@ fr = round(mean(cellfun(@(x) sum(x >= start_time & x < end_time) / 3,input)));
 STS = SpikeTrainSet(input,start_time,end_time);
 distMat = STS.SPIKEdistanceMatrix(start_time,end_time);
 
-performance = calcpcStatic(distMat, numTrials/2, 2, 0);
-pc = mean(max(performance));
+pc = calcpcStatic(distMat, numTrials/2, 2, 0);
 PCstr = ['PC = ' num2str(round(pc)) '%'];
 
 %plot
