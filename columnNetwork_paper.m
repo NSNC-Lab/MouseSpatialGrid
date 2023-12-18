@@ -1,40 +1,33 @@
-function [simdata,s] = columnNetwork_V2(study_dir,varies,options,netcons)
-% network for bird IC parameters
-% works for mouse parameters as well. Maybe I should rename this to
-% "spiking network".
-% 
+function [simdata,s] = columnNetwork_paper(study_dir,varies,options,netcons)
+
+% Generates and simulates a network featuring columns of excitatory cells 
+% that respond to onsets and offsets in auditory stimuli
+
+% Features of circuit:
+
+% Separate PV cells for onsets and offsets in stimuli; the PV cells will
+% inhibit both onset and offset relay units in the same layer
+
+% This is the original version of the single-channel model published in
+% bioRxiv (Nocon et al 2022)
+
+% INPUTS:
 % study_dir: location of IC spike files + directory for log and data files
-% time_end: length of simulation in ms
 % varies: vary parameter, a structure. e.g.
 %   varies(1).conxn = '(IC->IC)';
 %   varies(1).param = 'trial';
 %   varies(1).range = 1:20;
 %   *first set of parameters should always be "trial" for IC->IC cxn
-% plot_rasters: 1 or 0
-%
-% @Kenny F Chou, Boston Univ. 2019-06-20
-% 2019-08-04 - added sharpening neurons
-% 2019-08-14 - plotting now handles multiple varied parameters
-% 2019-09-11 - removed redundant code. Return R performance in addition to
-%              C performance
-% 2020-02-05 - added netCons as parameter
-% to do - fix plot_rasters option
+% options: struct with fields
+%   nCells: number of channels in network
+%   opto: simulating optogenetic suppression
+%   SpatialAttention: =1 if simulating SpatialAttention
+%   dt: timestep of trial (in ms)
+%   time_end: length of simulations
 
-% @Jio Nocon, Boston Univ., 2020-6-18
-% 2020-6-18 - added subfunction to plot model rasters vs. data rasters and
-%             calculate VR distance between the two
-
-% @Jio Nocon, BU 2020-10-14
-% 2020-10-14 - split inputs to R and S into EIC and IIC, respectively
-
-% 2020-11-17 - KC - general cleanup
-
-% @Jio Nocon, BU 2022-01-20
-% Added L4 layer between TC and L2/3 (per Moore and Wehr paper)
-
-% @Jio Nocon, BU 2023-12-02
-% Added TD unit (1 per channel), X units (2 per channel, 1 in each
-% layer), and output convergence unit
+% OUTPUTS:
+% simdata - simulated voltages and spikes for all units
+% s - model architecture (populations and connections)
 
 %% Input check
 if ~strcmp(varies(1).param,'trial')
@@ -52,9 +45,6 @@ time_end = options.time_end;
 nCells = options.nCells;
 
 s = struct();
-
-XRnetcon = netcons.XRnetcon;
-RCnetcon = netcons.RCnetcon;
 
 % onset column
 
@@ -108,29 +98,6 @@ s.populations(end).equations = 'noconLIF';
 s.populations(end).size = nCells;
 s.populations(end).parameters = {'g_L',1/100,'E_L',-57,'V_reset',-52,'t_ref',0.5};
 
-% TD unit
-s.populations(end+1).name='TD';
-s.populations(end).equations = 'noconLIF_currentOnly';
-s.populations(end).size = nCells;
-s.populations(end).parameters = {'Itonic',0.1,'padToTime',numel(options.locNum)};
-
-% cross-channel X units, modeled as SOM units
-s.populations(end+1).name='X1';
-s.populations(end).equations = 'noconLIF';
-s.populations(end).size = nCells;
-s.populations(end).parameters = {'g_L',1/275,'t_ref',2,'V_reset',-60};
-
-s.populations(end+1).name='X2';
-s.populations(end).equations = 'noconLIF';
-s.populations(end).size = nCells;
-s.populations(end).parameters = {'g_L',1/275,'t_ref',2,'V_reset',-60};
-
-% output unit
-s.populations(end+1).name='C';
-s.populations(end).equations = 'noconLIF';
-s.populations(end).size = 1;
-s.populations(end).parameters = {'g_inc',0.0003,'tau_ad',100,'t_ref',1};
-
 %% connections
 
 % ms
@@ -170,15 +137,6 @@ s.connections(end).parameters={'gSYN',0.03,'tauR',IE_rise,'tauD',IE_fall,'ESYN',
 s.connections(end+1).direction='S1On->R1Off';
 s.connections(end).mechanism_list={'PSC'};
 s.connections(end).parameters={'gSYN',0.03,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.5,'tauP',120}; 
-
-% cross-channel inhibition
-s.connections(end+1).direction='R1On->X1';
-s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.012,'tauR',EE_rise,'tauD',EE_fall,'fP',0,'tauP',30};
-
-s.connections(end+1).direction='X1->R1On';
-s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.01,'tauR',XE_rise,'tauD',XE_fall,'ESYN',-80,'fP',0,'tauP',30,'netcon',XRnetcon};
 
 % offset channels
 s.connections(end+1).direction='Off->R1Off';
@@ -236,28 +194,6 @@ s.connections(end).parameters={'gSYN',0.01,'tauR',IE_rise,'tauD',IE_fall,'ESYN',
 s.connections(end+1).direction='R2On->R2On';
 s.connections(end).mechanism_list={'iNoise_V3'};
 s.connections(end).parameters={'nSYN',0.015,'tauR_N',EE_rise,'tauD_N',EE_fall,'simlen',options.time_end / dt}; 
-
-s.connections(end+1).direction='S2On->S2On';
-s.connections(end).mechanism_list={'iNoise_V3'};
-s.connections(end).parameters={'nSYN',0.03,'tauR_N',EI_rise,'tauD_N',EI_fall,'simlen',options.time_end / dt}; 
-
-s.connections(end+1).direction='S2Off->S2Off';
-s.connections(end).mechanism_list={'iNoise_V3'};
-s.connections(end).parameters={'nSYN',0.03,'tauR_N',EI_rise,'tauD_N',EI_fall,'simlen',options.time_end / dt}; 
-
-% cross-channel inhibition
-s.connections(end+1).direction='R2On->X2';
-s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.012,'tauR',EE_rise,'tauD',EE_fall,'fP',0,'tauP',30};
-
-s.connections(end+1).direction='X2->R2On';
-s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.01,'tauR',XE_rise,'tauD',XE_fall,'ESYN',-80,'fP',0,'tauP',30,'netcon',XRnetcon};
-
-% convergence at output
-s.connections(end+1).direction='R2On->C';
-s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30,'netcon',RCnetcon};
 
 %% vary params
 vary = cell(length(varies),3);

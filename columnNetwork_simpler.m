@@ -1,16 +1,36 @@
 function [simdata,s] = columnNetwork_simpler(study_dir,varies,options,netcons)
-% network for bird IC parameters
-% works for mouse parameters as well. Maybe I should rename this to
-% "spiking network".
-% 
+
+% Generates and simulates a network featuring columns of excitatory cells 
+% that respond to onsets and offsets in auditory stimuli
+
+% Features of circuit:
+
+% Separate PV cells for onsets and offsets in stimuli; the PV cells will
+% inhibit both onset and offset relay units in the same layer
+
+% Output layer features single neuron ('C') where all spatially-tuned
+% channels converge
+
+% This is the closest combination of the AIM network and single-channel
+% model to use
+
+% INPUTS:
 % study_dir: location of IC spike files + directory for log and data files
-% time_end: length of simulation in ms
 % varies: vary parameter, a structure. e.g.
 %   varies(1).conxn = '(IC->IC)';
 %   varies(1).param = 'trial';
 %   varies(1).range = 1:20;
 %   *first set of parameters should always be "trial" for IC->IC cxn
-% plot_rasters: 1 or 0
+% options: struct with fields
+%   nCells: number of channels in network
+%   opto: simulating optogenetic suppression
+%   SpatialAttention: =1 if simulating SpatialAttention
+%   dt: timestep of trial (in ms)
+%   time_end: length of simulations
+
+% OUTPUTS:
+% simdata - simulated voltages and spikes for all units
+% s - model architecture (populations and connections)
 
 % @Jio Nocon, BU 2023-12-02
 % New version based on columnNetwork_V2 without L4 relays

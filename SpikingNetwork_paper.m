@@ -1,3 +1,6 @@
+% This mainscript will help you create Figures 3 through 5 in the bioRxiv
+% manuscript. - Jio
+
 %% Initialize
 
 % change current directory to folder where this script is stored
@@ -5,7 +8,7 @@ mfileinfo = mfilename('fullpath');
 mfiledir = strsplit(mfileinfo,filesep);
 % cd(fullfile(mfiledir{1:end-1}));
 
-dynasimPath = '../DynaSim';
+dynasimPath = fullfile('..','DynaSim');
 
 addpath('mechs');
 addpath('resampled-stimuli');
@@ -21,30 +24,22 @@ addpath('subfunctions');
 if ~isfile('ICfiles.mat'), makeICfiles; end
 
 %% user inputs
-dt = 0.5; %ms, should be a multiple of 0.1 ms
+dt = 0.1; %ms, should be a multiple of 0.1 ms
 
 % study_dir: folder under 'run' where m files and input spikes for simulations are written and saved
-study_dir = fullfile(pwd,'run','4-channel-PV-inputs');
+study_dir = fullfile(pwd,'run','1-channel-paper');
 
 if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
 mkdir(fullfile(study_dir, 'solve'));
 
 % expName: folder under 'simData' where results are saved
-expName = '12-15-23 very phasic, higher PV ptoential';
+expName = '12-18-23 test run';
 simDataDir = [pwd filesep 'simData' filesep expName];
 if ~exist(simDataDir,'dir'), mkdir(simDataDir); end
 
 %% Run .m file to generate options and varies structs for simulations
-addpath('params-4-channel');
-% params_4channel_cleanonly;
-params_4channel_cleanonly_PVinputs;
-
-% addpath('params-3-channel');
-% params_3channel;
-
-% To re-create figures in paper, look at 'params' directory
-% (other 'params' m files are for masked configs)
-% addpath('params');
+addpath('params');
+params_5_rate_based; % Generates Figure 5 (rate-based simulation)
 
 %% create spatially-tuned channels based on options.nCells
 
@@ -55,15 +50,9 @@ params_4channel_cleanonly_PVinputs;
 % row = source, column = target
 netcons = struct; 
 
-% XRnetcon: SOM->E
-netcons.XRnetcon = zeros(options.nCells,options.nCells);
-netcons.XRnetcon([3 3 3],[1 2 4]) = 1;
-
 % PEnetcon: PV->E, model as Gaussians for now
 sigma = 30;
 netcons.PEnetcon = makePENetcon(bestLocs,sigma);
-
-netcons.RCnetcon = ones(options.nCells,1);
 
 %% load input stimuli (targets and maskers) from ICSimStim
 load('default_STRF_with_offset_200k.mat');
@@ -111,9 +100,7 @@ options.dt = dt;
 
 if isempty(options.locNum), options.time_end = size(spks,1)*dt; % [ms];
 else, options.time_end = padToTime*numel(options.locNum); end
-% [snn_out,s] = columnNetwork_V2(study_dir,varies,options,netcons);
-% [snn_out,s] = columnNetwork_simpler(study_dir,varies,options,netcons);
-[snn_out,s] = columnNetwork_PVinputs(study_dir,varies,options,netcons);
+[snn_out,s] = columnNetwork_paper(study_dir,varies,options,netcons);
 
 %% post-process for performance and firing results
 

@@ -40,12 +40,17 @@ varies(end+1).conxn = '(S1Off->R1On,S1Off->R1Off,S2Off->R2On,S2Off->R2Off)';
 varies(end).param = 'gSYN';
 varies(end).range = 0.01;
 
+% E->PV depression
+varies(end+1).conxn = '(On->S1On,Off->S1Off,R1On->S2On,R1Off->S2Off)';
+varies(end).param = 'fP';
+varies(end).range = [ 0 : 0.1 : 1 ];
+
 % control and opto conditions 
 varies(end+1).conxn = '(S1On,S1Off,S2On,S2Off)';
 varies(end).param = 'Itonic';
 varies(end).range = 0; 
 
-varies(end+1).conxn = '(R2On->R2On,S2On->S2On,S2Off->S2Off)';
+varies(end+1).conxn = '(R2On->R2On)';
 varies(end).param = 'FR';
 varies(end).range = 8;
 
