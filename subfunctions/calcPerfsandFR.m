@@ -1,39 +1,30 @@
-function [pc,fr] = plotParamvsPerf_1D(varargin)
+function [pc,fr] = calcPerfsandFR(varargin)
 
 % calculates performance not only based on SPIKE-distance (already
 % calculated in postProcessData_new), but also the other Kreuz distances
 % (ISI, RI-SPIKE) and spike count distance
 
-results = varargin{1};
-nVaries = varargin{2}; % how much parameter sets are there, excluding the trials and number of repeat trials for laser
+spks = varargin{1};
+nVaried = varargin{2}; % how much parameter sets are there, excluding the trials and number of repeat trials for laser
 dt = varargin{3}; 
+pop = varargin{4};
 
-if nargin == 4
-    pop = varargin{4};
-else
-    fnames = fieldnames(results);
-    pop = fnames(contains(fnames,'_V_spikes'));
-    pop = erase(pop{1},'_V_spikes');
-end
+nSims = length(spks.(pop)) / nVaried; % how many repeats (set of 20 trials) for each parameter set (should be 5 for laser and control)
 
-nSims = length(results)/nVaries/20;
+chanNames = fieldnames(spks.(pop));
+nChans = length(chanNames);
 
-for ns = 1:nSims
-    for n = 1:nVaries
+for vv = 1:nVaried
+    for ns = 1:nSims
 
         % fetch 20 trials to calculate performance at specific spot
-        subData = results( ((ns-1)*nVaries + n) : nVaries*nSims : end);
+        popSpks = spks.(pop)(vv);
 
-        nCh = size(subData(1).([pop '_V_spikes']),2);
+        for ch = 1:nChans
+            raster = popSpks.(chanNames{ch});
+            numTrials = size(raster,1);
 
-        for ch = 1:nCh
-
-            for t = 1:20
-                raster(t,:) = subData(t).([pop '_V_spikes'])(:,ch);
-            end
-
-            [pc.SPIKE(ns,n,ch),pc.ISI(ns,n,ch),pc.RISPIKE(ns,n,ch),pc.spkct(ns,n),fr(ns,n,ch)] = calcPCandFR(raster,20,dt);
-
+            [pc.SPIKE(ns,vv,ch),pc.ISI(ns,vv,ch),pc.RISPIKE(ns,vv,ch),pc.spkct(ns,vv),fr(ns,vv,ch)] = calcPCandFR(raster,numTrials,dt);
         end
 
     end
