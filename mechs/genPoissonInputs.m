@@ -5,6 +5,7 @@ fileData = load(['IC_spks_' type '.mat'],'spks','dt');
 
 temp = fileData.spks;
 dt = fileData.dt;
+%dt = 0.1;
 loc_size = size(fileData.spks,1)/24;
 trial_rate = squeeze(temp(:,:,trial)); % time x channel x cells
 

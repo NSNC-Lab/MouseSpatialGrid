@@ -63,64 +63,64 @@ for i = 1:length(subz)
 end
 toc;
 
-% calculate number of parameter sets (excluding repeats for optogenetic
-% trials)
-nVaried = length(snn_out)/(20*nSims);
-
-% calculate control and laser performance for optogenetic trials
-if nSims == 5
-    calcMeanOptoPerf(results,nVaried,simDataDir);
-end
-
-if ~isempty(options.locNum)
-    [pc,fr] = plotParamvsPerf_1D(results,nVaried,options.dt);
-    save([simDataDir filesep 'perf_fr_C.mat'],'pc','fr');
-end
-
-% make surface plot for 2D parameter searches
-if nVaried >= 10
-    plotPerfvsParams('C',data,varies,simDataDir)
-    close all;
-end
-
-% % calculate trial similarity and RMS difference
-% clearvars TS RMS
+% % calculate number of parameter sets (excluding repeats for optogenetic
+% % trials)
+% nVaried = length(snn_out)/(20*nSims);
 % 
-% for nS = 1:nSims
-%     for nV = 1:nVaried
-%         outputSpks = {snn_out((nV + (nS-1)*nVaried) : nVaried*nSims : end).C_V_spikes};
-%         for n = 1:20
-%             outputSpks{n} = find(outputSpks{n})*dt/1000 - 0.3;
-%         end
-%         outputSpks = reshape(outputSpks,10,2);
-%         [TS(nV,nS),RMS(nV,nS)] = calcTrialSim(outputSpks);
-%     end
+% % calculate control and laser performance for optogenetic trials
+% if nSims == 5
+%     calcMeanOptoPerf(results,nVaried,simDataDir);
 % end
 % 
-% save([simDataDir filesep 'TS_RMS_C.mat'],'TS','RMS');
-
-%% Make full grid if we ran all spatial grid configurations
-
-% if the locNum field is empty, the simulation runs all configurations
-% (including masker-only) by default
-
-% the second condition is if we run all configurations that have a target
-% playing (will need to implement cases where locNum is an array instead of
-% a single value)
-if numel(subz) > 1
-    simOptions.subz = subz;
-    simOptions.locationLabels = strtrim(cellstr(num2str(locs'))');
-    simOptions.chanLabels = chanLabels;
-
-    subPops = {'C','ROn'};
-    targetIdx = 5:5:20;
-    mixedIdx = setdiff(1:24,[1:4 targetIdx]);
-
-    plotPerformanceGrids_v3(data,s,annotTable,subPops,targetIdx,mixedIdx,simOptions,expName)
-end
-
-%% peakDrv for spatial grid stimuli
-
-% ignore this for making full spatial grids
-
-% getPeakDrv_SpatialStim;
+% if ~isempty(options.locNum)
+%     [pc,fr] = plotParamvsPerf_1D(results,nVaried,options.dt);
+%     save([simDataDir filesep 'perf_fr_C.mat'],'pc','fr');
+% end
+% 
+% % make surface plot for 2D parameter searches
+% if nVaried >= 10
+%     plotPerfvsParams('C',data,varies,simDataDir)
+%     close all;
+% end
+% 
+% % % calculate trial similarity and RMS difference
+% % clearvars TS RMS
+% % 
+% % for nS = 1:nSims
+% %     for nV = 1:nVaried
+% %         outputSpks = {snn_out((nV + (nS-1)*nVaried) : nVaried*nSims : end).C_V_spikes};
+% %         for n = 1:20
+% %             outputSpks{n} = find(outputSpks{n})*dt/1000 - 0.3;
+% %         end
+% %         outputSpks = reshape(outputSpks,10,2);
+% %         [TS(nV,nS),RMS(nV,nS)] = calcTrialSim(outputSpks);
+% %     end
+% % end
+% % 
+% % save([simDataDir filesep 'TS_RMS_C.mat'],'TS','RMS');
+% 
+% %% Make full grid if we ran all spatial grid configurations
+% 
+% % if the locNum field is empty, the simulation runs all configurations
+% % (including masker-only) by default
+% 
+% % the second condition is if we run all configurations that have a target
+% % playing (will need to implement cases where locNum is an array instead of
+% % a single value)
+% if numel(subz) > 1
+%     simOptions.subz = subz;
+%     simOptions.locationLabels = strtrim(cellstr(num2str(locs'))');
+%     simOptions.chanLabels = chanLabels;
+% 
+%     subPops = {'C','ROn'};
+%     targetIdx = 5:5:20;
+%     mixedIdx = setdiff(1:24,[1:4 targetIdx]);
+% 
+%     plotPerformanceGrids_v3(data,s,annotTable,subPops,targetIdx,mixedIdx,simOptions,expName)
+% end
+% 
+% %% peakDrv for spatial grid stimuli
+% 
+% % ignore this for making full spatial grids
+% 
+% % getPeakDrv_SpatialStim;

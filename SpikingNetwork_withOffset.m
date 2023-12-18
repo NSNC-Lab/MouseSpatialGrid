@@ -1,3 +1,6 @@
+function ga_return = SpkingNetworkwithOffset(gsynvec)
+
+
 %% Initialize
 
 % change current directory to folder where this script is stored
@@ -36,7 +39,7 @@ if ~exist(simDataDir,'dir'), mkdir(simDataDir); end
 
 %% Run .m file to generate options and varies structs for simulations
 addpath('params-4-channel');
-params_4channel;
+[options,varies] = params_4channel(gsynvec);
 
 % addpath('params-3-channel');
 % params_3channel;
@@ -116,3 +119,6 @@ else, options.time_end = padToTime*numel(options.locNum); end
 %% post-process for performance and firing results
 
 postProcessSims;
+
+ga_return = data(5).output_PSTH;
+%end
