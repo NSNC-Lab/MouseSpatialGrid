@@ -3,6 +3,7 @@
 target_data = load('90_deg_target.mat')
 population_size = 8
 
+
 %Initilize the GA
 %Run SpikingNetowkr_withOffset with random inputs.
 
@@ -43,24 +44,8 @@ for m = 1:epochs
 
 
     %Mutation
-    mutation_strength = 0.02;
-    mutation_rate = 0.01;
 
-    choice = rand(1,1);
-    
-    Z = []
-    for zz = 1:length(pop_vec)
-        for xc = 1:length(pop_vec(1))
-            if choice < mutation_rate
-                Z(zz,xc) = mutation_strength;
-            else
-                Z(zz,xc) = 0;
-            end
-        end
-    end
 
-    pop_vec = pop_vec + Z;
-    
-    %Repeat
+
 
 end
