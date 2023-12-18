@@ -17,7 +17,7 @@ The final output of this script is 'default_STRF_with_offset_200k.mat', which co
 The offset-based firing rate is created by flipping the convolution of the STRF and stimulus across the x-axis and adding an offset based on the maximum onset firing rate. The resulting trace is then half-wave rectified. Modeling onset and offset-sensitive inputs is based on findings of parallel processing of onset and offset in mouse auditory cortex [Li et al. 2019](https://www.cell.com/cell-reports/fulltext/S2211-1247(19)30399-7).
 
 ## 2. The spiking Network Model
-To get started, use `run_SpikingNetwork_withOffset.m`.
+To get started, use `SpikingNetwork_withOffset.m`.
 
 ### 2.a Initializing code and loading parameters
 The first section of the code loads in the FR traces from section 1 and defines the `study_dir` directory where the model code and spikes will be stored; `expName` where the results will be stored under the folder `simData`, where ALL simulation results are stored.
@@ -27,7 +27,7 @@ The second section will load the parameters (`varies`) and simulation options (`
 The main fields in `options` are:
   `nCells` - the # of columns within the model (`nCells`), which should be equal to the amount of spatially-tuned or frequency-tuned channels you want in the model
   `opto` - whether you want to run multiple simulations with either a control or optogenetic condition (see `params_7.m` and `params_8.m`)
-  `locNum` - the spatial grid configurations you want to simulate. If you want to simulate a full spatial grid experiment, `locNum = []`, which will run all 24 configurations (4 target-only, 4 masker-only, and 16 target-masker).
+  `locNum` - the spatial grid configurations you want to simulate. If you want to simulate a full spatial grid experiment, `locNum = []`, which will run all 24 configurations (4 target-only, 4 masker-only, and 16 target-masker). The file `config_idx_reference.jpg` contains which locNums correspond to which spatial grid configuration.
   `time_end` - the length of simulations. For a full spatial grid simulation, `time_end = padToTime * 24`; for a single location, `time_end = 3500` (in ms).
 
 All params files should be .m files with the `varies` struct, which Dynasim uses to vary model parameters. The first entry in `varies` will always be
@@ -42,11 +42,16 @@ This defines the number of simulations you want to run for each target identity.
 
 The third section of the code will weigh each of the firing rate traces based on the channel's spatial tuning in `tuningcurve`. `tuningcurve` is defined from -90˚ to +90˚ and should have a number of rows equal to `nCells`. For masked simulations, we add the weighted target and masker firing rate traces and then re-weigh them so that the summed up spatial tuning weights (`t_wt` and `m_wt`) equal 1. 
 
-* Later down the line, we want to add other tuning curves based on work by [Ono & Oliver, 2014](https://www.jneurosci.org/content/34/10/3779) and [Panniello et al. 2018](https://pubmed.ncbi.nlm.nih.gov/29136122/). These studies defined the tuning curves in IC as left sigmoid, right sigmoid, Gaussian centered at 0, and U-shaped (inverted Gaussian). 
+The spatial tuning curves for each channel input are created using `genSpatiallyTunedChans`, which uses fits to data from [Panniello et al. 2018](https://pubmed.ncbi.nlm.nih.gov/29136122/). We also create spatial tuning for PV->E connections using `makePEnetcon`.
 
 ### 2.b Running the simulation
 
 After saving the firing rate traces to the `study_dir/solve` directory, the model will be ran using the `columnNetwork_V2` function. This function contains the model populations (`%% neuron populations`) and synaptic connections (`%% connections`) between cell types.
+
+12-17-23: I've also saved different versions of `columnNetwork`:
+- `_simpler` removes the second intermediate layer of neurons for one output unit `C`, which receives input from all excitatory onset (`ROn`) units
+- `_PVinputs` has the onset and offset-responding inputs converge onto the PV cells instead of staying separate. This model is partly based on findings from [Olsen and Hasenstaub 2023](https://www.jneurosci.org/content/42/39/7370.abstract); in mouse AC, they found that a majority of PV neurons and narrow-spiking cells exhibited phasic responses to both onset and offset, which suggests that converge between these different features occurs at the PV level.
+- `_V2` is the version that is published on bioRxiv as of 2022.
 
 ### 2.c Post-processing
 
@@ -56,17 +61,19 @@ After the simulations have finished, `SpikingNetwork_withOffset` will call the s
 
 `createSimNotes` writes a txtfile with the information on all varied parameters in the `varies` struct in the `simData/expName` folder . Keep in mind that `createSimNotes` does not track the parameter values in `columnNetwork_V2`. That's why the code saves a `results.mat` file which contains the spikes from the topmost cell (as of writing this, the `R2On` cells) and the `.model` field, which _does_ save all the parameters in the model.
 
-`postProcessData_new` will do a lot of things, such as 1) calculate the SPIKE-distance-based discriminability between both target identities, 2) calculates the average firing rate during stimulus playback, and 3) make a figure showing the raster plot for all units for a given parameter set. 
+A for loop will run through each `locNum` (also stored as `subz`) to calculate a bunch of things for each spatial grid location:
+- `postProcessData_new` does a lot of things, such as: 1) calculate the SPIKE-distance-based discriminability between both target identities (`data.perf`), 2) calculate the average firing rate during stimulus playback (`data.fr`), and 3) sort the spikes from each simulation into a struct `data.spks`, which contains the spike trains (i.e. the rasters) sorted by configuration, unit, and channel.
+- `plotRasterTree` and `plotPSTHTree` will make a figure showing the raster or PSTH at all units for each channel and parameter set.
+- `data.output_psth` contains the PSTH to each target stimulus for the output unit. 
+
+`plotPerformanceGrids_v3` will create the spatial grid figures for the output unit `C` and the relay units `R` for each parameter set.
 
 The last part of the code `%% convert peakDrv to samples (10000 Hz)` is based on analysis from [Penikis and Sanes 2023](https://www.jneurosci.org/content/43/1/93/tab-e-letters). For grids and discriminability, we don't use this, but we've included these analyses in submissions to show how our model can explain the results in that paper.
 
 ## 3. Next steps
 
-1) Add multiple spatially-tuned channels to the model. You will need to change `nCells` and add extra curves/rows within `tuningcurve`.
-2) Add a convergence 'output' cell similar to [Dong et al. 2016](https://www.eneuro.org/content/3/1/eneuro.0086-15.2015.abstract), which simulates spatial grids in bird data.
-3) Add frequency tuning to the model. This is less trivial, as the current input STRFs are broadband. We can create a 'library' of narrowband STRFs with different center frequencies and bandwidths, and then convolve those STRFs with the target stimuli.
-4) Adding top-down and cross-channel inhibition to model. Both are in Kenny's AIM network as `TD` and `X` respectively. We'll need to add that here as well.
-5) Adding interactions between different spatial/frequency channels via connection matrices (`netcons`). Currently, this model has 1 channel in both the spatial and frequency dimension. `netcons` will get more complicated when we start having multiple channels in both dimensions.
+1) Add frequency tuning to the model. This is less trivial, as the current input STRFs are broadband. We can create a 'library' of narrowband STRFs with different center frequencies and bandwidths, and then convolve those STRFs with the target stimuli.
+2) Adding interactions between different spatial/frequency channels via connection matrices (`netcons`). Currently, this model has 1 channel in both the spatial and frequency dimension. `netcons` will get more complicated when we start having multiple channels in both dimensions.
 
 ## Important changes to third-party toolboxes
 
