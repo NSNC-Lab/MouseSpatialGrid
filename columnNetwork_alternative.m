@@ -1,4 +1,4 @@
-function [simdata,s] = columnNetwork_PVinputs_2layer(study_dir,varies,options,netcons)
+function [simdata,s] = columnNetwork_alternative(study_dir,varies,options,netcons)
 
 % Generates and simulates a network featuring columns of excitatory cells 
 % that respond to onsets and offsets in auditory stimuli
@@ -96,7 +96,7 @@ s.populations(end).parameters = {'g_L',1/100,'E_L',-57,'V_reset',-52,'t_ref',0.5
 % ms
 EE_rise = 0.7;  EE_fall = 1.5;   % E->E
 IE_rise = 1;    IE_fall = 4.5;   % PV->E
-EI_rise = 0.1;  EI_fall = 1;     % E->PV
+EI_rise = 0.5;  EI_fall = 1;     % E->PV
 XE_rise = 2;    XE_fall = 8;    % SOM->E
 
 % note: all rise times must be greater than dt

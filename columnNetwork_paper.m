@@ -103,7 +103,7 @@ s.populations(end).parameters = {'g_L',1/100,'E_L',-57,'V_reset',-52,'t_ref',0.5
 % ms
 EE_rise = 0.7;  EE_fall = 1.5;   % E->E
 IE_rise = 1;    IE_fall = 4.5;   % PV->E
-EI_rise = 0.55; EI_fall = 1;     % E->PV
+EI_rise = 0.1;  EI_fall = 1;     % E->PV
 XE_rise = 2.5;  XE_fall = 6;     % SOM->E
 
 % note: all rise times must be greater than dt

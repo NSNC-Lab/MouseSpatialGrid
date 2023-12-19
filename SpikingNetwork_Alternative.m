@@ -21,7 +21,7 @@ addpath('subfunctions');
 if ~isfile('ICfiles.mat'), makeICfiles; end
 
 %% user inputs
-dt = 0.1; %ms, should be a multiple of 0.1 ms
+dt = 0.5; %ms, should be a multiple of 0.1 ms
 
 % study_dir: folder under 'run' where m files and input spikes for simulations are written and saved
 study_dir = fullfile(pwd,'run','1-channel-PV-inputs');
@@ -30,7 +30,7 @@ if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
 mkdir(fullfile(study_dir, 'solve'));
 
 % expName: folder under 'simData' where results are saved
-expName = '12-18-23 PV convergence, 1D search for PV inhib strength';
+expName = '12-18 alternative test';
 simDataDir = [pwd filesep 'simData' filesep expName];
 if ~exist(simDataDir,'dir'), mkdir(simDataDir); end
 
@@ -111,7 +111,7 @@ options.dt = dt;
 
 if isempty(options.locNum), options.time_end = size(spks,1)*dt; % [ms];
 else, options.time_end = padToTime*numel(options.locNum); end
-[snn_out,s] = columnNetwork_PVinputs_2layer(study_dir,varies,options,netcons);
+[snn_out,s] = columnNetwork_alternative(study_dir,varies,options,netcons);
 
 %% post-process for performance and firing results
 
