@@ -5,18 +5,16 @@ This repo does two things:
 2. It puts those neural spikes through a spiking neural network [preprint here](https://www.biorxiv.org/content/10.1101/2022.09.22.509092v1), which runs on the [DynaSim](https://github.com/DynaSim/DynaSim) Framework.
 
 ## 0. Before running the model
-Before running the model, you should run `cSPIKE/cSPIKEmex/MEX_compile` to re-compile the C++/mex files on your own machine. The repo does have 64-bit-compiled scripts, but I haven't checked if these scripts work for machines other than my lab desktop and my Macbook.
+You should also have the [Dynasim](https://github.com/DynaSim/DynaSim) toolbox one folder above this repo. Additionally, you should run `cSPIKE/cSPIKEmex/MEX_compile` to re-compile the C++/mex files on your own machine. The repo has 64-bit-compiled scripts for both Windows and Mac, but I haven't checked if these scripts work for machines other than the lab desktop and my Macbook.
 
 ## 1. The Input Model
-The model for generating inputs is found in `/ICSimStim`. To get started, open `main_STRF_target.m`.
+The model for generating inputs is found in `ICSimStim/`. To get started, open `main_STRF_target.m`.
 
-This will convolve the spatial grid stimuli from [Nocon et al. 2023](https://www.nature.com/articles/s42003-023-05126-0) with STRFs based on measurements of mouse MGB from [Lohse et al. 2020](https://www.nature.com/articles/s41467-019-14163-5).
+This will convolve the spatial grid stimuli from [Nocon et al. 2023](https://www.nature.com/articles/s42003-023-05126-0) with STRFs based on measurements of mouse MGB from [Lohse et al. 2020](https://www.nature.com/articles/s41467-019-14163-5). The offset-based firing rate is created by flipping the convolution of the STRF and stimulus across the x-axis and adding an offset based on the maximum onset firing rate. The resulting trace is then half-wave rectified. Modeling onset and offset-sensitive inputs is based on findings of parallel processing of onset and offset in mouse auditory cortex [Li et al. 2019](https://www.cell.com/cell-reports/fulltext/S2211-1247(19)30399-7).
 
-The final output of this script is 'default_STRF_with_offset_200k.mat', which contains firing rate traces for stimulus onsets and offsets (i.e. silent/quieter portions of stimuli). The Poisson-based input cells in the network model will use these firing rate traces to randomly generate spikes.
+The final output of this script is 'default_STRF_with_offset_200k.mat', which contains firing rate traces for stimulus onsets and offsets (i.e. silent/quieter portions of stimuli). The Poisson-based input cells in the network model will use these firing rate traces to randomly generate spikes. This is already included in the repo under `ICSimStim`.
 
-The offset-based firing rate is created by flipping the convolution of the STRF and stimulus across the x-axis and adding an offset based on the maximum onset firing rate. The resulting trace is then half-wave rectified. Modeling onset and offset-sensitive inputs is based on findings of parallel processing of onset and offset in mouse auditory cortex [Li et al. 2019](https://www.cell.com/cell-reports/fulltext/S2211-1247(19)30399-7).
-
-## 2. The spiking Network Model
+## 2. The Spiking Network Model
 To get started, use `SpikingNetwork_withOffset.m`.
 
 ### 2.a Initializing code and loading parameters
@@ -38,13 +36,13 @@ varies(1).range = trialInds(:)';
 ```
 This defines the number of simulations you want to run for each target identity. `trialInds` is a vector `1:20`, where `1:10` means that 10 simulations for target 1 will be ran and `11:20` means that 10 simulations for target 2 will be ran.
 
-### 2.a Loading input spikes and spatial tuning
+### 2.b Loading input spikes and spatial tuning
 
 The third section of the code will weigh each of the firing rate traces based on the channel's spatial tuning in `tuningcurve`. `tuningcurve` is defined from -90˚ to +90˚ and should have a number of rows equal to `nCells`. For masked simulations, we add the weighted target and masker firing rate traces and then re-weigh them so that the summed up spatial tuning weights (`t_wt` and `m_wt`) equal 1. 
 
 The spatial tuning curves for each channel input are created using `genSpatiallyTunedChans`, which uses fits to data from [Panniello et al. 2018](https://pubmed.ncbi.nlm.nih.gov/29136122/). We also create spatial tuning for PV->E connections using `makePEnetcon`.
 
-### 2.b Running the simulation
+### 2.c Running the simulation
 
 After saving the firing rate traces to the `study_dir/solve` directory, the model will be ran using the `columnNetwork_V2` function. This function contains the model populations (`%% neuron populations`) and synaptic connections (`%% connections`) between cell types.
 
@@ -53,7 +51,7 @@ After saving the firing rate traces to the `study_dir/solve` directory, the mode
 - `_PVinputs` has the onset and offset-responding inputs converge onto the PV cells instead of staying separate. This model is partly based on findings from [Olsen and Hasenstaub 2023](https://www.jneurosci.org/content/42/39/7370.abstract); in mouse AC, they found that a majority of PV neurons and narrow-spiking cells exhibited phasic responses to both onset and offset, which suggests that converge between these different features occurs at the PV level.
 - `_V2` is the version that is published on bioRxiv as of 2022.
 
-### 2.c Post-processing
+### 2.d Post-processing
 
 After the simulations have finished, `SpikingNetwork_withOffset` will call the script (`postProcessSims`) which runs all the post-processing.
 
@@ -70,10 +68,19 @@ A for loop will run through each `locNum` (also stored as `subz`) to calculate a
 
 The last part of the code `%% convert peakDrv to samples (10000 Hz)` is based on analysis from [Penikis and Sanes 2023](https://www.jneurosci.org/content/43/1/93/tab-e-letters). For grids and discriminability, we don't use this, but we've included these analyses in submissions to show how our model can explain the results in that paper.
 
-## 3. Next steps
+## 3. Strategies to vary parameters in the model
+
+To vary parameters in the model, you should use the `varies` struct in the `params` .m files. The best parameters to vary are:
+- `gSYN`, the synaptic connectivity between cells
+- `fP`, the depression decrement for every pre-synaptic spike
+- `tauP`, the recovery time constant for synaptic depression
+
+I usually keep the parameters for connections between excitatory cells (`On->R`,`R->C`, etc.) constant; most of the variations should be on connections involving PV/sharpening units (`On->S`,`S->R`,etc.).
+
+## 4. Next steps
 
 1) Add frequency tuning to the model. This is less trivial, as the current input STRFs are broadband. We can create a 'library' of narrowband STRFs with different center frequencies and bandwidths, and then convolve those STRFs with the target stimuli.
-2) Adding interactions between different spatial/frequency channels via connection matrices (`netcons`). Currently, this model has 1 channel in both the spatial and frequency dimension. `netcons` will get more complicated when we start having multiple channels in both dimensions.
+2) Adding interactions between different spatial/frequency channels via connection matrices (`netcons`). Currently, this model has 1 channel in both the spatial and frequency dimension. `netcons` will get more complicated when we start having multiple channels in both dimensions. Another question too is whether spatial tuning varies across frequencies. 
 
 ## Important changes to third-party toolboxes
 
