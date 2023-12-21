@@ -112,11 +112,11 @@ tuningParam.strf = strf;
 tuningParam.type = tuning;
 tuningParam.sigma = sigma;
 
-[~,~,fr_target_on{1},fr_target_off{1}] = STRFconvolve_V2(strf,specs.songs{1}*stimGain,mean_rate,1,[],paramSpk.t_ref,paramSpk.t_ref_rel,paramSpk.rec);
-[~,~,fr_target_on{2},fr_target_off{2}] = STRFconvolve_V2(strf,specs.songs{2}*stimGain,mean_rate,1,[],paramSpk.t_ref,paramSpk.t_ref_rel,paramSpk.rec);
+[~,~,fr_target_on{1},fr_target_off{1}] = STRFconvolve_V2(strf,specs.songs{1}*stimGain,mean_rate);
+[~,~,fr_target_on{2},fr_target_off{2}] = STRFconvolve_V2(strf,specs.songs{2}*stimGain,mean_rate);
 
 for m = 1:10
-    [~,~,fr_masker{m}] = STRFconvolve_V2(strf,specs.maskers{m}*stimGain,mean_rate,1,[],paramSpk.t_ref,paramSpk.t_ref_rel,paramSpk.rec);
+    [~,~,fr_masker{m}] = STRFconvolve_V2(strf,specs.maskers{m}*stimGain,mean_rate);
 end
 
 save('default_STRF_with_offset_200k.mat','fr_target_on','fr_target_off','fr_masker','paramH','paramG','strfGain');
