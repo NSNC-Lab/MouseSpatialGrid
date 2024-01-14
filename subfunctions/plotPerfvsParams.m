@@ -1,4 +1,4 @@
-function plotPerfvsParams(pop,data,varies,simDataDir)
+function plotPerfvsParams(pop,data,varies,simDataDir,configName)
 
 % 12-01-23: only works on single-config, need to change
 
@@ -43,7 +43,7 @@ for ch = 1:nCells
     cc = colorbar; cc.Label.String = 'Firing rate (Hz)';
     colormap(ax2,'gray');
     clim([0 max(FR,[],'all')]);
-    titleStr = [pop ', CH' num2str(ch)];
+    titleStr = [pop ', CH' num2str(ch) ', ' configName];
     sgtitle(titleStr);
     
     saveas(gcf,[simDataDir filesep titleStr ' grid search.png']);

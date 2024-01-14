@@ -24,20 +24,20 @@ if ~isfile('ICfiles.mat'), makeICfiles; end
 dt = 0.5; %ms, should be a multiple of 0.1 ms
 
 % study_dir: folder under 'run' where m files and input spikes for simulations are written and saved
-study_dir = fullfile(pwd,'run','4-channel-PV-inputs');
+study_dir = fullfile(pwd,'run','1-channel-PV-inputs');
 
 if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
 mkdir(fullfile(study_dir, 'solve'));
 
 % expName: folder under 'simData' where results are saved
-expName = '12-15-23 very phasic, higher PV ptoential';
+expName = '12-18 alternative test';
 simDataDir = [pwd filesep 'simData' filesep expName];
 if ~exist(simDataDir,'dir'), mkdir(simDataDir); end
 
 %% Run .m file to generate options and varies structs for simulations
-addpath('params-4-channel');
+% addpath('params-4-channel');
 % params_4channel_cleanonly;
-params_4channel_cleanonly_PVinputs;
+params_PVconverge;
 
 % addpath('params-3-channel');
 % params_3channel;
@@ -111,8 +111,7 @@ options.dt = dt;
 
 if isempty(options.locNum), options.time_end = size(spks,1)*dt; % [ms];
 else, options.time_end = padToTime*numel(options.locNum); end
-% [snn_out,s] = columnNetwork_V2(study_dir,varies,options,netcons);
-[snn_out,s] = columnNetwork_simpler(study_dir,varies,options,netcons);
+[snn_out,s] = columnNetwork_alternative(study_dir,varies,options,netcons);
 
 %% post-process for performance and firing results
 

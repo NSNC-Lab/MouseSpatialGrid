@@ -10,7 +10,6 @@ trial_length = options.trial_length;
 dt = options.dt;
 
 jump = length(data.spks.On);
-SpatAttention = options.SpatialAttention;
 
 % network properties
 popNames = fieldnames(data.fr);
@@ -23,27 +22,16 @@ annotConfig = configName(end-3:end);
 % visualize spikes for specified populations
 if ~isfield(options,'subPops'), options.subPops = popNames; end
 
-% in same order as popNames
-if nPops == 8% no top down
-    subplot_locs = [11 12 7 9 8 4 5 2]; %[11 7 8 4 5 9 6 2];
-elseif nPops == 9% no top down
-    subplot_locs = [11 10 7 8 4 5 9 6 2];
-elseif nPops == 10 % no C neuron
-    subplot_locs = [14 16 10 12 9 11 6 8 5 7 ];
-elseif nPops == 14 % 2 X neurons, 1 C neuron, 1 TD neuron
-    subplot_locs = [14 16 10 12 9 11 6 8 5 7 1 13 15 2];
-else
-    subplot_locs = [14 10 11 7 8 12 9 1 2 5]; %[14 13 10 11 7 8 12 9 1 2 5];
-end
+[subplot_locs,n_rows,n_cols] = detSubplotLocs(popNames);
 
 % locs = {'90','45','0','-90'};
 figure('unit','inches','position',[6 3 6 5]);
 
+subSpks = data.spks;
+subPC = data.perf;
+subFR = data.fr;
+
 for vv = 1:jump % for each varied parameter
-    
-    subSpks = data.spks(vv);
-    subPC = data.perf(vv);
-    subFR = data.fr(vv);
     
     for ch = 1:nChans
 
@@ -52,10 +40,10 @@ for vv = 1:jump % for each varied parameter
             if strcmp(popNames{currentPop},'C'), ch_num = 1;
             else, ch_num = ch; end
 
-            plotSubRaster(subSpks.(popNames{currentPop}).(['channel' num2str(ch_num)]),...
-                subPC.(popNames{currentPop}).(['channel' num2str(ch_num)]),...
-                subFR.(popNames{currentPop}).(['channel' num2str(ch_num)]),...
-                trial_length,dt,popNames{currentPop},subplot_locs(currentPop),SpatAttention);
+            plotSubRaster(subSpks.(popNames{currentPop})(vv).(['channel' num2str(ch_num)]),...
+                subPC.(popNames{currentPop}).(['channel' num2str(ch_num)])(vv),...
+                subFR.(popNames{currentPop}).(['channel' num2str(ch_num)])(vv),...
+                trial_length,dt,popNames{currentPop},subplot_locs(currentPop),[n_rows n_cols]);
         end
 
         figName = sprintf('%s_CH%i_set%s',configName,ch,num2str(vv));
@@ -72,20 +60,13 @@ end
 
 end
 
-function plotSubRaster(raster,pc,fr,trial_length,dt,unit,subplot_loc,SpatAttention)
+function plotSubRaster(raster,pc,fr,trial_length,dt,unit,subplot_loc,subplot_dims)
 
 % ind2sub counts down per column first,`
-if SpatAttention
-    [c,r] = ind2sub([3 5],subplot_loc);
-    r = 6-r;
-    ypos = 0.06 + 0.2*(r-1);
-    y = 0.10;
-else
-    [c,r] = ind2sub([4 4],subplot_loc);
-    r = 5-r;
-    ypos = 0.06 + 0.215*(r-1);
-    y = 0.12;
-end
+[c,r] = ind2sub(subplot_dims + [1 0],subplot_loc);
+r = subplot_dims(1) + 1 - r;
+ypos = 0.06 + 0.215*(r-1);
+y = 0.12;
 
 xpos = 0.06 + 0.23*(c-1);
 x = 0.22;
@@ -101,3 +82,4 @@ title({unit,[PCstr,[', FR = ' num2str(fr)]]},'fontweight','normal','fontsize',8)
 line([0 trial_length/dt],[10.5 10.5],'color','k');
 
 end
+

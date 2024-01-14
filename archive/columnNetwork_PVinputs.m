@@ -1,18 +1,15 @@
-function [simdata,s] = columnNetwork_simpler(study_dir,varies,options,netcons)
+function [simdata,s] = columnNetwork_PVinputs(study_dir,varies,options,netcons)
 
 % Generates and simulates a network featuring columns of excitatory cells 
 % that respond to onsets and offsets in auditory stimuli
 
-% Features of circuit:
+% 'PVinputs' refers to the fact that onset and offset neurons both excite
+% a single PV in the intermediate layer
 
-% Separate PV cells for onsets and offsets in stimuli; the PV cells will
-% inhibit both onset and offset relay units in the same layer
-
-% Output layer features single neuron ('C') where all spatially-tuned
-% channels converge
-
-% This is the closest combination of the AIM network and single-channel
-% model to use
+% This version is different from PVinputs_2layer, as the second
+% intermediate layer is replaced by a single output neuron ('C') where
+% different spatially-tuned channels converge (similar to Kenny's AIM
+% network and Junzi's model)
 
 % INPUTS:
 % study_dir: location of IC spike files + directory for log and data files
@@ -31,9 +28,8 @@ function [simdata,s] = columnNetwork_simpler(study_dir,varies,options,netcons)
 % OUTPUTS:
 % simdata - simulated voltages and spikes for all units
 % s - model architecture (populations and connections)
-
-% @Jio Nocon, BU 2023-12-02
-% New version based on columnNetwork_V2 without L4 relays
+% @Jio Nocon, BU 2023-12-13
+% PV now receives input from both onset and offset neurons
 
 %% Input check
 if ~strcmp(varies(1).param,'trial')
@@ -78,15 +74,10 @@ s.populations(end).equations = 'noconLIF';
 s.populations(end).size = nCells;
 s.populations(end).parameters = {'g_inc',0.0003,'tau_ad',100,'t_ref',1};
 
-s.populations(end+1).name='SOn';
+s.populations(end+1).name='S';
 s.populations(end).equations = 'noconLIF';
 s.populations(end).size = nCells;
-s.populations(end).parameters = {'g_L',1/100,'E_L',-57,'V_reset',-52,'t_ref',0.5};
-
-s.populations(end+1).name='SOff';
-s.populations(end).equations = 'noconLIF';
-s.populations(end).size = nCells;
-s.populations(end).parameters = {'g_L',1/100,'E_L',-57,'V_reset',-52,'t_ref',0.5};
+s.populations(end).parameters = {'g_L',1/100,'E_L',-57,'V_reset',-54,'t_ref',0.5};
 
 % TD unit
 s.populations(end+1).name='TD';
@@ -98,7 +89,7 @@ s.populations(end).parameters = {'Itonic',0.1,'numLocs',numel(options.locNum)};
 s.populations(end+1).name='X';
 s.populations(end).equations = 'noconLIF';
 s.populations(end).size = nCells;
-s.populations(end).parameters = {'g_L',1/275,'t_ref',1,'V_reset',-55};
+s.populations(end).parameters = {'g_L',1/275,'t_ref',1,'V_reset',-52};
 
 % output unit
 s.populations(end+1).name='C';
@@ -119,8 +110,7 @@ if any([EE_rise,IE_rise,EI_rise,XE_rise,EE_fall,IE_fall,EI_fall,XE_fall] <= dt)
     error('PSC time constants must be greater than simulation timestep.')
 end
 
-% % % Input layer % % %
-
+% INPUT CELLS
 s.connections(1).direction='On->On';
 s.connections(1).mechanism_list={'IC'};
 s.connections(1).parameters={'g_postIC',0.265,'label','on','trial',1,'locNum',options.locNum,'netcon',eye(nCells,nCells),'t_ref',1,'t_ref_rel',1,'rec',2};
@@ -129,48 +119,38 @@ s.connections(end+1).direction='Off->Off';
 s.connections(end).mechanism_list={'IC'};
 s.connections(end).parameters={'g_postIC',0.265,'label','off','trial',1,'locNum',options.locNum,'netcon',eye(nCells,nCells),'t_ref',1,'t_ref_rel',1,'rec',2};
 
-% % % Intermediate layer % % %
-
-% excitatory inputs
+% INPUTS TO INTERMEDIATE LAYER
 s.connections(end+1).direction='On->ROn';
 s.connections(end).mechanism_list={'PSC'};
 s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30};
 
-s.connections(end+1).direction='On->SOn';
+s.connections(end+1).direction='On->S';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
+s.connections(end).parameters={'gSYN',0.025,'tauR',EI_rise,'tauD',EI_fall,'fP',0.6,'tauP',80};
 
-s.connections(end+1).direction='SOn->ROn';
+s.connections(end+1).direction='Off->S';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.4,'tauP',100,'netcon',PEnetcon}; 
+s.connections(end).parameters={'gSYN',0.025,'tauR',EI_rise,'tauD',EI_fall,'fP',0.6,'tauP',80};
 
-s.connections(end+1).direction='SOn->ROff';
+% INHIBITION FROM PV NEURONS
+s.connections(end+1).direction='S->ROn';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.4,'tauP',100,'netcon',PEnetcon}; 
+s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.4,'tauP',80,'netcon',PEnetcon}; 
 
-% offset channels
-s.connections(end+1).direction='Off->ROff';
+s.connections(end+1).direction='S->ROff';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30};
+s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.4,'tauP',80,'netcon',PEnetcon}; 
 
-s.connections(end+1).direction='Off->SOff';
-s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
-
-s.connections(end+1).direction='SOff->ROn';
-s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.4,'tauP',100,'netcon',PEnetcon}; 
-
-s.connections(end+1).direction='SOff->ROff';
-s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.4,'tauP',100,'netcon',PEnetcon}; 
-
-% noise at relays
+% NOISE AT RELAYS
 s.connections(end+1).direction='ROn->ROn';
 s.connections(end).mechanism_list={'iNoise_V3'};
 s.connections(end).parameters={'nSYN',0.015,'tauR_N',EE_rise,'tauD_N',EE_fall,'simlen',time_end/dt}; 
 
-% cross-channel inhibition
+s.connections(end+1).direction='ROff->ROff';
+s.connections(end).mechanism_list={'iNoise_V3'};
+s.connections(end).parameters={'nSYN',0.015,'tauR_N',EE_rise,'tauD_N',EE_fall,'simlen',time_end/dt}; 
+
+% CROSS-CHANNEL INHIBITION
 s.connections(end+1).direction='ROn->X';
 s.connections(end).mechanism_list={'PSC'};
 s.connections(end).parameters={'gSYN',0.012,'tauR',EE_rise,'tauD',EE_fall};
@@ -179,7 +159,7 @@ s.connections(end+1).direction='X->ROn';
 s.connections(end).mechanism_list={'PSC'};
 s.connections(end).parameters={'gSYN',0.01,'tauR',XE_rise,'tauD',XE_fall,'ESYN',-80,'netcon',XRnetcon};
 
-% apply TD->E and TD->S inhibition
+% TOP-DOWN INHIBITION
 s.connections(end+1).direction='TD->ROn';
 s.connections(end).mechanism_list={'PSC'};
 s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80};
@@ -192,10 +172,10 @@ s.connections(end+1).direction='TD->X';
 s.connections(end).mechanism_list={'PSC'};
 s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80};
 
-% convergence at output from onset-responding neurons
+% CONVERGENCE AT OUTPUT CELLS
 s.connections(end+1).direction='ROn->C';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30,'netcon',RCnetcon};
+s.connections(end).parameters={'gSYN',0.013,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30,'netcon',RCnetcon};
 
 %% vary params
 vary = cell(length(varies),3);

@@ -1,8 +1,12 @@
+% This version will help you create the AM stimulus responses in Figure 6
+% in the bioRxiv paper. - Jio
+
 %% Initialize
 
-% mfileinfo = mfilename('fullpath');
-% mfiledir = fileparts(mfileinfo);
-% cd(mfiledir);
+% change current directory to folder where this script is stored
+mfileinfo = mfilename('fullpath');
+mfiledir = strsplit(mfileinfo,filesep);
+% cd(fullfile(mfiledir{1:end-1}));
 
 dynasimPath = ['..' filesep 'DynaSim'];
 
@@ -56,7 +60,6 @@ end
 % params_AM_noPV;
 params_AM_varyingStrengths;
 
-
 %% create input spikes from STRFs
 % concatenate spike-time matrices, save to study dir
 
@@ -67,7 +70,7 @@ prepInputData_AMStim;
 
 if isempty(options.locNum), options.time_end = size(spks,1)*dt; %ms;
 else, options.time_end = padToTime; end
-[snn_out,s] = columnNetwork_V2(study_dir,varies,options,netcons);
+[snn_out,s] = columnNetwork_paper(study_dir,varies,options,netcons);
 
 %% post-process for performance and firing results
 

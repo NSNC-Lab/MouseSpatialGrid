@@ -45,7 +45,7 @@ varies(end+1).conxn = '(S1On,S1Off,S2On,S2Off)';
 varies(end).param = 'Itonic';
 varies(end).range = [0 -0.03]; 
 
-varies(end+1).conxn = '(R2On->R2On,S2On->S2On,S2Off->S2Off)';
+varies(end+1).conxn = '(R2On->R2On)';
 varies(end).param = 'FR';
 varies(end).range = [8 12];
 

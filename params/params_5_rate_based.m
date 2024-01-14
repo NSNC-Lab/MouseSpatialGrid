@@ -38,14 +38,14 @@ varies(end).range = 0.025;
 % offset pvs
 varies(end+1).conxn = '(S1Off->R1On,S1Off->R1Off,S2Off->R2On,S2Off->R2Off)';
 varies(end).param = 'gSYN';
-varies(end).range = 0.035;
+varies(end).range = 0.01;
 
 % control and opto conditions 
 varies(end+1).conxn = '(S1On,S1Off,S2On,S2Off)';
 varies(end).param = 'Itonic';
 varies(end).range = 0; 
 
-varies(end+1).conxn = '(R2On->R2On,S2On->S2On,S2Off->S2Off)';
+varies(end+1).conxn = '(R2On->R2On)';
 varies(end).param = 'FR';
 varies(end).range = 8;
 

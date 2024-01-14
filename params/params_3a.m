@@ -40,8 +40,8 @@ varies(end+1).conxn = '(S1Off->R1On,S1Off->R1Off,S2Off->R2On,S2Off->R2Off)';
 varies(end).param = 'gSYN';
 varies(end).range = 0.01;
 
-% PV->E depression
-varies(end+1).conxn = '(S1On->R1On,S1On->R1Off,S2On->R2On,S2On->R2Off,S1Off->R1On,S1Off->R1Off,S2Off->R2On,S2Off->R2Off)';
+% E->E depression
+varies(end+1).conxn = '(On->R1On,R1On->R2On,Off->R1Off,R1Off->R2Off)';
 varies(end).param = 'fP';
 varies(end).range = [ 0 : 0.1 : 1 ];
 
@@ -50,7 +50,7 @@ varies(end+1).conxn = '(S1On,S1Off,S2On,S2Off)';
 varies(end).param = 'Itonic';
 varies(end).range = 0; 
 
-varies(end+1).conxn = '(R2On->R2On,S2On->S2On,S2Off->S2Off)';
+varies(end+1).conxn = '(R2On->R2On)';
 varies(end).param = 'FR';
 varies(end).range = 8;
 

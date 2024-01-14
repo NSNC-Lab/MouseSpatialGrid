@@ -1,5 +1,3 @@
-function [options,varies] = params_4channel(gsynvec)
-
 %% Options struct
 
 options = struct;
@@ -32,36 +30,34 @@ varies(1).range =  trialInds(:)';
 % E->E connections
 varies(end+1).conxn = '(On->ROn,Off->ROff)';
 varies(end).param = 'gSYN';
-varies(end).range = gsynvec(1);
+varies(end).range = 0.018;
 
 % E->E connections
 varies(end+1).conxn = 'ROn->C';
 varies(end).param = 'gSYN';
-varies(end).range = gsynvec(2);
+varies(end).range = 0.013;
 
 % pv inputs
 varies(end+1).conxn = '(SOn->ROn,SOn->ROff)';
 varies(end).param = 'gSYN';
-varies(end).range = gsynvec(3);
+varies(end).range = 0.015;
 
 % offset pv inhibition
 varies(end+1).conxn = '(SOff->ROn,SOff->ROff)';
 varies(end).param = 'gSYN';
-varies(end).range = gsynvec(4);
+varies(end).range = 0.01;
 
 % inputs to SOM neurons
 varies(end+1).conxn = '(ROn->X)';
 varies(end).param = 'gSYN';
-varies(end).range = gsynvec(5);
+varies(end).range = 0.015;
 
 % cross-channel inhibition
 varies(end+1).conxn = '(X->ROn)';
 varies(end).param = '(gSYN,tauR,tauD,fF,tauF)';
-varies(end).range = [gsynvec(6) ; 6; 12 ; 0.1 ; 120];
+varies(end).range = [0.016 ; 6; 12 ; 0.1 ; 120];
 
 % noise at intermediate neurons
 varies(end+1).conxn = 'ROn->ROn';
 varies(end).param = 'FR';
-varies(end).range = [8/options.nCells];
-
-end
+varies(end).range = 8/options.nCells;

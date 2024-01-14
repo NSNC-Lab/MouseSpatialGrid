@@ -2,7 +2,7 @@
 
 options = struct;
 options.nCells = 1;
-options.opto = 1;
+options.opto = 0;
 
 if options.opto, nSims = 5; else, nSims = 1; end
 
@@ -38,16 +38,16 @@ varies(end).range = 0.025;
 % offset pvs
 varies(end+1).conxn = '(S1Off->R1On,S1Off->R1Off,S2Off->R2On,S2Off->R2Off)';
 varies(end).param = 'gSYN';
-varies(end).range = 0.01;
+varies(end).range = 0.035;
 
 % control and opto conditions 
 varies(end+1).conxn = '(S1On,S1Off,S2On,S2Off)';
 varies(end).param = 'Itonic';
-varies(end).range = [0 -0.03]; 
+varies(end).range = 0; 
 
-varies(end+1).conxn = '(R2On->R2On,S2On->S2On,S2Off->S2Off)';
+varies(end+1).conxn = '(R2On->R2On)';
 varies(end).param = 'FR';
-varies(end).range = [8 12];
+varies(end).range = 8;
 
 % find varied parameter, excluding trials
 varied_param = find( (cellfun(@length,{varies.range}) > 1 & ~cellfun(@iscolumn,{varies.range})));
