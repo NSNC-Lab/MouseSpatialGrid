@@ -19,9 +19,11 @@ for ICtype = [1 2]
         % target and masker weights
         if z <= 4  % masker only
             tloc(z) = nan;
+
             mloc(z) = locs(z);
         elseif mod(z,5) == 0 % target only
             tloc(z) = locs(floor(z/5));
+            
             mloc(z) = nan;
         else % mixed
             tloc(z) = locs(floor(z/5));
@@ -58,13 +60,22 @@ for ICtype = [1 2]
             singleConfigSpks = cat(3,singleConfigSpks,zeros(20,options.nCells,padSize));
         end
 
+        spkies = singleConfigSpks;
+        
+        %Current hypothesis is that snn contains 4 sets seperated by 7000
+
         % increase or decrease gain factor of strf
         % spks = cat(3,spks,singleConfigSpks(:,1,:)) * newStrfGain / strfGain;
         spks = cat(3,spks,singleConfigSpks) * newStrfGain / strfGain;
         % strfGain is from default_STRF_with_offset_200k.mat == 0.1
+        spkies2 = squeeze(spks(1,:,:));
 
     end
     % format of spks should be : [time x channel x trial]
     spks = permute(spks,[3 2 1]);
+    
+    study_dir2 = 'C:\Users\Admin\Documents\GitHub\MouseSpatialGrid';
+
     save(fullfile(study_dir, 'solve',['IC_spks_' labels{ICtype} '.mat']),'spks','dt');
+    save(fullfile(study_dir2, 'solve',['IC_spks_' labels{ICtype} '.mat']),'spks','dt');
 end

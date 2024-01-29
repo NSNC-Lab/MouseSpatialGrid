@@ -35,9 +35,10 @@ simDataDir = [pwd filesep 'simData' filesep expName];
 if ~exist(simDataDir,'dir'), mkdir(simDataDir); end
 
 %% Run .m file to generate options and varies structs for simulations
-% addpath('params-4-channel');
-% params_4channel_cleanonly;
-params_PVconverge;
+addpath('params-4-channel');
+params_4channel_cleanonly;
+%addpath('params')
+%params_PVconverge;
 
 % addpath('params-3-channel');
 % params_3channel;
@@ -57,7 +58,7 @@ netcons = struct;
 
 % XRnetcon: SOM->E
 netcons.XRnetcon = zeros(options.nCells,options.nCells);
-netcons.XRnetcon([3 3 3],[1 2 4]) = 1;
+%netcons.XRnetcon([3 3 3],[1 2 4]) = 1;
 
 % PEnetcon: PV->E, model as Gaussians for now
 sigma = 30;

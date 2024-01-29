@@ -57,13 +57,17 @@ netcons = struct;
 
 % XRnetcon: SOM->E
 netcons.XRnetcon = zeros(options.nCells,options.nCells);
-netcons.XRnetcon([3 3 3],[1 2 4]) = 1;
+%netcons.XRnetcon([3 3 3],[1 2 3 4]) = 1;
 
 % PEnetcon: PV->E, model as Gaussians for now
 sigma = 30;
-netcons.PEnetcon = makePENetcon(bestLocs,sigma);
+%netcons.PEnetcon = makePENetcon(bestLocs,sigma);
+netcons.PEnetcon = ones(options.nCells,options.nCells);
 
-netcons.RCnetcon = ones(options.nCells,1);
+%Try 4x4 RC netcon?
+netcons.RCnetcon = ones(options.nCells,options.nCells);
+%netcons.RCnetcon = [1,2,3,4];
+
 
 %% load input stimuli (targets and maskers) from ICSimStim
 load('default_STRF_with_offset_200k.mat');
@@ -111,9 +115,15 @@ options.dt = dt;
 
 if isempty(options.locNum), options.time_end = size(spks,1)*dt; % [ms];
 else, options.time_end = padToTime*numel(options.locNum); end
-% [snn_out,s] = columnNetwork_V2(study_dir,varies,options,netcons);
-[snn_out,s] = columnNetwork_simpler(study_dir,varies,options,netcons);
 
+%In theory the thing below should have to go 4 times
+%The question is, how do we get snn_out to reflect a certain target
+%direction
+
+%[snn_out,s] = columnNetwork_paper(study_dir,varies,options,netcons);
+%[snn_out,s] = columnNetwork_simpler(study_dir,varies,options,netcons);
+[snn_out,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons);
+%[snn_out,s] = columnNetwork_alternative(study_dir,varies,options,netcons);
 %% post-process for performance and firing results
 
 postProcessSims;
