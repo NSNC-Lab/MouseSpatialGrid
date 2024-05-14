@@ -39,7 +39,18 @@ if ~exist(simDataDir,'dir'), mkdir(simDataDir); end
 
 %% Run .m file to generate options and varies structs for simulations
 addpath('params');
-params_5_rate_based; % Generates Figure 5 (rate-based simulation)
+%addpath('params-AM')
+%params_5_rate_based_onoff_WorkingCopy; % Generates Figure 5 (rate-based simulation)
+%params_5_rate_based_onoff_WorkingCopy_HalfDense;
+%params_5_rate_based_onoff_fig4;
+%params_4_opto_onoff_fig6;
+%params_5_rate_based_onoff_offNonSupressed;
+%params_opto_onoff_2
+%params_5_off_dominated
+params_5_rate_based_onoff;
+%params_AM_best_onoff;
+
+
 
 %% create spatially-tuned channels based on options.nCells
 
@@ -61,7 +72,7 @@ load('default_STRF_with_offset_200k.mat');
 % simulation time step, downsample if dt's don't match
 if dt ~= 0.1
     dsamp_fac = dt/0.1;
-    for m = 1:10
+    for m = 1:10    
         fr_masker{m} = downsample(fr_masker{m},dsamp_fac);
     end
     for t = 1:2
@@ -79,7 +90,6 @@ padToTime = 3500; % [ms]
 
 % ICfiles.mat contains names of spatial grid configs: s[targetloc]m[maskerloc]
 % See 'config_idx_reference.JPG' for indexes
-
 % options.locNum is defined in params .m file
 % if it's empty, default to running all 24 configs (including masker-only
 % trials)
@@ -100,7 +110,7 @@ options.dt = dt;
 
 if isempty(options.locNum), options.time_end = size(spks,1)*dt; % [ms];
 else, options.time_end = padToTime*numel(options.locNum); end
-[snn_out,s] = columnNetwork_paper(study_dir,varies,options,netcons);
+[snn_out,s] = columnNetwork_paper_onoff(study_dir,varies,options,netcons);
 
 %% post-process for performance and firing results
 
