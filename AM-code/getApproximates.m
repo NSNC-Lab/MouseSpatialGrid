@@ -1,0 +1,59 @@
+approximates = [];
+
+RM2 = RM;
+
+for d = 1:121
+    for p = 1:5
+        if p == 1
+            compare = RM2(d,p).R2On;
+        end
+        RM2(d,p).R2On = RM2(d,p).R2On/compare;
+    end
+end
+
+for k = 1:121
+    Found_Flag = 0;
+    for c = 1:5
+
+        %Find crossing
+        %Can just go forwards because by the time that we get to 32Hz we
+        %should almost defininately be below 0.5.
+
+        %Normalize down.
+
+        if Found_Flag == 0
+            
+            %Every movement in linear space (y) results in a movement in
+            %2^y space in the x direction.
+
+            %Find where the crossing is in linear space.
+            %Convert the proportionality into exponential space.
+            
+            t = 0.5 - RM2(k,c).R2On + (RM2(k,c).R2On/RM2(k,c+1).R2On);
+
+            fr_fin = 2^(c+t);
+            
+            if RM2(k,c+1).R2On < 0.5
+                Found_Flag = 1;
+                
+
+                %0.5 = RM(k,c).R2On - (RM(k,c).R2On - RM(k,c+1).R2On)
+
+                t = (0.5 - RM2(k,c).R2On)/-(RM2(k,c).R2On - RM2(k,c+1).R2On);
+
+           
+
+                fr_fin = 2^(c+t);
+                
+                
+
+                approximates = [approximates, fr_fin];
+            end
+
+        end
+
+    end
+end
+
+approximates = reshape(approximates, [11 11]);
+approximates = flipud(approximates);

@@ -61,8 +61,8 @@ for i = 1:length(subz)
 
     % tree-plotting functions: makes figures for all units for each config
 
-    plotRasterTree(data(subz(i)),figName,options); close;
-    plotPSTHTree(data(subz(i)),figName,options); close; 
+    plotRasterTree(data(subz(i)),figName,options); %close;
+    plotPSTHTree(data(subz(i)),figName,options); %close; 
 
     % make PSTH from spks
 
@@ -83,10 +83,10 @@ end
 toc;
 
 % calculate control and laser performance for optogenetic trials
-if nSims == 5
+if nSims >= 2
     calcMeanOptoPerf(results,nVaried,simDataDir);
 end
-
+%%
 pc = struct;
 for i = 1:length(subz)
     [perf,FR] = calcPerfsandFR( data(subz(i)).spks , nVaried ,options.dt , output_pop);
@@ -100,7 +100,7 @@ save([simDataDir filesep 'perf_fr_' output_pop '.mat'],'pc');
 if nVaried >= 10
     for i = 1:length(subz)
         plotPerfvsParams(output_pop,data(subz(i)),varies,simDataDir,data(subz(i)).config)
-        close all;
+        %close all;
     end
 end
 
@@ -146,6 +146,8 @@ if numel(subz) > 1
 
     plotPerformanceGrids_v3(data,s,annotTable,subPops,targetIdx,mixedIdx,simOptions,expName)
 end
+
+disp('here')
 
 %% peakDrv for spatial grid stimuli
 

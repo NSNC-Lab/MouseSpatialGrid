@@ -8,8 +8,8 @@ pc_trials = struct2cell(pc);
 ctrl_mean = cellfun(@(x) mean(x(:,1)),pc_trials);
 laser_mean = cellfun(@(x) mean(x(:,end)),pc_trials);
 
-ctrl_se = cellfun(@(x) std(x(:,1))/sqrt(numel(x(:,1))),pc_trials);
-laser_se = cellfun(@(x) std(x(:,end))/sqrt(numel(x(:,end))),pc_trials);
+ctrl_se = cellfun(@(x) std(x(:,1)), pc_trials);%/sqrt(numel(x(:,1))),pc_trials);
+laser_se = cellfun(@(x) std(x(:,end)), pc_trials);%/sqrt(numel(x(:,end))),pc_trials);
 
 figure('unit','inches','position',[5 5 3 3]);
 bar((1:4)-.2,ctrl_mean,0.4,'facecolor','none','linewidth',2); hold on;
@@ -22,6 +22,8 @@ errorbar((1:4)+.2,laser_mean,laser_se,'color','k','linestyle','none','linewidth'
 p_vals = cellfun(@(x) ranksum(x(:,1),x(:,2)),pc_trials)
 groups = mat2cell([[1:4]'-0.2 [1:4]'+0.2],[ 1 1 1 1 ]);
 ylim([50 100]);
+
+addpath('sigstar-master\');
 
 sigstar(groups,p_vals);
 

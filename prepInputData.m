@@ -74,8 +74,8 @@ for ICtype = [1 2]
     % format of spks should be : [time x channel x trial]
     spks = permute(spks,[3 2 1]);
     
-    study_dir2 = 'C:\Users\Admin\Documents\GitHub\MouseSpatialGrid';
+    %study_dir2 = 'C:\Users\Admin\Documents\GitHub\MouseSpatialGrid';
 
     save(fullfile(study_dir, 'solve',['IC_spks_' labels{ICtype} '.mat']),'spks','dt');
-    save(fullfile(study_dir2, 'solve',['IC_spks_' labels{ICtype} '.mat']),'spks','dt');
+    %save(fullfile(study_dir2, 'solve',['IC_spks_' labels{ICtype} '.mat']),'spks','dt');
 end

@@ -35,6 +35,22 @@ for i = 1:nCells
     c_ind = find(strcmp({spatial_fits.label},chanLabels(i)));
     spatialCurves(i,:) = spatial_fits(c_ind).curve / max(spatial_fits(c_ind).curve);
 end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%Insert spatial tuning curves from data
+
+%Examples of implementation that runs just using gaussians
+
+%spatialCurves(1,:) = exp(((-1/2)*(azi-90).^2)*(1/100));
+%spatialCurves(2,:) = exp(((-1/2)*(azi-45).^2)*(1/100));
+%spatialCurves(3,:) = exp(((-1/2)*(azi-0).^2)*(1/100));
+%spatialCurves(4,:) = exp(((-1/2)*(azi+90).^2)*(1/100));
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure;
 plot(azi,spatialCurves','linewidth',1);

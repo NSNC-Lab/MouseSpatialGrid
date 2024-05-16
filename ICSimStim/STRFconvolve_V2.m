@@ -1,6 +1,6 @@
 % function [spkcnt_on,onset_rate,spktimes_on]=...
 %     STRFconvolve_V2(strf,stim_spec,mean_rate,trialn,songn,t_ref,t_ref_rel,rec)
-% 
+ 
 function [onset_rate,offset_rate]=...
      STRFconvolve_V2(strf,stim_spec,mean_rate)
 %

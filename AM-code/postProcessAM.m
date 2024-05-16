@@ -4,6 +4,11 @@ nVaries = length(snn_out)/nTrials;
 % load ICfiles struct just for the names of the configs
 load('ICfiles.mat'); subz = 1:24;
 
+trialStartTimes = zeros(1,length(subz)); %ms
+for i = 1:length(subz) 
+    trialStartTimes(i) = padToTime; %3500 ms
+end
+
 % calculate performance
 data = struct();
 options.time_end = padToTime; %ms
@@ -35,8 +40,12 @@ save([simDataDir filesep 'spikes.mat'],'results','-v7.3');
 %% convert peakDrv to samples (10000 Hz)
 close all;
 
+%RM = {}
+
+
 for nV = 1:nVaries
 
+    %nV
     figure(1);
 
     AM_freqs = [2 4 8 16 32];
@@ -51,7 +60,7 @@ for nV = 1:nVaries
         % convert peakDrv to ms
         temp = [];
         % get spiketime indexes for each trial
-        for t = ((0:TrialsPerStim-1)*nVaries + nV) + ((a-1)*10*nVaries) % (1:TrialsPerStim)+(a-1)*10
+        for t = ((0:TrialsPerStim-1)*nVaries + nV) + ((a-1)*TrialsPerStim*nVaries)
             temp = [temp; find(snn_out(t).R2On_V_spikes)];
         end
 
@@ -75,10 +84,18 @@ for nV = 1:nVaries
             end
         end
         figure(2);
-        subplot(nStim,1,a);
-        plot(peak_vec(1:end-1),mean(peakAct)); hold on;
-        plot([0 0],[0 10],'r');
-        ylabel(sprintf('%i Hz',AM_freqs(a)));
+     
+        h3 = subplot(1,nStim,a);
+        set(h3,'Position',[-0.15 + a*0.18, 0.01, 0.165, 0.8]);
+        plot(peak_vec(1:end-1),mean(peakAct),'k'); hold on;
+        plot([0 0],[0 16],'r');
+        set(gca,'xtick',[])
+        set(gca,'xticklabel',[])
+        set(gca,'ytick',[])
+        set(gca,'yticklabel',[])
+        set(gca,'box','off')
+        %ylabel(sprintf('%i Hz',AM_freqs(a)));
+
     end
 
     figure(1);
@@ -89,7 +106,7 @@ for nV = 1:nVaries
     xlabel('Time from peakDrv (ms)');
     savefig(gcf,fullfile(simDataDir,filesep,sprintf('R2On_peakDrv, vary %i.fig',nV)));
 
-    %% Look at peakDrv response across excitatory layers
+    % Look at peakDrv response across excitatory layers
     % close all;
     figure('unit','inches','position',[4 4 1.4 3])
 
@@ -103,7 +120,7 @@ for nV = 1:nVaries
 
             temp = []; % contains indexes for all trials
             % get spiketime indexes for each trial
-            for t = ((0:TrialsPerStim-1)*nVaries + nV) + ((a-1)*10*nVaries)
+            for t = ((0:TrialsPerStim-1)*nVaries + nV) + ((a-1)*TrialsPerStim*nVaries)
                 temp = [temp; find(snn_out(t).(spks))];
             end
 
@@ -124,24 +141,35 @@ for nV = 1:nVaries
             box off;
 
             xlim([-200 200]);
-            ylim([0 15]);
-            set(gca,'fontsize',8,'xtick',-200:50:200,'ytick',[0 15]);
+            ylim([0 5]);
+            set(gca,'fontsize',8,'xtick',-200:50:200,'ytick',[0 5]);
             if a == 5
+
                 set(gca,'xticklabels',{-200,[],[],[],0,[],[],[],200},'xticklabelrotation',0);
             else
                 set(gca,'xticklabels',[]);
             end
-
-            % calculate rate modulation per peakAct event
             meanAct = mean(peakAct);
             minFR = min(meanAct); maxFR = max(meanAct);
-            RM(nV,a).(pops{p}) = (maxFR-minFR)/(minFR+maxFR);
+
+            %Hold onto the first one
+            %if a == 1
+            %    diff = (maxFR-minFR);
+            %end
+            
+            RM(nV,a).(pops{p}) = maxFR-minFR;
+
+            
+            % calculate rate modulation per peakAct event
+            % meanAct = mean(peakAct);
+            % minFR = min(meanAct); maxFR = max(meanAct);
+            % RM(nV,a).(pops{p}) = (maxFR-minFR)/(minFR+maxFR);
         end
     end
     xlabel('Time (ms)');
     legend(pops);
     savefig(gcf,fullfile(simDataDir,filesep,sprintf('exc peakDrv responses, vary %i.fig',nV)));
-    close all;
+    %close all;
 
 end
 

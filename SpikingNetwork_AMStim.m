@@ -18,7 +18,7 @@ addpath('params-AM');
 addpath('AM-code');
 addpath('subfunctions');
 
-dt = 0.1; %ms
+options.dt = 0.1; %ms
 
 % study_dir: folder under 'run' where m files and input spikes for simulations are written and saved
 study_dir = fullfile(pwd,'run','single-channel-AM-stim');
@@ -26,7 +26,7 @@ study_dir = fullfile(pwd,'run','single-channel-AM-stim');
 if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
 mkdir(fullfile(study_dir, 'solve'));
 
-load('AM_stim_FR_traces.mat');
+load('AM_stim_FR_traces_narrower.mat');
 load('peakDrv_AM.mat');
 load('AM_sigs.mat')
 
@@ -53,24 +53,44 @@ else
     TrialsPerStim = nTrials/2;
 end
 
-%% Run .m file to generate options and varies structs for simulations
+%% Run .m file to generate options and varie    s structs for simulations
 
 % params_AM_adjustPVDynamics;
-% params_AM_noDep;
-% params_AM_noPV;
-params_AM_varyingStrengths;
+%params_AM_noDep;
+params_AM_best_onoff;
+%params_AM_best_onoff;
+% params_AM_varyingStrengths;
 
 %% create input spikes from STRFs
 % concatenate spike-time matrices, save to study dir
 
-options.regenSpks = 0;
+padToTime = 3500; % [ms]
+
+% ICfiles.mat contains names of spatial grid configs: s[targetloc]m[maskerloc]
+% See 'config_idx_reference.JPG' for indexes
+
+% options.locNum is defined in params .m file
+% if it's empty, default to running all 24 configs (including masker-only
+% trials)
+
+if ~isempty(options.locNum)
+    subz = options.locNum;
+else
+    subz = 1:24;
+end
+
+% concatenate spike-time matrices, save to study_dir
 prepInputData_AMStim;
 
 %% run simulation
 
+options.strfGain = strfGain;
+options.dt = dt;
+options.TrialsPerStim = TrialsPerStim;
+
 if isempty(options.locNum), options.time_end = size(spks,1)*dt; %ms;
 else, options.time_end = padToTime; end
-[snn_out,s] = columnNetwork_paper(study_dir,varies,options,netcons);
+[snn_out,s] = columnNetwork_paper_onoff(study_dir,varies,options,netcons);
 
 %% post-process for performance and firing results
 

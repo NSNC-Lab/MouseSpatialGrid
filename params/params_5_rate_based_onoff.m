@@ -28,7 +28,7 @@ varies(1).range =  trialInds(:)';
 % Input strength
 varies(end+1).conxn = '(On->On,Off->Off)';
 varies(end).param = 'g_postIC';
-varies(end).range = [0.08,0.09,0.1,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19];
+varies(end).range = 0.165;
 
 %Switch back Off->R1On to On->R1On
     
@@ -50,7 +50,7 @@ varies(end).range = 0.01;
 % Off-> PV
 varies(end+1).conxn = '(Off->S1OnOff,R1Off->S2OnOff)';
 varies(end).param = 'gSYN';
-varies(end).range = [0,0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,0.05,0.055];
+varies(end).range = 0.005;
 
 
 % control and opto conditions 

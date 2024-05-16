@@ -1,10 +1,12 @@
 function s = genPoissonInputs(trial,locNum,label,t_ref,t_ref_rel,rec)
 
-disp('hello :)')
-disp(pwd)
+%disp('hello :)')
+%disp(pwd)
 
 
 type = label(2:end-1);   % dynasim reads the apostrophes as literals
+%fileData = load(['C:\Users\ipboy\Desktop\Modeling Paper\Model\Model_Code\run\single-channel-AM-stim\solve\IC_spks_' type '.mat'],'spks','dt');
+
 fileData = load(['IC_spks_' type '.mat'],'spks','dt');
 
 temp = fileData.spks;

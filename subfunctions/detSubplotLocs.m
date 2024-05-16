@@ -12,8 +12,12 @@ hasPVconverge = ~any(contains(popNames,'S') & ~contains(popNames,'On'));
 n_rows = 3;
 n_cols = 4 + hasX;
 
-topPops = {'C','R2On','R2Off','TD','S2On','S2Off','S2'};
-middlePops = {'S','S1','S1On','S1Off','R1On','R1Off','ROn','ROff','SOn','SOff','X'};
+% topPops = {'C','R2On','R2Off','TD','S2On','S2Off','S2'};
+% middlePops = {'S','S1','S1On','S1Off','R1On','R1Off','ROn','ROff','SOn','SOff','X'};
+% bottomPops = {'On','Off'};
+
+topPops = {'C','R2On','R2Off','TD','S2OnOff'};
+middlePops = {'S1OnOff','R1On','R1Off','ROn','ROff','X'};
 bottomPops = {'On','Off'};
 
 % initalize unit subplot locations by layer

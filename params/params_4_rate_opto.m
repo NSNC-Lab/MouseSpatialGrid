@@ -4,7 +4,7 @@ options = struct;
 options.nCells = 1;
 options.opto = 1;
 
-if options.opto, nSims = 5; else, nSims = 1; end
+if options.opto, nSims = 30; else, nSims = 1; end
 
 options.mex_flag = 0;
 options.parfor_flag = 0;

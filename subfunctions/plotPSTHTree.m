@@ -35,12 +35,11 @@ subFR = data.fr;
 
 for vv = 1:jump % for each varied parameter
   
-    for ch = 1:nChans
+    for ch = 1:1%nChans
 
         for currentPop = 1:nPops
 
-            if strcmp(popNames{currentPop},'C'), ch_num = 1;
-            else, ch_num = ch; end
+            ch_num = ch;
 
             plotSubPSTH(subSpks.(popNames{currentPop})(vv).(['channel' num2str(ch_num)]),...
                 subPC.(popNames{currentPop}).(['channel' num2str(ch_num)])(vv),...
@@ -50,12 +49,13 @@ for vv = 1:jump % for each varied parameter
 
         % make ylim the same across all subplots
         psths = findobj(gcf,'type','line');
-        ymax = max([psths.YData]);
-        plts = findobj(gcf,'type','axes');
-        for p = 1:length(plts)
-            plts(p).YLim = [0 ymax];
+        if vv > 1
+            ymax = max([psths.YData]);
+            plts = findobj(gcf,'type','axes');
+            for p = 1:length(plts)
+                plts(p).YLim = [0 ymax];
+            end
         end
-
         figName = sprintf('%s_CH%i_set%s_PSTH',configName,ch,num2str(vv));
         
         annotation('textbox',[.6 .82 .1 .1], ...
@@ -63,7 +63,7 @@ for vv = 1:jump % for each varied parameter
         
         saveas(gcf,[figName '.png']);
         % savefig(gcf,[figName '.fig']);
-        clf;
+        %clf;
     end
 
 end

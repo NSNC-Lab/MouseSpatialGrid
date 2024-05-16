@@ -33,12 +33,11 @@ subFR = data.fr;
 
 for vv = 1:jump % for each varied parameter
     
-    for ch = 1:nChans
+    for ch = 1:1%nChans
 
         for currentPop = 1:nPops
 
-            if strcmp(popNames{currentPop},'C'), ch_num = 1;
-            else, ch_num = ch; end
+            ch_num = ch;
 
             plotSubRaster(subSpks.(popNames{currentPop})(vv).(['channel' num2str(ch_num)]),...
                 subPC.(popNames{currentPop}).(['channel' num2str(ch_num)])(vv),...
@@ -53,7 +52,7 @@ for vv = 1:jump % for each varied parameter
 
         saveas(gcf,[figName '.png']);
         % savefig(gcf,[figName '.fig']);
-        clf
+        %clf
     end
 
 end

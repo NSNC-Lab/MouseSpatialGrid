@@ -62,10 +62,11 @@ netcons.XRnetcon = zeros(options.nCells,options.nCells);
 % PEnetcon: PV->E, model as Gaussians for now
 sigma = 30;
 %netcons.PEnetcon = makePENetcon(bestLocs,sigma);
-netcons.PEnetcon = ones(options.nCells,options.nCells);
+netcons.PEnetcon = ones(options.nCells); % ones(options.nCells,options.nCells);
 
 %Try 4x4 RC netcon?
-netcons.RCnetcon = ones(options.nCells,options.nCells);
+netcons.RCnetcon = [1;1;1;1];
+% ceones(options.nCells,options.nCells);
 %netcons.RCnetcon = [1,2,3,4];
 
 

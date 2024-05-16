@@ -111,13 +111,15 @@ if any([EE_rise,IE_rise,EI_rise,XE_rise,EE_fall,IE_fall,EI_fall,XE_fall]) <= dt
     error('PSC time constants must be greater than simulation timestep.')
 end
 
+%g_postIC is nominally 0.265
+
 s.connections(1).direction='On->On';
 s.connections(1).mechanism_list={'IC'};
-s.connections(1).parameters={'g_postIC',0.265,'label','on','trial',1,'locNum',options.locNum,'netcon',eye(nCells,nCells),'t_ref',1,'t_ref_rel',1,'rec',2};
+s.connections(1).parameters={'g_postIC',0.168,'label','on','trial',1,'locNum',options.locNum,'netcon',eye(nCells,nCells),'t_ref',1,'t_ref_rel',1,'rec',2};
 
 s.connections(end+1).direction='Off->Off';
 s.connections(end).mechanism_list={'IC'};
-s.connections(end).parameters={'g_postIC',0.265,'label','off','trial',1,'locNum',options.locNum,'netcon',eye(nCells,nCells),'t_ref',1,'t_ref_rel',1,'rec',2};
+s.connections(end).parameters={'g_postIC',0.168,'label','off','trial',1,'locNum',options.locNum,'netcon',eye(nCells,nCells),'t_ref',1,'t_ref_rel',1,'rec',2};
 
 % % % L4 % % %
 
@@ -128,7 +130,7 @@ s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.
 
 s.connections(end+1).direction='On->S1On';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
+s.connections(end).parameters={'gSYN',0.032,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
 
 s.connections(end+1).direction='S1On->R1On';
 s.connections(end).mechanism_list={'PSC'};
@@ -145,7 +147,7 @@ s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.
 
 s.connections(end+1).direction='Off->S1Off';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
+s.connections(end).parameters={'gSYN',0.032,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
 
 s.connections(end+1).direction='S1Off->R1On';
 s.connections(end).mechanism_list={'PSC'};
@@ -164,7 +166,7 @@ s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.
 
 s.connections(end+1).direction='R1On->S2On';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
+s.connections(end).parameters={'gSYN',0.032,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
 
 s.connections(end+1).direction='S2On->R2On';
 s.connections(end).mechanism_list={'PSC'};
@@ -181,7 +183,7 @@ s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.
 
 s.connections(end+1).direction='R1Off->S2Off';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
+s.connections(end).parameters={'gSYN',0.032,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
 
 s.connections(end+1).direction='S2Off->R2On';
 s.connections(end).mechanism_list={'PSC'};

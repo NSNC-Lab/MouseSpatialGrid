@@ -4,7 +4,7 @@
 
 % note:
 % large bottleneck lies in r/w to network drive
-
+tic
 if ~contains(pwd,'ICSimStim'), cd('ICSimStim'); end
 clearvars
 clc
@@ -42,7 +42,8 @@ maxWeight = 1; %maximum mixed tuning weight; capped at this level.
 
 paramH.alpha = 0.01; % time constant of temporal kernel [s] 0.0097
 paramH.N1 = 5;
-paramH.N2 = 7;
+%paramH.N2 nominal = 7
+paramH.N2 = 8;
 paramH.SC1 = 1;
 paramH.SC2 = 0.88;  % increase -> more inhibition
 
@@ -153,3 +154,4 @@ end
 % save(sprintf('AM_stim_FR_traces_cf%dHz.mat',f0s(f)),'fr_target_on','fr_target_off','paramH','paramG','strfGain');
 save('AM_stim_FR_traces_narrower.mat','fr_target_on','fr_target_off','paramH','paramG','strfGain');
 % end
+toc

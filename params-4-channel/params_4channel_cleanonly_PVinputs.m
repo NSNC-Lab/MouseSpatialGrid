@@ -11,7 +11,8 @@ options.plotRasters = 0;
 % locations of speakers: [90 45 0 -90];
 
 % locNum should be empty for full grids
-options.locNum = [5 10 15 20];
+%options.locNum = [5 10 15 20];
+options.locNum = [];
 options.SpatialAttention = 0;
 
 %% define network parameters
