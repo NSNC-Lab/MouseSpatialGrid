@@ -61,7 +61,7 @@ for i = 1:length(subz)
 
     % tree-plotting functions: makes figures for all units for each config
 
-    plotRasterTree(data(subz(i)),figName,options); %close;
+    %plotRasterTree(data(subz(i)),figName,options); %close;
     plotPSTHTree(data(subz(i)),figName,options); %close; 
 
     % make PSTH from spks

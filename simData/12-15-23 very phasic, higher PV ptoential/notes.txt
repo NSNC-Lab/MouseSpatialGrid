@@ -1,6 +1,0 @@
-STRF gain: 0.100000 
-
-Simulation #1
-Off_Off_trial =1
-ROn_ROn_FR =2
-

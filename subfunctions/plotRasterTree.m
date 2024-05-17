@@ -12,7 +12,11 @@ dt = options.dt;
 jump = length(data.spks.On);
 
 % network properties
-popNames = fieldnames(data.fr);
+%popNames = fieldnames(data.fr);
+popNames = {'SOnOff','ROn'};
+
+
+
 nPops = numel(popNames); 
 
 nChans = length(fieldnames(data.perf.On));
@@ -25,7 +29,7 @@ if ~isfield(options,'subPops'), options.subPops = popNames; end
 [subplot_locs,n_rows,n_cols] = detSubplotLocs(popNames);
 
 % locs = {'90','45','0','-90'};
-figure('unit','inches','position',[6 3 6 5]);
+%figure('unit','inches','position',[6 3 6 5]);
 
 subSpks = data.spks;
 subPC = data.perf;
@@ -33,7 +37,9 @@ subFR = data.fr;
 
 for vv = 1:jump % for each varied parameter
     
-    for ch = 1:1%nChans
+    for ch = 1:nChans
+
+        figure('unit','inches','position',[6 3 6 5]);
 
         for currentPop = 1:nPops
 

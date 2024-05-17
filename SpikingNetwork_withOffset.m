@@ -46,29 +46,15 @@ params_4channel_cleanonly_PVinputs;
 % (other 'params' m files are for masked configs)
 % addpath('params');
 
-%% create spatially-tuned channels based on options.nCells
+%% Creating TuningCurves
 
 % spatial tuning at inputs
 [azi,spatialCurves,chanLabels,bestLocs] = genSpatiallyTunedChans(options.nCells);
 
-% use a separate struct for connectivity matrices (netcons) between populations
-% row = source, column = target
-netcons = struct; 
 
-% XRnetcon: SOM->E
-netcons.XRnetcon = zeros(options.nCells,options.nCells);
-%netcons.XRnetcon([3 3 3],[1 2 3 4]) = 1;
+%% Handle Netcons
 
-% PEnetcon: PV->E, model as Gaussians for now
-sigma = 30;
-%netcons.PEnetcon = makePENetcon(bestLocs,sigma);
-netcons.PEnetcon = ones(options.nCells); % ones(options.nCells,options.nCells);
-
-%Try 4x4 RC netcon?
-netcons.RCnetcon = [1;1;1;1];
-% ceones(options.nCells,options.nCells);
-%netcons.RCnetcon = [1,2,3,4];
-
+NetconHandler;
 
 %% load input stimuli (targets and maskers) from ICSimStim
 load('default_STRF_with_offset_200k.mat');
