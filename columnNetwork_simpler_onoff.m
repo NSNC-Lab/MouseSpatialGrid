@@ -1,5 +1,5 @@
 function [simdata,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons)
-
+NetconHandler;
 % Generates and simulates a network featuring columns of excitatory cells 
 % that respond to onsets and offsets in auditory stimuli
 
@@ -139,11 +139,11 @@ s.connections(end).parameters={'g_postIC',0.265,'label','off','trial',1,'locNum'
 % excitatory inputs
 s.connections(end+1).direction='On->ROn';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30};
+s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30,'netcon',eye(nCells,nCells)};
 
 s.connections(end+1).direction='On->SOnOff';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
+s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80,'netcon',eye(nCells,nCells)};
 
 s.connections(end+1).direction='SOnOff->ROn';
 s.connections(end).mechanism_list={'PSC'};
@@ -151,26 +151,26 @@ s.connections(end).parameters={'gSYN',0.03,'tauR',IE_rise,'tauD',IE_fall,'ESYN',
 
 s.connections(end+1).direction='SOnOff->ROff';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.4,'tauP',100,'netcon',PEnetcon}; 
+s.connections(end).parameters={'gSYN',0.03,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.4,'tauP',100,'netcon',eye(nCells,nCells)}; 
 
 % offset channels
 s.connections(end+1).direction='Off->ROff';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30};
+s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30,'netcon',eye(nCells,nCells)};
 
 s.connections(end+1).direction='Off->SOnOff';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
+s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80,'netcon',eye(nCells,nCells)};
 
 % noise at relays
 s.connections(end+1).direction='ROn->ROn';
 s.connections(end).mechanism_list={'iNoise_V3'};
-s.connections(end).parameters={'nSYN',0.015,'tauR_N',EE_rise,'tauD_N',EE_fall,'simlen',time_end/dt}; 
+s.connections(end).parameters={'nSYN',0.015,'tauR_N',EE_rise,'tauD_N',EE_fall,'simlen',time_end/dt,'netcon',eye(nCells,nCells)}; 
 
 % cross-channel inhibition
 s.connections(end+1).direction='ROn->X';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.012,'tauR',EE_rise,'tauD',EE_fall};
+s.connections(end).parameters={'gSYN',0.012,'tauR',EE_rise,'tauD',EE_fall,'netcon',eye(nCells,nCells)};
 
 s.connections(end+1).direction='X->ROn';
 s.connections(end).mechanism_list={'PSC'};
@@ -179,15 +179,15 @@ s.connections(end).parameters={'gSYN',0.01,'tauR',XE_rise,'tauD',XE_fall,'ESYN',
 % apply TD->E and TD->S inhibition
 s.connections(end+1).direction='TD->ROn';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80};
+s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'netcon',eye(nCells,nCells)};
 
 s.connections(end+1).direction='TD->ROff';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80};
+s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'netcon',eye(nCells,nCells)};
 
 s.connections(end+1).direction='TD->X';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80};
+s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'netcon',eye(nCells,nCells)};
 
 % convergence at output from onset-responding neurons
 s.connections(end+1).direction='ROn->C';
@@ -225,6 +225,7 @@ end
 %% simulate
 tic;
 
+simdata = 0;
 simdata = dsSimulate(s,'tspan',[dt time_end], 'solver',solverType, 'dt',dt,...
   'downsample_factor',1, 'save_data_flag',0, 'save_results_flag',1,...
   'study_dir',study_dir, 'vary',vary, 'debug_flag', 1, 'verbose_flag',0,...
