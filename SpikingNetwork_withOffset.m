@@ -114,3 +114,6 @@ else, options.time_end = padToTime*numel(options.locNum); end
 %% post-process for performance and firing results
 
 postProcessSims;
+
+
+%4x4   * 1x4   * 4x4
