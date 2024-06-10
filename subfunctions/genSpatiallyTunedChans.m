@@ -65,9 +65,10 @@ for i=1:length(curves)
         rise = curr_values(j+1)-curr_values(j);
         run = bestLocs(j) - bestLocs(j+1);
         slope = rise/run;
-        points_temp = (0:run)*slope + curr_values(j);
+        points_temp = (0:run-1)*slope + curr_values(j);
         points = [points points_temp];
     end
+    points = [points curves{i}(end)];
     curve_data{end+1} = points;
 end
 
@@ -75,7 +76,7 @@ spatialCurves(1,:) = curve_data{1};
 spatialCurves(2,:) = curve_data{2};
 spatialCurves(3,:) = curve_data{3};
 spatialCurves(4,:) = curve_data{4};
-azi = fliplr(linspace(-90,90, length(spatialCurves(1,:))));
+azi = fliplr(linspace(-90,90, 181));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure;

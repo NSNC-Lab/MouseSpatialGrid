@@ -1,9 +1,12 @@
+%% THIS IS NOW SPLIT INTO create_structure.m AND plot_digraph/ALL
+% so obsolete for now
+
 %update netcons
 NetconHandler;
 
 %Number of nodes (x data)
 %heirarchy of nodes (y data)
-channels = [1:4];
+channels = 1:4;
 
 numChannels = length(channels);
 numPopulations = length(s.populations);
@@ -26,6 +29,8 @@ nodeCounter = 0;
 popNameOffsets = containers.Map(...
     {'On', 'Off', 'ROn', 'ROff', 'SOnOff', 'TD', 'X'}, ...
     {[0, 0], [0.5, 0], [0, 2], [0.5, 2], [0.25, 1], [0.75, 3], [-0.25, 1]});
+
+
 
 for b = 1:numChannels
     for a = 1:numPopulations
@@ -96,6 +101,11 @@ for c = 1:numChannels
         str = extractBefore(direction,"-");
         stra = extractAfter(direction,">");
 
+        % we don't want On->On, or Off->Off
+        if strcmp(str,stra)
+            continue;
+        end
+
         % Check if the connection is inhibitory
         if ismember(str, inhibitory_cons)
             for p = 1:n
@@ -149,49 +159,12 @@ for c = 1:numChannels
 end
 
 
-%% Graphing Segment
-
-%Be careful! Do not override the s struct
-%s1 = [1 1 2 2 5 5 3 6 6 3];
-%t = [3 5 4 5 3 4 8 3 4 7];
-weights = ones(1,length(targets))*1;
-
-figure;
-
-G = digraph(sources,targets,weights);
-%G = digraph(s,t)
-
-%IMPORTANT:::: Look at
-%https://www.mathworks.com/help/matlab/ref/matlab.graphics.chart.primitive.graphplot.highlight.html
-%for graph colors
-
-%% graph and change X and PV attributes
-p = plot(G,'k','Xdata',Nodesx,'Ydata',Nodesy); hold on
-
-%% highlight P-E connections
-highlight(p, inhibs_PEs,'NodeColor','red')
-for node=1:length(inhibs_PEt)
-    if inhibs_PEt{node}{2} == 1 % within channel
-        highlight(p, inhibs_PEs(node), inhibs_PEt{node}{1},'EdgeColor','blue')
-    else                        % cross channel
-        highlight(p, inhibs_PEs(node), inhibs_PEt{node}{1},'EdgeColor','green')
-    end
-end
-
-%% highlight X-R connections
-highlight(p, SOM_nodes,'NodeColor','red')
-highlight(p, inhibs_XRs, inhibs_XRt,'EdgeColor','red')
-%highlight(p, inhibs_XRs, inhibs_XRt,'LineStyle','--')
-
-%% highlight TD-X connections
-highlight(p, TD_SOMs,'NodeColor','red')
-highlight(p, TD_SOMs, TD_SOMt,'EdgeColor','yellow')
-
-
 %% synaptic strength modifier
 %Now we have to go through and "highlight" which means to change the size
 %of the line widths that connect neurons.
 syns = [];
+all_gsyns = [];
+arrow_sizes = [];
 
 %Might have to do this for inhibs_2/s2
 for u = 1:length(sources)
@@ -221,24 +194,85 @@ for u = 1:length(sources)
         row_num = floor((sources(u) - 1) / 7) + 1;
         col_num = floor((targets(u) - 1) / 7) + 1;
         gsyn = gsyn_net(row_num, col_num);
-        if gsyn > 0.2
-            end_gsyn = 0.5;
+        % if X or PV and ending on ROn
+        if (start_type == 5 || start_type == 7) && end_type == 3
+            if gsyn > 0.2 
+                end_gsyn = 1;
+            else
+                % end_gsyn = (gsyn^1.5)*750;
+                end_gsyn = gsyn*400;
+                arrow_size = end_gsyn*3;
+            end
         else
-            end_gsyn = (gsyn^1.5)*750;
+            end_gsyn = 1;
+            arrow_size = end_gsyn*6;
         end
-
-    elseif gsyn_m{1} > 0.2
-        end_gsyn = 0.5;
+    % cross channel PV condition
+    elseif start_type == 5 && (sources(u) - targets(u) ~= 2) && end_type == 3
+            end_gsyn = gsyn*100;
+            arrow_size = end_gsyn*3;
     else
-        end_gsyn = (gsyn_m{1}^1.5)*750;
+        end_gsyn = 1;
+        arrow_size = end_gsyn*6;
     end
+    % elseif gsyn_m{1} > 0.2
+    %     end_gsyn = 0.5;
+    % else
+    %     end_gsyn = (gsyn_m{1}^1.5)*750;
+    % end
+
 
     syns = [syns gsyn_m];
 
-    highlight(p, sources(u), targets(u), 'LineWidth',end_gsyn,'ArrowSize',end_gsyn*5)
+    all_gsyns = [all_gsyns end_gsyn];
 
+    arrow_sizes = [arrow_sizes arrow_size];
 
 end
+
+plot_digraph;
+
+% %% Graphing Segment
+% 
+% %Be careful! Do not override the s struct
+% 
+% weights = ones(1,length(targets))*1;
+% 
+% figure;
+% 
+% G = digraph(sources,targets,weights);
+% 
+% 
+% %IMPORTANT:::: Look at
+% %https://www.mathworks.com/help/matlab/ref/matlab.graphics.chart.primitive.graphplot.highlight.html
+% %for graph colors
+% 
+% %% graph and change X and PV attributes
+% p = plot(G,'k','Xdata',Nodesx,'Ydata',Nodesy); hold on
+% 
+% %% highlight P-E connections
+% highlight(p, inhibs_PEs,'NodeColor','red')
+% for node=1:length(inhibs_PEt)
+%     if inhibs_PEt{node}{2} == 1 % within channel
+%         highlight(p, inhibs_PEs(node), inhibs_PEt{node}{1},'EdgeColor','blue')
+%     else                        % cross channel
+%         highlight(p, inhibs_PEs(node), inhibs_PEt{node}{1},'EdgeColor','green')
+%     end
+% end
+% 
+% %% highlight X-R connections
+% highlight(p, SOM_nodes,'NodeColor','red')
+% highlight(p, inhibs_XRs, inhibs_XRt,'EdgeColor','red')
+% %highlight(p, inhibs_XRs, inhibs_XRt,'LineStyle','--')
+% 
+% %% highlight TD-X connections
+% highlight(p, TD_SOMs,'NodeColor','red')
+% highlight(p, TD_SOMs, TD_SOMt,'EdgeColor',[0.75,0.75,0])
+% 
+% %% highlight and modify line widths and arrow sizes
+% for node=1:length(sources)
+%     highlight(p, sources(node), targets(node), 'LineWidth',all_gsyns(node),'ArrowSize',arrow_sizes(node))
+% end
 
 
 %% GPT HSV test

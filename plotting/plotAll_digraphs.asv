@@ -1,0 +1,91 @@
+source_offsetY = 4;
+masker_offsetY = 4;
+
+source_labels = [0,1,2,3,4];
+masker_labels = [0,1,2,3,4];
+
+pre_normalized_x = [0.59, 1.24, 1.91, 2.57];
+
+x_normalized = [0,0];
+y_normalized = [0,0];
+
+% Get the limits of the plot
+%ax = gca;
+xlim = [.25,4.75];
+ylim = [-0.5,4];
+
+weights = ones(1,length(targets))*1;
+
+G = digraph(sources,targets,weights);
+
+% Define the desired size of the figure in pixels
+figureWidth = 800; % Width in pixels
+figureHeight = 600; % Height in pixels
+
+for i=source_labels
+    for j=masker_labels
+        % everything but s0m0
+        if i == 0 && j == 0
+            continue;
+        end
+        source_offsetX = 0.25 + (i-1); 
+        masker_offsetX = 0.25 + (j-1);
+        
+        Create the figure with the specified size
+        figure('Position', [100, 100, figureWidth, figureHeight]);
+        
+        % graph and change X and PV attributes
+        p = plot(G,'k','Xdata',Nodesx,'Ydata',Nodesy); hold on
+        
+        % highlight P-E connections
+        highlight(p, inhibs_PEs,'NodeColor','red')
+        for node=1:length(inhibs_PEt)
+            if inhibs_PEt{node}{2} == 1 % within channel
+                highlight(p, inhibs_PEs(node), inhibs_PEt{node}{1},'EdgeColor','blue')
+            else                        % cross channel
+                highlight(p, inhibs_PEs(node), inhibs_PEt{node}{1},'EdgeColor','green')
+            end
+        end
+        
+        % highlight X-R connections
+        highlight(p, SOM_nodes,'NodeColor','red')
+        highlight(p, inhibs_XRs, inhibs_XRt,'EdgeColor','red')
+        %highlight(p, inhibs_XRs, inhibs_XRt,'LineStyle','--')
+        
+        % highlight TD-X connections
+        highlight(p, TD_SOMs,'NodeColor','red')
+        highlight(p, TD_SOMs, TD_SOMt,'EdgeColor',[0.75,0.75,0])
+        
+        % highlight and modify line widths and arrow sizes
+        for node=1:length(sources)
+            highlight(p, sources(node), targets(node), 'LineWidth',all_gsyns(node),'ArrowSize',arrow_sizes(node))
+        end
+        
+        if i == j
+            xx = pre_normalized_x(i) + 1;
+            % Convert data coordinates to normalized figure units
+            x_normalized = ([xx, xx] - xlim(1)) / (xlim(2) - xlim(1));
+            y_normalized = ([3.5,2.75] - ylim(1)) / (ylim(2) - ylim(1));
+            annotation('textarrow', x_normalized, y_normalized, 'String', 'Source + Masker', 'FontSize', 12, 'Color', 'blue');
+        else
+            if i ~= 0
+                xx = pre_normalized_x(i) + 1;
+                % Convert data coordinates to normalized figure units
+                x_normalized = ([xx, xx] - xlim(1)) / (xlim(2) - xlim(1));
+                y_normalized = ([3.5,2.75] - ylim(1)) / (ylim(2) - ylim(1));
+                annotation('textarrow', x_normalized, y_normalized, 'String', 'Source', 'FontSize', 12, 'Color', 'green');
+            end
+            if j ~= 0
+                xx = pre_normalized_x(j) + 1;
+                % Convert data coordinates to normalized figure units
+                x_normalized = ([xx, xx] - xlim(1)) / (xlim(2) - xlim(1));
+                y_normalized = ([3.5,2.75] - ylim(1)) / (ylim(2) - ylim(1));
+                annotation('textarrow', x_normalized, y_normalized, 'String', 'Masker', 'FontSize', 12, 'Color', 'red');
+            end
+        end                                    
+
+    end
+end
+       
+
+

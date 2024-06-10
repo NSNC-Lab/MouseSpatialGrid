@@ -174,7 +174,7 @@ s.connections(end).parameters={'gSYN',0.012,'tauR',EE_rise,'tauD',EE_fall,'netco
 
 s.connections(end+1).direction='X->ROn';
 s.connections(end).mechanism_list={'PSC3'};
-s.connections(end).parameters={'gSYN',[0.00,0.000,0.000,0.000;0.000,0.000,0.000,0.012;0.000,0.000,0.000,0.000;0.000,0.000,0.000,0.000],'tauR',XE_rise,'tauD',XE_fall,'ESYN',-80,'netcon',XRnetcon};
+s.connections(end).parameters={'gSYN',[0.00,0.000,0.000,0.000;0.000,0.000,0.000,0.000;0.000,0.000,0.000,0.000;0.000,0.012,0.000,0.000],'tauR',XE_rise,'tauD',XE_fall,'ESYN',-80,'netcon',XRnetcon};
 
 % apply TD->E and TD->S inhibition
 s.connections(end+1).direction='TD->ROn';
@@ -232,5 +232,7 @@ simdata = dsSimulate(s,'tspan',[dt time_end], 'solver',solverType, 'dt',dt,...
   'mex_flag',options.mex_flag);
 
 toc;
+
+plot_structure;
 
 end
