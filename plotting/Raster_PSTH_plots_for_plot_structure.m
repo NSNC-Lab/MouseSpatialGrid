@@ -61,7 +61,7 @@ for j = 1:length(titles)
     figure(2000+counter,'Visible', 'off')
     plot(avg_data1,'r',LineWidth=0.5);
 
-    saveas(gcf, ['titles{j}' '_' location '_PSTH' '.fig']); % Save as MATLAB figure file
+    saveas(gcf, [titles{j} '_' location '_PSTH' '.fig']); % Save as MATLAB figure file
 
 
     % if contains(titles{j}, 'S')
