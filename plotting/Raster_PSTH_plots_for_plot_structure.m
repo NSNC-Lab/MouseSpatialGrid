@@ -1,68 +1,102 @@
 close all
-data_channel = 1;
+
+profile on;
+
 fig_num = 6;
 
-counter = 0;
+% counter = 0;
+counter = 25;
 
-cd Plot_Structure_Graphs\
+
+% implement check to first navigate to correct subfolder
+curr_folder = pwd;
+plot_folder = 'Plot_Structure_Graphs';
+
+
+if ~endsWith(curr_folder, plot_folder)
+    if ~isfolder(plot_folder)
+        mkdir(plot_folder);
+    end
+    cd 'Plot_Structure_Graphs';
+end
+
 
 titles = {'On','Off','ROn','ROff','SOnOff','TD','X','C'};
 
+channels = [1,2,3,4];
 
-for j = 1:length(titles)
+tic;
+parfor j = 1:length(titles)
+    node_name = titles{j};
     plotting_data = [];
     for m = subz
         location = data(m).config;
-        counter = counter + 1;
-        for k = 1:10
-            if k > 10
-                d = 10;
-            else
-                d= 0;
+        % counter = counter + 1;
+        for data_channel = channels
+            for k = 1:10
+                if k > 10
+                    d = 10;
+                else
+                    d= 0;
+                end
+    
+                %% Rasters
+                %Grab the spikes that we are interested in
+                On = transpose(data(m).spks.On.channel1(k,:));
+                Off = transpose(data(m).spks.Off.channel1(k,:));
+                Ron = transpose(data(m).spks.ROn.channel1(k,:));
+                Roff = transpose(data(m).spks.ROff.channel1(k,:));
+                SOnOff = transpose(data(m).spks.SOnOff.channel1(k,:));
+                TD = transpose(data(m).spks.TD.channel1(k,:));
+                X = transpose(data(m).spks.X.channel1(k,:));
+                C = transpose(data(m).spks.C.channel1(k,:));
+            
+                reference_cell = {On,Off,Ron,Roff,SOnOff,TD,X,C};
+                
+                times = find(reference_cell{j} == 1);
+                b = transpose(repmat(times,1,3));
+                y_lines = nan(1,length(times));
+                y_lines(1,:) = k-1-d;
+                y_lines(2,:) = k-d;
+                y_lines(3,:) = nan;
+                figure('Visible', 'off');
+                plotting_data = [plotting_data;times];
+    
+                % Optimize figure properties
+                % set(gcf, 'Toolbar', 'none', 'Menubar', 'none');
+    
+                plot(b,y_lines,'Color',[0 0 0 0.2],'LineWidth',0.3); hold on;
+    
+                            
             end
+            channel_string = join(["Channel", data_channel], ' ');
+            graph_title = [node_name, channel_string, location];
+            title(graph_title, 'FontSize', 12, 'FontWeight', 'bold', 'FontName', 'Arial');
+    
+            RASTER_file_name = [node_name num2str(data_channel) '_' location '_RASTER' '.fig'];
+            saveas(gcf, RASTER_file_name);
+            close(gcf);
 
-            %% Rasters
-            %Grab the spikes that we are interested in
-            on = transpose(data(m).spks.On(data_channel).channel1(k,:));
-            off = transpose(data(m).spks.Off(data_channel).channel1(k,:));
-            R1on = transpose(data(m).spks.ROn(data_channel).channel1(k,:));
-            R2on = transpose(data(m).spks.ROff(data_channel).channel1(k,:));
-            R1off = transpose(data(m).spks.SOnOff(data_channel).channel1(k,:));
-            R2off = transpose(data(m).spks.TD(data_channel).channel1(k,:));
-            S1OnOff = transpose(data(m).spks.X(data_channel).channel1(k,:));
-            S2OnOff = transpose(data(m).spks.C(data_channel).channel1(k,:));
+            raw_freq_data = histcounts(plotting_data, BinWidth=200);
+            avg_data1 = movmean(raw_freq_data,3);
         
-            reference_cell = {on,off,R1on,R2on,R1off,R2off,S1OnOff,S2OnOff};
+            %Conver to frequency from spike count
+            % avg_data = (avg_data1*50/10)*10/150*75/40;
             
-            times = find(reference_cell{j} == 1);
-            b = transpose(repmat(times,1,3));
-            y_lines = nan(1,length(times));
-            y_lines(1,:) = k-1-d;
-            y_lines(2,:) = k-d;
-            y_lines(3,:) = nan;
-            figure(25+counter,'Visible', 'off')
-            plotting_data = [plotting_data;times];
-            plot(b,y_lines,'Color',[0 0 0 0.2],'LineWidth',0.3); hold on;
-
+            figure('Visible', 'off');
+            % Optimize figure properties
+            % set(gcf, 'Toolbar', 'none', 'Menubar', 'none');
             
-
+            plot(avg_data1,'r',LineWidth=0.5);
+        
+            channel_string = join(["Channel", data_channel], ' ');
+            graph_title = [node_name, channel_string, location];
+            title(graph_title, 'FontSize', 12, 'FontWeight', 'bold', 'FontName', 'Arial');
+        
+            PSTH_file_name = [node_name num2str(data_channel) '_' location '_PSTH' '.fig'];
+            saveas(gcf, PSTH_file_name); % Save as MATLAB figure file
+            close(gcf);
         end
-        saveas(gcf, [titles{j} '_' location '_RASTER' '.fig']);
-
-    
-
-    
-    raw_freq_data = histcounts(plotting_data, BinWidth=200);
-    avg_data1 = movmean(raw_freq_data,3);
-
-    %Conver to frequency from spike count
-    % avg_data = (avg_data1*50/10)*10/150*75/40;
-    
-    figure(2000+counter,'Visible', 'off')
-    plot(avg_data1,'r',LineWidth=0.5);
-
-    saveas(gcf, [titles{j} '_' location '_PSTH' '.fig']); % Save as MATLAB figure file
-
 
     % if contains(titles{j}, 'S')
     %     plot(linspace(0,ending_sample-starting_sample,length(avg_data)),avg_data,'r',LineWidth=0.5);
@@ -114,4 +148,8 @@ for j = 1:length(titles)
     end
 
 end
+toc;
 
+cd ..
+
+profile viewer;

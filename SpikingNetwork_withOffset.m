@@ -1,4 +1,7 @@
 %% Initialize
+profile on;
+warning('off','all');
+warning
 
 % change current directory to folder where this script is stored
 mfileinfo = mfilename('fullpath');
@@ -16,6 +19,7 @@ addpath('cSPIKE'); InitializecSPIKE;
 addpath('plotting');
 addpath('subfunctions');
 
+
 %% Make ICfiles.mat if it's not in your directory
 
 if ~isfile('ICfiles.mat'), makeICfiles; end
@@ -29,8 +33,11 @@ study_dir = fullfile(pwd,'run','4-channel-PV-inputs');
 if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
 mkdir(fullfile(study_dir, 'solve'));
 
+addpath(fullfile(study_dir, 'solve'));
+
+
 % expName: folder under 'simData' where results are saved
-expName = '12-15-23 very phasic, higher PV ptoential';
+expName = '12-15-23 very phasic, higher PV potential';
 simDataDir = [pwd filesep 'simData' filesep expName];
 if ~exist(simDataDir,'dir'), mkdir(simDataDir); end
 
@@ -114,6 +121,9 @@ else, options.time_end = padToTime*numel(options.locNum); end
 %% post-process for performance and firing results
 
 postProcessSims;
+save('current_run_data.mat');
 
+profile off;
+profile viewer;
 
 %4x4   * 1x4   * 4x4

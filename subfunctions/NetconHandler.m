@@ -18,4 +18,4 @@ netcons.PEnetcon = [1,0,0,0;
                     0,0,0,1];
 
 % RCnetcon: E (Ron) -> C
-netcons.RCnetcon = [0;0;0;1];
+netcons.RCnetcon = [1;0;0;0];

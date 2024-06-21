@@ -1,5 +1,6 @@
 % run either plot_digraph or plotAll_digraphs after running this for
 % graphing data
+% load('current_run_data.mat');
 
 %update netcons
 NetconHandler;
@@ -48,7 +49,7 @@ end
 
 %% single offset implementation for C
 nodeCounter = nodeCounter + 1;
-Nodesx(nodeCounter) = (numChannels+1)/2;
+Nodesx(nodeCounter) = (numChannels+1)/2 + .25;
 Nodesy(nodeCounter) = 3.5;
 
 
@@ -85,6 +86,10 @@ inhibitory_cons = {'SOnOff', 'X', 'TD'};
 % mapping for node numberings
 nodeMap = containers.Map({'On', 'Off', 'ROn', 'ROff', 'SOnOff', 'TD', 'X', 'C'}, ...
                            {1, 2, 3, 4, 5, 6, 7, totalNodes});
+
+% reverse mapping
+reverseNodeMap = containers.Map(values(nodeMap), keys(nodeMap));
+
 
 for c = 1:numChannels
     for x = 1:numConnections
@@ -229,146 +234,4 @@ for u = 1:length(sources)
     arrow_sizes = [arrow_sizes arrow_size];
 
 end
-
-plotAll_digraphs;
-
-% %% Graphing Segment
-% 
-% %Be careful! Do not override the s struct
-% 
-% weights = ones(1,length(targets))*1;
-% 
-% figure;
-% 
-% G = digraph(sources,targets,weights);
-% 
-% 
-% %IMPORTANT:::: Look at
-% %https://www.mathworks.com/help/matlab/ref/matlab.graphics.chart.primitive.graphplot.highlight.html
-% %for graph colors
-% 
-% %% graph and change X and PV attributes
-% p = plot(G,'k','Xdata',Nodesx,'Ydata',Nodesy); hold on
-% 
-% %% highlight P-E connections
-% highlight(p, inhibs_PEs,'NodeColor','red')
-% for node=1:length(inhibs_PEt)
-%     if inhibs_PEt{node}{2} == 1 % within channel
-%         highlight(p, inhibs_PEs(node), inhibs_PEt{node}{1},'EdgeColor','blue')
-%     else                        % cross channel
-%         highlight(p, inhibs_PEs(node), inhibs_PEt{node}{1},'EdgeColor','green')
-%     end
-% end
-% 
-% %% highlight X-R connections
-% highlight(p, SOM_nodes,'NodeColor','red')
-% highlight(p, inhibs_XRs, inhibs_XRt,'EdgeColor','red')
-% %highlight(p, inhibs_XRs, inhibs_XRt,'LineStyle','--')
-% 
-% %% highlight TD-X connections
-% highlight(p, TD_SOMs,'NodeColor','red')
-% highlight(p, TD_SOMs, TD_SOMt,'EdgeColor',[0.75,0.75,0])
-% 
-% %% highlight and modify line widths and arrow sizes
-% for node=1:length(sources)
-%     highlight(p, sources(node), targets(node), 'LineWidth',all_gsyns(node),'ArrowSize',arrow_sizes(node))
-% end
-
-
-%% GPT HSV test
-% syns = [];
-% 
-% for u = 1:length(sources)
-%     start_type = mod(sources(u),7);
-%     end_type = mod(targets(u),7);
-% 
-%     if start_type == 0
-%         start_type = 7;
-%     end
-%     if end_type == 0
-%         end_type = 7;
-%     end
-% 
-%     tstring = s.populations(start_type).name + "->" + s.populations(end_type).name;
-%     for j = 1:length(s.connections)
-%         if strcmp(tstring,s.connections(j).direction)
-%             target = j;
-%         end
-%     end
-% 
-%     gsyn_m = s.connections(target).parameters(2);
-%     syns = [syns gsyn_m{1}];
-% 
-% end
-% 
-% % Step 2: Normalize the gsyn values
-% min_gsyn = min(syns);
-% max_gsyn = max(syns);
-% norm_gsyns = (syns - min_gsyn) / (max_gsyn - min_gsyn);  % Normalize to [0, 1]
-% 
-% % Step 3: Assign hues based on normalized gsyn values
-% for u = 1:length(sources)
-%     start_type = mod(sources(u), 7);
-%     end_type = mod(targets(u), 7);
-% 
-%     if start_type == 0
-%         start_type = 7;
-%     end
-%     if end_type == 0
-%         end_type = 7;
-%     end
-% 
-%     tstring = s.populations(start_type).name + "->" + s.populations(end_type).name;
-%     for j = 1:length(s.connections)
-%         if strcmp(tstring, s.connections(j).direction)
-%             target = j;
-%         end
-%     end
-% 
-%     gsyn_m = s.connections(target).parameters(2);
-%     gsyn_value = gsyn_m{1};
-% 
-%     % Find the normalized value for this gsyn
-%     norm_value = (gsyn_value - min_gsyn) / (max_gsyn - min_gsyn);
-% 
-%     % Set hue based on normalized gsyn value
-%     hue = norm_value;  % Hue varies from 0 to 1
-%     saturation = 1;    % Full saturation
-%     value = 1;         % Full brightness
-%     color = hsv2rgb([hue, saturation, value]);
-% 
-%     % Highlight the line with the calculated color
-%     highlight(p, sources(u), targets(u), 'EdgeColor', color, 'ArrowSize', 5);
-% end
-
-
-%What are the things that go into the magnitude of the connection?
-%Gsyn
-%Netcon
-    %PEnetcon
-    %RCnetcon
-
-%annotation('arrow', [.56 .58], [.221 .223],'color',[0 0 1]);
-
-%ToDos
-%Make all of the connections dynamic    %Still needs some work
-      %Should make it so that if a new node  is added to the system or
-      %taken away it still works.
-      %Should work with different cortical neuron setups.
-
-%Extend to 4 channels                   %Done
-%Change colors                          %Mostly done
-%Change line/arrow weights              %Mostly done
-%Put in arrows                          %Done
-%Find a way to handle x inhibition without it being too crowded   %Done
-
-%Dales law implement   %Mostly Done
-
-%Things to touch on in today's meeting
-%1. Netcon is not implemented yet for line width multiplier
-%2. Labels on lines
-%3. Further flexibility
-
-%Todos (After meeting)
-%Make TDs red
-%Replicate Aim network model
+gui_plotting(TD_SOMs, TD_SOMt, inhibs_XRs, inhibs_XRt, inhibs_PEs, inhibs_PEt, targets, sources, Nodesx, Nodesy, SOM_nodes, all_gsyns, arrow_sizes, reverseNodeMap);

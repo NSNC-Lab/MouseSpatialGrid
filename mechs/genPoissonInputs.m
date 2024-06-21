@@ -1,16 +1,39 @@
 function s = genPoissonInputs(trial,locNum,label,t_ref,t_ref_rel,rec)
 
+% coder.extrinsic('load');
+% fileData.spks = [];
+% fileData.dt = 0;
+
 %disp('hello :)')
 %disp(pwd)
 
 
 type = label(2:end-1);   % dynasim reads the apostrophes as literals
+
 %fileData = load(['C:\Users\ipboy\Desktop\Modeling Paper\Model\Model_Code\run\single-channel-AM-stim\solve\IC_spks_' type '.mat'],'spks','dt');
 
-fileData = load(['IC_spks_' type '.mat'],'spks','dt');
+% fileData = load(['/Users/sanket/Desktop/Model Stuff/MouseSpatialGrid/run/4-channel-PV-inputs/solve/IC_spks_' type '.mat'],'spks','dt');
+
+% file_Path = 'C:\Users\sanke\Desktop\Github\PC-Copy\run\4-channel-PV-inputs\solve\IC_spks_on.mat';
+% 
+% 
+% fileData = load(file_Path,'spks','dt');
+
+% fileData = load(['IC_spks_' type '.mat'], 'spks', 'dt');
+
+if strcmp(type, 'on')
+    fileData = load('IC_spks_on.mat', 'spks', 'dt');
+elseif strcmp(type, 'off')
+    fileData = load('IC_spks_off.mat', 'spks', 'dt');
+else
+%     fileData = load(['IC_spks_' type '.mat'],'spks','dt');
+    fileData = load('IC_spks_on.mat', 'spks', 'dt');
+end
+
 
 temp = fileData.spks;
 dt = fileData.dt;
+
 %dt = 0.1;
 loc_size = size(fileData.spks,1)/24;
 trial_rate = squeeze(temp(:,:,trial)); % time x channel x cells
@@ -23,7 +46,9 @@ trial_rate = squeeze(temp(:,:,trial)); % time x channel x cells
 
 rate = trial_rate; 
 
+
 s = zeros(size(rate));
+
 
 for n = 1:size(rate,2)
     s(:,n) = spikeGenerator(rate(:,n),dt,t_ref,t_ref_rel,rec);
@@ -46,15 +71,29 @@ w = (tw - t_ref_samp).^rec ./ ((tw - t_ref_samp).^rec + (t_rel_samp).^rec); % re
 w(tw < t_ref_samp) = 0;
 
 x=rand(1,n);
-spike_train=zeros(1,n);
-spike_times=[];
+spike_train = zeros(1,n);
+
+% spike_times = [];
+spike_times = zeros(1,n);
+
+spike_count = 0; % keep track of actual number of spikes
+
 for i=1:n   % sample
-    if ~isempty(spike_times) && i-spike_times(end) < n_refab
-        rate(i)=rate(i)*w(i-spike_times(end)); % implement relative refractory period
+    % if ~isempty(spike_times) && i-spike_times(end) < n_refab
+    %     rate(i)=rate(i)*w(i-spike_times(end)); % implement relative refractory period
+    % end
+    % if x(i)<dt_sec*rate(i)
+    %     spike_train(i) = 1;
+    %     spike_times=[spike_times; i];
+    % end
+
+    if spike_count > 0 && i - spike_times(spike_count) < n_refab
+        rate(i) = rate(i) * w(i - spike_times(spike_count));
     end
-    if x(i)<dt_sec*rate(i)
+    if x(i) < dt_sec * rate(i)
         spike_train(i) = 1;
-        spike_times=[spike_times; i];
+        spike_count = spike_count + 1;
+        spike_times(spike_count) = i;
     end
 end
 
