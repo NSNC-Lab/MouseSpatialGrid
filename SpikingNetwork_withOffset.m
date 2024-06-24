@@ -114,6 +114,7 @@ else, options.time_end = padToTime*numel(options.locNum); end
 %The question is, how do we get snn_out to reflect a certain target
 %direction
 
+
 %[snn_out,s] = columnNetwork_paper(study_dir,varies,options,netcons);
 %[snn_out,s] = columnNetwork_simpler(study_dir,varies,options,netcons);
 [snn_out,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons);
@@ -121,7 +122,6 @@ else, options.time_end = padToTime*numel(options.locNum); end
 %% post-process for performance and firing results
 
 postProcessSims;
-save('current_run_data.mat');
 
 profile off;
 profile viewer;

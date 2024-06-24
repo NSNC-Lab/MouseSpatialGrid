@@ -174,7 +174,10 @@ s.connections(end).parameters={'gSYN',0.012,'tauR',EE_rise,'tauD',EE_fall,'netco
 
 s.connections(end+1).direction='X->ROn';
 s.connections(end).mechanism_list={'PSC3'};
-s.connections(end).parameters={'gSYN',[0.000,0.000,0.000,0.000;0.000,0.000,0.000,0.000;0.000,0.000,0.000,0.000;0.000,0.012,0.000,0.000],'tauR',XE_rise,'tauD',XE_fall,'ESYN',-80,'netcon',XRnetcon};
+s.connections(end).parameters={'gSYN',[0.012,0.012,0.012,0.012;
+                                       0.012,0.012,0.012,0.012;
+                                       0.012,0.012,0.012,0.012;
+                                       0.012,0.012,0.012,0.012],'tauR',XE_rise,'tauD',XE_fall,'ESYN',-80,'netcon',XRnetcon};
 
 % apply TD->E and TD->S inhibition
 s.connections(end+1).direction='TD->ROn';
@@ -226,10 +229,10 @@ end
 tic;
 
 % simdata = 0;
-simdata = dsSimulate(s,'tspan',[dt time_end], 'solver',solverType, 'dt',dt,...
+simdata = dsSimulate(s, netcons,'tspan',[dt time_end], 'solver',solverType, 'dt',dt,...
   'downsample_factor',1, 'save_data_flag',0, 'save_results_flag',1,...
   'study_dir',study_dir, 'vary',vary, 'debug_flag', 1, 'verbose_flag',0,...
-  'mex_flag',options.mex_flag, 'parfor_flag',1);
+  'mex_flag',options.mex_flag, 'parfor_flag',0, 'compile_flag',1);
 
 toc;
 

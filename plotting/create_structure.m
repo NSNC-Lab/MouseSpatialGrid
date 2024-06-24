@@ -234,4 +234,4 @@ for u = 1:length(sources)
     arrow_sizes = [arrow_sizes arrow_size];
 
 end
-gui_plotting(TD_SOMs, TD_SOMt, inhibs_XRs, inhibs_XRt, inhibs_PEs, inhibs_PEt, targets, sources, Nodesx, Nodesy, SOM_nodes, all_gsyns, arrow_sizes, reverseNodeMap);
+persistent_gui(TD_SOMs, TD_SOMt, inhibs_XRs, inhibs_XRt, inhibs_PEs, inhibs_PEt, targets, sources, Nodesx, Nodesy, SOM_nodes, all_gsyns, arrow_sizes, reverseNodeMap);
