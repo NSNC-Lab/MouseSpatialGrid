@@ -21,11 +21,11 @@ y_range = [-1.5,4];
 weights = ones(1,length(targets))*1;
 
 G = digraph(sources,targets,weights);
-
+ 
 
 % Define the desired size of the figure in pixels
-figureWidth = 1000; % Width in pixels
-figureHeight = 750; % Height in pixels
+figureWidth = 1200; % Width in pixels
+figureHeight = 900; % Height in pixels
 
 tic;
 % for i=source_labels
@@ -38,7 +38,7 @@ tic;
         masker_offsetX = 0.25 + (j-1);
         
         % Create the figure with the specified size
-        h = figure('Position', [100, 100, figureWidth, figureHeight]);
+        figure('Position', [100, 100, figureWidth, figureHeight]);
         
         % graph and change X and PV attributes
         p = plot(G,'k','Xdata',Nodesx,'Ydata',Nodesy); hold on
@@ -68,18 +68,19 @@ tic;
         for node=1:length(sources)
             highlight(p, sources(node), targets(node), 'LineWidth',all_gsyns(node),'ArrowSize',arrow_sizes(node))
         end
-        
-        if i == j
-            xx = pre_normalized_x(i) + 1;
-            create_arrow(xx, 'Source + Masker', 'blue', x_range, y_range);
-        else
-            if i ~= 0
+        if i~=0 && j~=0
+            if i == j
                 xx = pre_normalized_x(i) + 1;
-                create_arrow(xx, 'Source', 'green', x_range, y_range);
-            end
-            if j ~= 0
-                xx = pre_normalized_x(j) + 1;
-                create_arrow(xx, 'Masker', 'red', x_range, y_range);
+                create_arrow(xx, 'Source + Masker', 'blue', x_range, y_range);
+            else
+                if i ~= 0
+                    xx = pre_normalized_x(i) + 1;
+                    create_arrow(xx, 'Source', 'green', x_range, y_range);
+                end
+                if j ~= 0
+                    xx = pre_normalized_x(j) + 1;
+                    create_arrow(xx, 'Masker', 'red', x_range, y_range);
+                end
             end
         end
         

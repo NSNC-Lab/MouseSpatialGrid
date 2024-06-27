@@ -1,5 +1,5 @@
 %% Initialize
-profile on;
+% profile on;
 warning('off','all');
 warning
 
@@ -59,12 +59,10 @@ params_4channel_cleanonly_PVinputs;
 [azi,spatialCurves,chanLabels,bestLocs] = genSpatiallyTunedChans(options.nCells);
 
 
-%% Handle Netcons
-
-NetconHandler;
-
 %% load input stimuli (targets and maskers) from ICSimStim
 load('default_STRF_with_offset_200k.mat');
+
+NetconHandler;
 
 % firing rates were generated with sampling rate of 10000 Hz to match old
 % simulation time step, downsample if dt's don't match
@@ -114,6 +112,7 @@ else, options.time_end = padToTime*numel(options.locNum); end
 %The question is, how do we get snn_out to reflect a certain target
 %direction
 
+
 %[snn_out,s] = columnNetwork_paper(study_dir,varies,options,netcons);
 %[snn_out,s] = columnNetwork_simpler(study_dir,varies,options,netcons);
 [snn_out,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons);
@@ -121,9 +120,8 @@ else, options.time_end = padToTime*numel(options.locNum); end
 %% post-process for performance and firing results
 
 postProcessSims;
-save('current_run_data.mat');
 
-profile off;
-profile viewer;
+% profile off;
+% profile viewer;
 
 %4x4   * 1x4   * 4x4

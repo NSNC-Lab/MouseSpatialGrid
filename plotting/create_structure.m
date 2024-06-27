@@ -214,6 +214,7 @@ for u = 1:length(sources)
         end
     % cross channel PV condition
     elseif start_type == 5 && (sources(u) - targets(u) ~= 2) && end_type == 3
+            gsyn = gsyn_m{1};
             end_gsyn = gsyn*100;
             arrow_size = end_gsyn*3;
     else
@@ -234,4 +235,4 @@ for u = 1:length(sources)
     arrow_sizes = [arrow_sizes arrow_size];
 
 end
-gui_plotting(TD_SOMs, TD_SOMt, inhibs_XRs, inhibs_XRt, inhibs_PEs, inhibs_PEt, targets, sources, Nodesx, Nodesy, SOM_nodes, all_gsyns, arrow_sizes, reverseNodeMap);
+persistent_gui(TD_SOMs, TD_SOMt, inhibs_XRs, inhibs_XRt, inhibs_PEs, inhibs_PEt, targets, sources, Nodesx, Nodesy, SOM_nodes, all_gsyns, arrow_sizes, reverseNodeMap);

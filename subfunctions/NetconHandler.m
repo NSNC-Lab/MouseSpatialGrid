@@ -8,7 +8,7 @@ netcons = struct;
 netcons.XRnetcon = [0,0,0,0;
                     0,0,0,0;
                     0,0,0,0;
-                    0,1,0,0];
+                    0,0,0,0];
 
 % PEnetcon: PV (SOnOff) -> E (Ron)
 %netcons.PEnetcon = eye(options.nCells);
@@ -18,4 +18,4 @@ netcons.PEnetcon = [1,0,0,0;
                     0,0,0,1];
 
 % RCnetcon: E (Ron) -> C
-netcons.RCnetcon = [1;0;0;0];
+netcons.RCnetcon = [1;1;1;1];
