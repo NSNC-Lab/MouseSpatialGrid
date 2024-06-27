@@ -64,7 +64,7 @@ for vv = 1:jump % for each varied parameter
             channel = struct();
             
             % for each trial
-            for trial = 1:numTrials
+           for trial = 1:numTrials
                 channel(channelNum).popSpks(trial,:) = subData(trial).(fieldNames{currentPop})(tstart:tend,channelNum);
             end
             spks.(popNames{currentPop})(vv).(['channel' num2str(channelNum)]) = channel(channelNum).popSpks;

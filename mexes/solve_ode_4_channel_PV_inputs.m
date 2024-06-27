@@ -1,4 +1,4 @@
-function [T,On_V,On_g_ad,Off_V,Off_g_ad,ROn_V,ROn_g_ad,ROff_V,ROff_g_ad,SOnOff_V,SOnOff_g_ad,TD_V,TD_g_ad,X_V,X_g_ad,C_V,C_g_ad,ROn_On_PSC_s,ROn_On_PSC_x,ROn_On_PSC_F,ROn_On_PSC_P,ROn_On_PSC_q,SOnOff_On_PSC_s,SOnOff_On_PSC_x,SOnOff_On_PSC_F,SOnOff_On_PSC_P,SOnOff_On_PSC_q,ROn_SOnOff_PSC_s,ROn_SOnOff_PSC_x,ROn_SOnOff_PSC_F,ROn_SOnOff_PSC_P,ROn_SOnOff_PSC_q,ROff_SOnOff_PSC_s,ROff_SOnOff_PSC_x,ROff_SOnOff_PSC_F,ROff_SOnOff_PSC_P,ROff_SOnOff_PSC_q,ROff_Off_PSC_s,ROff_Off_PSC_x,ROff_Off_PSC_F,ROff_Off_PSC_P,ROff_Off_PSC_q,SOnOff_Off_PSC_s,SOnOff_Off_PSC_x,SOnOff_Off_PSC_F,SOnOff_Off_PSC_P,SOnOff_Off_PSC_q,ROn_ROn_iNoise_V3_sn,ROn_ROn_iNoise_V3_xn,X_ROn_PSC_s,X_ROn_PSC_x,X_ROn_PSC_F,X_ROn_PSC_P,X_ROn_PSC_q,ROn_X_PSC3_s,ROn_X_PSC3_x,ROn_X_PSC3_F,ROn_X_PSC3_P,ROn_X_PSC3_q,ROn_TD_PSC_s,ROn_TD_PSC_x,ROn_TD_PSC_F,ROn_TD_PSC_P,ROn_TD_PSC_q,ROff_TD_PSC_s,ROff_TD_PSC_x,ROff_TD_PSC_F,ROff_TD_PSC_P,ROff_TD_PSC_q,X_TD_PSC_s,X_TD_PSC_x,X_TD_PSC_F,X_TD_PSC_P,X_TD_PSC_q,C_ROn_PSC_s,C_ROn_PSC_x,C_ROn_PSC_F,C_ROn_PSC_P,C_ROn_PSC_q,On_V_spikes,Off_V_spikes,ROn_V_spikes,ROff_V_spikes,SOnOff_V_spikes,TD_V_spikes,X_V_spikes,C_V_spikes,On_On_IC_iIC,Off_Off_IC_iIC,ROn_On_PSC_syn,SOnOff_On_PSC_syn,ROn_SOnOff_PSC_syn,ROff_SOnOff_PSC_syn,ROff_Off_PSC_syn,SOnOff_Off_PSC_syn,X_ROn_PSC_syn,ROn_X_PSC3_syn,ROn_TD_PSC_syn,ROff_TD_PSC_syn,X_TD_PSC_syn,C_ROn_PSC_syn,On_R,On_tau,On_Imask,Off_R,Off_tau,Off_Imask,ROn_R,ROn_tau,ROn_Imask,ROff_R,ROff_tau,ROff_Imask,SOnOff_R,SOnOff_tau,SOnOff_Imask,TD_R,TD_tau,TD_Imask,TD_Icur,X_R,X_tau,X_Imask,C_R,C_tau,C_Imask,On_On_IC_netcon,On_On_IC_input,Off_Off_IC_netcon,Off_Off_IC_input,ROn_On_PSC_netcon,ROn_On_PSC_scale,SOnOff_On_PSC_netcon,SOnOff_On_PSC_scale,ROn_SOnOff_PSC_netcon,ROn_SOnOff_PSC_scale,ROff_SOnOff_PSC_netcon,ROff_SOnOff_PSC_scale,ROff_Off_PSC_netcon,ROff_Off_PSC_scale,SOnOff_Off_PSC_netcon,SOnOff_Off_PSC_scale,ROn_ROn_iNoise_V3_netcon,ROn_ROn_iNoise_V3_token,ROn_ROn_iNoise_V3_scale,X_ROn_PSC_netcon,X_ROn_PSC_scale,ROn_X_PSC3_netcon,ROn_X_PSC3_scale,ROn_TD_PSC_netcon,ROn_TD_PSC_scale,ROff_TD_PSC_netcon,ROff_TD_PSC_scale,X_TD_PSC_netcon,X_TD_PSC_scale,C_ROn_PSC_netcon,C_ROn_PSC_scale]=solve_ode
+function [T,On_V,On_g_ad,Off_V,Off_g_ad,ROn_V,ROn_g_ad,ROff_V,ROff_g_ad,SOnOff_V,SOnOff_g_ad,TD_V,TD_g_ad,X_V,X_g_ad,C_V,C_g_ad,ROn_On_PSC3_s,ROn_On_PSC3_x,ROn_On_PSC3_F,ROn_On_PSC3_P,ROn_On_PSC3_q,SOnOff_On_PSC_s,SOnOff_On_PSC_x,SOnOff_On_PSC_F,SOnOff_On_PSC_P,SOnOff_On_PSC_q,ROn_SOnOff_PSC_s,ROn_SOnOff_PSC_x,ROn_SOnOff_PSC_F,ROn_SOnOff_PSC_P,ROn_SOnOff_PSC_q,ROff_SOnOff_PSC_s,ROff_SOnOff_PSC_x,ROff_SOnOff_PSC_F,ROff_SOnOff_PSC_P,ROff_SOnOff_PSC_q,ROff_Off_PSC_s,ROff_Off_PSC_x,ROff_Off_PSC_F,ROff_Off_PSC_P,ROff_Off_PSC_q,SOnOff_Off_PSC_s,SOnOff_Off_PSC_x,SOnOff_Off_PSC_F,SOnOff_Off_PSC_P,SOnOff_Off_PSC_q,ROn_ROn_iNoise_V3_sn,ROn_ROn_iNoise_V3_xn,X_ROn_PSC_s,X_ROn_PSC_x,X_ROn_PSC_F,X_ROn_PSC_P,X_ROn_PSC_q,ROn_X_PSC3_s,ROn_X_PSC3_x,ROn_X_PSC3_F,ROn_X_PSC3_P,ROn_X_PSC3_q,ROn_TD_PSC_s,ROn_TD_PSC_x,ROn_TD_PSC_F,ROn_TD_PSC_P,ROn_TD_PSC_q,ROff_TD_PSC_s,ROff_TD_PSC_x,ROff_TD_PSC_F,ROff_TD_PSC_P,ROff_TD_PSC_q,X_TD_PSC_s,X_TD_PSC_x,X_TD_PSC_F,X_TD_PSC_P,X_TD_PSC_q,C_ROn_PSC3_s,C_ROn_PSC3_x,C_ROn_PSC3_F,C_ROn_PSC3_P,C_ROn_PSC3_q,On_V_spikes,Off_V_spikes,ROn_V_spikes,ROff_V_spikes,SOnOff_V_spikes,TD_V_spikes,X_V_spikes,C_V_spikes,On_On_IC_iIC,Off_Off_IC_iIC,ROn_On_PSC3_syn,SOnOff_On_PSC_syn,ROn_SOnOff_PSC_syn,ROff_SOnOff_PSC_syn,ROff_Off_PSC_syn,SOnOff_Off_PSC_syn,X_ROn_PSC_syn,ROn_X_PSC3_syn,ROn_TD_PSC_syn,ROff_TD_PSC_syn,X_TD_PSC_syn,C_ROn_PSC3_syn,On_R,On_tau,On_Imask,Off_R,Off_tau,Off_Imask,ROn_R,ROn_tau,ROn_Imask,ROff_R,ROff_tau,ROff_Imask,SOnOff_R,SOnOff_tau,SOnOff_Imask,TD_R,TD_tau,TD_Imask,TD_Icur,X_R,X_tau,X_Imask,C_R,C_tau,C_Imask,On_On_IC_netcon,On_On_IC_input,Off_Off_IC_netcon,Off_Off_IC_input,ROn_On_PSC3_netcon,ROn_On_PSC3_scale,SOnOff_On_PSC_netcon,SOnOff_On_PSC_scale,ROn_SOnOff_PSC_netcon,ROn_SOnOff_PSC_scale,ROff_SOnOff_PSC_netcon,ROff_SOnOff_PSC_scale,ROff_Off_PSC_netcon,ROff_Off_PSC_scale,SOnOff_Off_PSC_netcon,SOnOff_Off_PSC_scale,ROn_ROn_iNoise_V3_netcon,ROn_ROn_iNoise_V3_token,ROn_ROn_iNoise_V3_scale,X_ROn_PSC_netcon,X_ROn_PSC_scale,ROn_X_PSC3_netcon,ROn_X_PSC3_scale,ROn_TD_PSC_netcon,ROn_TD_PSC_scale,ROff_TD_PSC_netcon,ROff_TD_PSC_scale,X_TD_PSC_netcon,X_TD_PSC_scale,C_ROn_PSC3_netcon,C_ROn_PSC3_scale]=solve_ode
 
 % ------------------------------------------------------------
 % Parameters:
@@ -46,8 +46,8 @@ On_On_IC_netcon = [+1.000000000000000e+00   +0.000000000000000e+00   +0.00000000
 On_On_IC_input =  genPoissonInputs(p.On_On_IC_trial,p.On_On_IC_locNum,p.On_On_IC_label,p.On_On_IC_t_ref,p.On_On_IC_t_ref_rel,p.On_On_IC_rec);
 Off_Off_IC_netcon = [+1.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +1.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +1.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +1.000000000000000e+00];
 Off_Off_IC_input =  genPoissonInputs(p.Off_Off_IC_trial,p.Off_Off_IC_locNum,p.Off_Off_IC_label,p.Off_Off_IC_t_ref,p.Off_Off_IC_t_ref_rel,p.Off_Off_IC_rec);
-ROn_On_PSC_netcon = [+1.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +1.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +1.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +1.000000000000000e+00];
-ROn_On_PSC_scale = (p.ROn_On_PSC_tauD/p.ROn_On_PSC_tauR)^(p.ROn_On_PSC_tauR/(p.ROn_On_PSC_tauD-p.ROn_On_PSC_tauR));
+ROn_On_PSC3_netcon = [+1.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +1.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +1.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +1.000000000000000e+00];
+ROn_On_PSC3_scale = (p.ROn_On_PSC3_tauD/p.ROn_On_PSC3_tauR)^(p.ROn_On_PSC3_tauR/(p.ROn_On_PSC3_tauD-p.ROn_On_PSC3_tauR));
 SOnOff_On_PSC_netcon = [+1.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +1.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +1.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +1.000000000000000e+00];
 SOnOff_On_PSC_scale = (p.SOnOff_On_PSC_tauD/p.SOnOff_On_PSC_tauR)^(p.SOnOff_On_PSC_tauR/(p.SOnOff_On_PSC_tauD-p.SOnOff_On_PSC_tauR));
 ROn_SOnOff_PSC_netcon = p.ROn_SOnOff_PSC_netcon;
@@ -58,7 +58,7 @@ ROff_Off_PSC_netcon = [+1.000000000000000e+00   +0.000000000000000e+00   +0.0000
 ROff_Off_PSC_scale = (p.ROff_Off_PSC_tauD/p.ROff_Off_PSC_tauR)^(p.ROff_Off_PSC_tauR/(p.ROff_Off_PSC_tauD-p.ROff_Off_PSC_tauR));
 SOnOff_Off_PSC_netcon = [+1.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +1.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +1.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +1.000000000000000e+00];
 SOnOff_Off_PSC_scale = (p.SOnOff_Off_PSC_tauD/p.SOnOff_Off_PSC_tauR)^(p.SOnOff_Off_PSC_tauR/(p.SOnOff_Off_PSC_tauD-p.SOnOff_Off_PSC_tauR));
-ROn_ROn_iNoise_V3_netcon = [+0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00];
+ROn_ROn_iNoise_V3_netcon = [+1.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +1.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +1.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +1.000000000000000e+00];
 ROn_ROn_iNoise_V3_token = genPoissonTimes(p.ROn_Npop,p.ROn_ROn_iNoise_V3_dt,p.ROn_ROn_iNoise_V3_FR,p.ROn_ROn_iNoise_V3_sigma,p.ROn_ROn_iNoise_V3_simlen);
 ROn_ROn_iNoise_V3_scale =  (p.ROn_ROn_iNoise_V3_tauD_N/p.ROn_ROn_iNoise_V3_tauR_N)^(p.ROn_ROn_iNoise_V3_tauR_N/(p.ROn_ROn_iNoise_V3_tauD_N-p.ROn_ROn_iNoise_V3_tauR_N));
 X_ROn_PSC_netcon = [+1.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +1.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +1.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +1.000000000000000e+00];
@@ -71,8 +71,8 @@ ROff_TD_PSC_netcon = [+1.000000000000000e+00   +0.000000000000000e+00   +0.00000
 ROff_TD_PSC_scale = (p.ROff_TD_PSC_tauD/p.ROff_TD_PSC_tauR)^(p.ROff_TD_PSC_tauR/(p.ROff_TD_PSC_tauD-p.ROff_TD_PSC_tauR));
 X_TD_PSC_netcon = [+1.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +1.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +1.000000000000000e+00   +0.000000000000000e+00; +0.000000000000000e+00   +0.000000000000000e+00   +0.000000000000000e+00   +1.000000000000000e+00];
 X_TD_PSC_scale = (p.X_TD_PSC_tauD/p.X_TD_PSC_tauR)^(p.X_TD_PSC_tauR/(p.X_TD_PSC_tauD-p.X_TD_PSC_tauR));
-C_ROn_PSC_netcon = p.C_ROn_PSC_netcon;
-C_ROn_PSC_scale = (p.C_ROn_PSC_tauD/p.C_ROn_PSC_tauR)^(p.C_ROn_PSC_tauR/(p.C_ROn_PSC_tauD-p.C_ROn_PSC_tauR));
+C_ROn_PSC3_netcon = [+1.000000000000000e+00; +1.000000000000000e+00; +1.000000000000000e+00; +1.000000000000000e+00];
+C_ROn_PSC3_scale = (p.C_ROn_PSC3_tauD/p.C_ROn_PSC3_tauR)^(p.C_ROn_PSC3_tauR/(p.C_ROn_PSC3_tauD-p.C_ROn_PSC3_tauR));
 
 % ------------------------------------------------------------
 % Initial conditions:
@@ -112,16 +112,16 @@ C_V = zeros(nsamp,p.C_Npop);
 C_V(1,:) =  p.C_E_L*ones(1,p.C_Npop);
 C_g_ad = zeros(nsamp,p.C_Npop);
 C_g_ad(1,:) =  zeros(1,p.C_Npop);
-ROn_On_PSC_s = zeros(nsamp,p.On_Npop);
-ROn_On_PSC_s(1,:) =  zeros(1,p.On_Npop);
-ROn_On_PSC_x = zeros(nsamp,p.On_Npop);
-ROn_On_PSC_x(1,:) =  zeros(1,p.On_Npop);
-ROn_On_PSC_F = zeros(nsamp,p.On_Npop);
-ROn_On_PSC_F(1,:) =  ones(1,p.On_Npop);
-ROn_On_PSC_P = zeros(nsamp,p.On_Npop);
-ROn_On_PSC_P(1,:) =  ones(1,p.On_Npop);
-ROn_On_PSC_q = zeros(nsamp,p.On_Npop);
-ROn_On_PSC_q(1,:) =  ones(1,p.On_Npop);
+ROn_On_PSC3_s = zeros(nsamp,p.On_Npop);
+ROn_On_PSC3_s(1,:) =  zeros(1,p.On_Npop);
+ROn_On_PSC3_x = zeros(nsamp,p.On_Npop);
+ROn_On_PSC3_x(1,:) =  zeros(1,p.On_Npop);
+ROn_On_PSC3_F = zeros(nsamp,p.On_Npop);
+ROn_On_PSC3_F(1,:) =  ones(1,p.On_Npop);
+ROn_On_PSC3_P = zeros(nsamp,p.On_Npop);
+ROn_On_PSC3_P(1,:) =  ones(1,p.On_Npop);
+ROn_On_PSC3_q = zeros(nsamp,p.On_Npop);
+ROn_On_PSC3_q(1,:) =  ones(1,p.On_Npop);
 SOnOff_On_PSC_s = zeros(nsamp,p.On_Npop);
 SOnOff_On_PSC_s(1,:) =  zeros(1,p.On_Npop);
 SOnOff_On_PSC_x = zeros(nsamp,p.On_Npop);
@@ -226,16 +226,16 @@ X_TD_PSC_P = zeros(nsamp,p.TD_Npop);
 X_TD_PSC_P(1,:) =  ones(1,p.TD_Npop);
 X_TD_PSC_q = zeros(nsamp,p.TD_Npop);
 X_TD_PSC_q(1,:) =  ones(1,p.TD_Npop);
-C_ROn_PSC_s = zeros(nsamp,p.ROn_Npop);
-C_ROn_PSC_s(1,:) =  zeros(1,p.ROn_Npop);
-C_ROn_PSC_x = zeros(nsamp,p.ROn_Npop);
-C_ROn_PSC_x(1,:) =  zeros(1,p.ROn_Npop);
-C_ROn_PSC_F = zeros(nsamp,p.ROn_Npop);
-C_ROn_PSC_F(1,:) =  ones(1,p.ROn_Npop);
-C_ROn_PSC_P = zeros(nsamp,p.ROn_Npop);
-C_ROn_PSC_P(1,:) =  ones(1,p.ROn_Npop);
-C_ROn_PSC_q = zeros(nsamp,p.ROn_Npop);
-C_ROn_PSC_q(1,:) =  ones(1,p.ROn_Npop);
+C_ROn_PSC3_s = zeros(nsamp,p.ROn_Npop);
+C_ROn_PSC3_s(1,:) =  zeros(1,p.ROn_Npop);
+C_ROn_PSC3_x = zeros(nsamp,p.ROn_Npop);
+C_ROn_PSC3_x(1,:) =  zeros(1,p.ROn_Npop);
+C_ROn_PSC3_F = zeros(nsamp,p.ROn_Npop);
+C_ROn_PSC3_F(1,:) =  ones(1,p.ROn_Npop);
+C_ROn_PSC3_P = zeros(nsamp,p.ROn_Npop);
+C_ROn_PSC3_P(1,:) =  ones(1,p.ROn_Npop);
+C_ROn_PSC3_q = zeros(nsamp,p.ROn_Npop);
+C_ROn_PSC3_q(1,:) =  ones(1,p.ROn_Npop);
 
 % MONITORS:
 On_tspike = -1e32*ones(5,p.On_Npop);
@@ -266,8 +266,8 @@ On_On_IC_iIC = zeros(nsamp,p.On_Npop);
 On_On_IC_iIC(1,:)=p.On_On_IC_g_postIC*(On_On_IC_input(k,:)*On_On_IC_netcon).*(On_V(1,:)-p.On_On_IC_E_exc);
 Off_Off_IC_iIC = zeros(nsamp,p.Off_Npop);
 Off_Off_IC_iIC(1,:)=p.Off_Off_IC_g_postIC*(Off_Off_IC_input(k,:)*Off_Off_IC_netcon).*(Off_V(1,:)-p.Off_Off_IC_E_exc);
-ROn_On_PSC_syn = zeros(nsamp,p.ROn_Npop);
-ROn_On_PSC_syn(1,:)=p.ROn_On_PSC_gSYN.*(ROn_On_PSC_s(1,:)*ROn_On_PSC_netcon).*(ROn_V(1,:)-p.ROn_On_PSC_ESYN);
+ROn_On_PSC3_syn = zeros(nsamp,p.ROn_Npop);
+ROn_On_PSC3_syn(1,:)=((ROn_On_PSC3_s(1,:)*(ROn_On_PSC3_netcon.*p.ROn_On_PSC3_gSYN)).*(ROn_V(1,:)-p.ROn_On_PSC3_ESYN));
 SOnOff_On_PSC_syn = zeros(nsamp,p.SOnOff_Npop);
 SOnOff_On_PSC_syn(1,:)=p.SOnOff_On_PSC_gSYN.*(SOnOff_On_PSC_s(1,:)*SOnOff_On_PSC_netcon).*(SOnOff_V(1,:)-p.SOnOff_On_PSC_ESYN);
 ROn_SOnOff_PSC_syn = zeros(nsamp,p.ROn_Npop);
@@ -288,8 +288,8 @@ ROff_TD_PSC_syn = zeros(nsamp,p.ROff_Npop);
 ROff_TD_PSC_syn(1,:)=p.ROff_TD_PSC_gSYN.*(ROff_TD_PSC_s(1,:)*ROff_TD_PSC_netcon).*(ROff_V(1,:)-p.ROff_TD_PSC_ESYN);
 X_TD_PSC_syn = zeros(nsamp,p.X_Npop);
 X_TD_PSC_syn(1,:)=p.X_TD_PSC_gSYN.*(X_TD_PSC_s(1,:)*X_TD_PSC_netcon).*(X_V(1,:)-p.X_TD_PSC_ESYN);
-C_ROn_PSC_syn = zeros(nsamp,p.C_Npop);
-C_ROn_PSC_syn(1,:)=p.C_ROn_PSC_gSYN.*(C_ROn_PSC_s(1,:)*C_ROn_PSC_netcon).*(C_V(1,:)-p.C_ROn_PSC_ESYN);
+C_ROn_PSC3_syn = zeros(nsamp,p.C_Npop);
+C_ROn_PSC3_syn(1,:)=((C_ROn_PSC3_s(1,:)*(C_ROn_PSC3_netcon.*p.C_ROn_PSC3_gSYN)).*(C_V(1,:)-p.C_ROn_PSC3_ESYN));
 
 % ###########################################################
 % Numerical integration:
@@ -301,7 +301,7 @@ for k=2:ntime
   On_g_ad_k1 = -On_g_ad(n-1,:) / p.On_tau_ad;
   Off_V_k1 = ( (p.Off_E_L-Off_V(n-1,:)) - Off_R*Off_g_ad(n-1,:).*(Off_V(n-1,:)-p.Off_E_k) - Off_R*((((p.Off_Off_IC_g_postIC*(Off_Off_IC_input(k,:)*Off_Off_IC_netcon).*(Off_V(n-1,:)-p.Off_Off_IC_E_exc))))) + Off_R*p.Off_Itonic.*Off_Imask + Off_R*p.Off_noise.*randn(1,p.Off_Npop) ) / Off_tau;
   Off_g_ad_k1 = -Off_g_ad(n-1,:) / p.Off_tau_ad;
-  ROn_V_k1 = ( (p.ROn_E_L-ROn_V(n-1,:)) - ROn_R*ROn_g_ad(n-1,:).*(ROn_V(n-1,:)-p.ROn_E_k) - ROn_R*((((p.ROn_On_PSC_gSYN.*(ROn_On_PSC_s(n-1,:)*ROn_On_PSC_netcon).*(ROn_V(n-1,:)-p.ROn_On_PSC_ESYN))))+((((p.ROn_SOnOff_PSC_gSYN.*(ROn_SOnOff_PSC_s(n-1,:)*ROn_SOnOff_PSC_netcon).*(ROn_V(n-1,:)-p.ROn_SOnOff_PSC_ESYN))))+((((p.ROn_ROn_iNoise_V3_nSYN.*(ROn_ROn_iNoise_V3_sn(n-1,:)*ROn_ROn_iNoise_V3_netcon).*(ROn_V(n-1,:)-p.ROn_ROn_iNoise_V3_E_exc))))+((((((ROn_X_PSC3_s(n-1,:)*(ROn_X_PSC3_netcon.*p.ROn_X_PSC3_gSYN)).*(ROn_V(n-1,:)-p.ROn_X_PSC3_ESYN)))))+((((p.ROn_TD_PSC_gSYN.*(ROn_TD_PSC_s(n-1,:)*ROn_TD_PSC_netcon).*(ROn_V(n-1,:)-p.ROn_TD_PSC_ESYN))))))))) + ROn_R*p.ROn_Itonic.*ROn_Imask + ROn_R*p.ROn_noise.*randn(1,p.ROn_Npop) ) / ROn_tau;
+  ROn_V_k1 = ( (p.ROn_E_L-ROn_V(n-1,:)) - ROn_R*ROn_g_ad(n-1,:).*(ROn_V(n-1,:)-p.ROn_E_k) - ROn_R*((((((ROn_On_PSC3_s(n-1,:)*(ROn_On_PSC3_netcon.*p.ROn_On_PSC3_gSYN)).*(ROn_V(n-1,:)-p.ROn_On_PSC3_ESYN)))))+((((p.ROn_SOnOff_PSC_gSYN.*(ROn_SOnOff_PSC_s(n-1,:)*ROn_SOnOff_PSC_netcon).*(ROn_V(n-1,:)-p.ROn_SOnOff_PSC_ESYN))))+((((p.ROn_ROn_iNoise_V3_nSYN.*(ROn_ROn_iNoise_V3_sn(n-1,:)*ROn_ROn_iNoise_V3_netcon).*(ROn_V(n-1,:)-p.ROn_ROn_iNoise_V3_E_exc))))+((((((ROn_X_PSC3_s(n-1,:)*(ROn_X_PSC3_netcon.*p.ROn_X_PSC3_gSYN)).*(ROn_V(n-1,:)-p.ROn_X_PSC3_ESYN)))))+((((p.ROn_TD_PSC_gSYN.*(ROn_TD_PSC_s(n-1,:)*ROn_TD_PSC_netcon).*(ROn_V(n-1,:)-p.ROn_TD_PSC_ESYN))))))))) + ROn_R*p.ROn_Itonic.*ROn_Imask + ROn_R*p.ROn_noise.*randn(1,p.ROn_Npop) ) / ROn_tau;
   ROn_g_ad_k1 = -ROn_g_ad(n-1,:) / p.ROn_tau_ad;
   ROff_V_k1 = ( (p.ROff_E_L-ROff_V(n-1,:)) - ROff_R*ROff_g_ad(n-1,:).*(ROff_V(n-1,:)-p.ROff_E_k) - ROff_R*((((p.ROff_SOnOff_PSC_gSYN.*(ROff_SOnOff_PSC_s(n-1,:)*ROff_SOnOff_PSC_netcon).*(ROff_V(n-1,:)-p.ROff_SOnOff_PSC_ESYN))))+((((p.ROff_Off_PSC_gSYN.*(ROff_Off_PSC_s(n-1,:)*ROff_Off_PSC_netcon).*(ROff_V(n-1,:)-p.ROff_Off_PSC_ESYN))))+((((p.ROff_TD_PSC_gSYN.*(ROff_TD_PSC_s(n-1,:)*ROff_TD_PSC_netcon).*(ROff_V(n-1,:)-p.ROff_TD_PSC_ESYN))))))) + ROff_R*p.ROff_Itonic.*ROff_Imask + ROff_R*p.ROff_noise.*randn(1,p.ROff_Npop) ) / ROff_tau;
   ROff_g_ad_k1 = -ROff_g_ad(n-1,:) / p.ROff_tau_ad;
@@ -311,13 +311,13 @@ for k=2:ntime
   TD_g_ad_k1 = -TD_g_ad(n-1,:) / p.TD_tau_ad;
   X_V_k1 = ( (p.X_E_L-X_V(n-1,:)) - X_R*X_g_ad(n-1,:).*(X_V(n-1,:)-p.X_E_k) - X_R*((((p.X_ROn_PSC_gSYN.*(X_ROn_PSC_s(n-1,:)*X_ROn_PSC_netcon).*(X_V(n-1,:)-p.X_ROn_PSC_ESYN))))+((((p.X_TD_PSC_gSYN.*(X_TD_PSC_s(n-1,:)*X_TD_PSC_netcon).*(X_V(n-1,:)-p.X_TD_PSC_ESYN)))))) + X_R*p.X_Itonic.*X_Imask + X_R*p.X_noise.*randn(1,p.X_Npop) ) / X_tau;
   X_g_ad_k1 = -X_g_ad(n-1,:) / p.X_tau_ad;
-  C_V_k1 = ( (p.C_E_L-C_V(n-1,:)) - C_R*C_g_ad(n-1,:).*(C_V(n-1,:)-p.C_E_k) - C_R*((((p.C_ROn_PSC_gSYN.*(C_ROn_PSC_s(n-1,:)*C_ROn_PSC_netcon).*(C_V(n-1,:)-p.C_ROn_PSC_ESYN))))) + C_R*p.C_Itonic.*C_Imask + C_R*p.C_noise.*randn(1,p.C_Npop) ) / C_tau;
+  C_V_k1 = ( (p.C_E_L-C_V(n-1,:)) - C_R*C_g_ad(n-1,:).*(C_V(n-1,:)-p.C_E_k) - C_R*((((((C_ROn_PSC3_s(n-1,:)*(C_ROn_PSC3_netcon.*p.C_ROn_PSC3_gSYN)).*(C_V(n-1,:)-p.C_ROn_PSC3_ESYN)))))) + C_R*p.C_Itonic.*C_Imask + C_R*p.C_noise.*randn(1,p.C_Npop) ) / C_tau;
   C_g_ad_k1 = -C_g_ad(n-1,:) / p.C_tau_ad;
-  ROn_On_PSC_s_k1 = ( ROn_On_PSC_scale * ROn_On_PSC_x(n-1,:) - ROn_On_PSC_s(n-1,:) )/p.ROn_On_PSC_tauR;
-  ROn_On_PSC_x_k1 = -ROn_On_PSC_x(n-1,:)/p.ROn_On_PSC_tauD;
-  ROn_On_PSC_F_k1 = (1 - ROn_On_PSC_F(n-1,:))/p.ROn_On_PSC_tauF;
-  ROn_On_PSC_P_k1 = (1 - ROn_On_PSC_P(n-1,:))/p.ROn_On_PSC_tauP;
-  ROn_On_PSC_q_k1 = 0;
+  ROn_On_PSC3_s_k1 = ( ROn_On_PSC3_scale * ROn_On_PSC3_x(n-1,:) - ROn_On_PSC3_s(n-1,:) )/p.ROn_On_PSC3_tauR;
+  ROn_On_PSC3_x_k1 = -ROn_On_PSC3_x(n-1,:)/p.ROn_On_PSC3_tauD;
+  ROn_On_PSC3_F_k1 = (1 - ROn_On_PSC3_F(n-1,:))/p.ROn_On_PSC3_tauF;
+  ROn_On_PSC3_P_k1 = (1 - ROn_On_PSC3_P(n-1,:))/p.ROn_On_PSC3_tauP;
+  ROn_On_PSC3_q_k1 = 0;
   SOnOff_On_PSC_s_k1 = ( SOnOff_On_PSC_scale * SOnOff_On_PSC_x(n-1,:) - SOnOff_On_PSC_s(n-1,:) )/p.SOnOff_On_PSC_tauR;
   SOnOff_On_PSC_x_k1 = -SOnOff_On_PSC_x(n-1,:)/p.SOnOff_On_PSC_tauD;
   SOnOff_On_PSC_F_k1 = (1 - SOnOff_On_PSC_F(n-1,:))/p.SOnOff_On_PSC_tauF;
@@ -370,11 +370,11 @@ for k=2:ntime
   X_TD_PSC_F_k1 = (1 - X_TD_PSC_F(n-1,:))/p.X_TD_PSC_tauF;
   X_TD_PSC_P_k1 = (1 - X_TD_PSC_P(n-1,:))/p.X_TD_PSC_tauP;
   X_TD_PSC_q_k1 = 0;
-  C_ROn_PSC_s_k1 = ( C_ROn_PSC_scale * C_ROn_PSC_x(n-1,:) - C_ROn_PSC_s(n-1,:) )/p.C_ROn_PSC_tauR;
-  C_ROn_PSC_x_k1 = -C_ROn_PSC_x(n-1,:)/p.C_ROn_PSC_tauD;
-  C_ROn_PSC_F_k1 = (1 - C_ROn_PSC_F(n-1,:))/p.C_ROn_PSC_tauF;
-  C_ROn_PSC_P_k1 = (1 - C_ROn_PSC_P(n-1,:))/p.C_ROn_PSC_tauP;
-  C_ROn_PSC_q_k1 = 0;
+  C_ROn_PSC3_s_k1 = ( C_ROn_PSC3_scale * C_ROn_PSC3_x(n-1,:) - C_ROn_PSC3_s(n-1,:) )/p.C_ROn_PSC3_tauR;
+  C_ROn_PSC3_x_k1 = -C_ROn_PSC3_x(n-1,:)/p.C_ROn_PSC3_tauD;
+  C_ROn_PSC3_F_k1 = (1 - C_ROn_PSC3_F(n-1,:))/p.C_ROn_PSC3_tauF;
+  C_ROn_PSC3_P_k1 = (1 - C_ROn_PSC3_P(n-1,:))/p.C_ROn_PSC3_tauP;
+  C_ROn_PSC3_q_k1 = 0;
 
   % ------------------------------------------------------------
   % Update state variables:
@@ -395,11 +395,11 @@ for k=2:ntime
   X_g_ad(n,:) = X_g_ad(n-1,:)+dt*X_g_ad_k1;
   C_V(n,:) = C_V(n-1,:)+dt*C_V_k1;
   C_g_ad(n,:) = C_g_ad(n-1,:)+dt*C_g_ad_k1;
-  ROn_On_PSC_s(n,:) = ROn_On_PSC_s(n-1,:)+dt*ROn_On_PSC_s_k1;
-  ROn_On_PSC_x(n,:) = ROn_On_PSC_x(n-1,:)+dt*ROn_On_PSC_x_k1;
-  ROn_On_PSC_F(n,:) = ROn_On_PSC_F(n-1,:)+dt*ROn_On_PSC_F_k1;
-  ROn_On_PSC_P(n,:) = ROn_On_PSC_P(n-1,:)+dt*ROn_On_PSC_P_k1;
-  ROn_On_PSC_q(n,:) = ROn_On_PSC_q(n-1,:)+dt*ROn_On_PSC_q_k1;
+  ROn_On_PSC3_s(n,:) = ROn_On_PSC3_s(n-1,:)+dt*ROn_On_PSC3_s_k1;
+  ROn_On_PSC3_x(n,:) = ROn_On_PSC3_x(n-1,:)+dt*ROn_On_PSC3_x_k1;
+  ROn_On_PSC3_F(n,:) = ROn_On_PSC3_F(n-1,:)+dt*ROn_On_PSC3_F_k1;
+  ROn_On_PSC3_P(n,:) = ROn_On_PSC3_P(n-1,:)+dt*ROn_On_PSC3_P_k1;
+  ROn_On_PSC3_q(n,:) = ROn_On_PSC3_q(n-1,:)+dt*ROn_On_PSC3_q_k1;
   SOnOff_On_PSC_s(n,:) = SOnOff_On_PSC_s(n-1,:)+dt*SOnOff_On_PSC_s_k1;
   SOnOff_On_PSC_x(n,:) = SOnOff_On_PSC_x(n-1,:)+dt*SOnOff_On_PSC_x_k1;
   SOnOff_On_PSC_F(n,:) = SOnOff_On_PSC_F(n-1,:)+dt*SOnOff_On_PSC_F_k1;
@@ -452,11 +452,11 @@ for k=2:ntime
   X_TD_PSC_F(n,:) = X_TD_PSC_F(n-1,:)+dt*X_TD_PSC_F_k1;
   X_TD_PSC_P(n,:) = X_TD_PSC_P(n-1,:)+dt*X_TD_PSC_P_k1;
   X_TD_PSC_q(n,:) = X_TD_PSC_q(n-1,:)+dt*X_TD_PSC_q_k1;
-  C_ROn_PSC_s(n,:) = C_ROn_PSC_s(n-1,:)+dt*C_ROn_PSC_s_k1;
-  C_ROn_PSC_x(n,:) = C_ROn_PSC_x(n-1,:)+dt*C_ROn_PSC_x_k1;
-  C_ROn_PSC_F(n,:) = C_ROn_PSC_F(n-1,:)+dt*C_ROn_PSC_F_k1;
-  C_ROn_PSC_P(n,:) = C_ROn_PSC_P(n-1,:)+dt*C_ROn_PSC_P_k1;
-  C_ROn_PSC_q(n,:) = C_ROn_PSC_q(n-1,:)+dt*C_ROn_PSC_q_k1;
+  C_ROn_PSC3_s(n,:) = C_ROn_PSC3_s(n-1,:)+dt*C_ROn_PSC3_s_k1;
+  C_ROn_PSC3_x(n,:) = C_ROn_PSC3_x(n-1,:)+dt*C_ROn_PSC3_x_k1;
+  C_ROn_PSC3_F(n,:) = C_ROn_PSC3_F(n-1,:)+dt*C_ROn_PSC3_F_k1;
+  C_ROn_PSC3_P(n,:) = C_ROn_PSC3_P(n-1,:)+dt*C_ROn_PSC3_P_k1;
+  C_ROn_PSC3_q(n,:) = C_ROn_PSC3_q(n-1,:)+dt*C_ROn_PSC3_q_k1;
 
   % ------------------------------------------------------------
   % Conditional actions:
@@ -533,9 +533,9 @@ for k=2:ntime
   conditional_test=any(any(t<=C_tspike+p.C_t_ref,1));
   conditional_indx=(any(t<=C_tspike+p.C_t_ref,1));
   if conditional_test, C_V(n,conditional_indx) = p.C_V_reset; end
-  conditional_test=any(any(t == On_tspike+p.ROn_On_PSC_delay,1));
-  conditional_indx=(any(t == On_tspike+p.ROn_On_PSC_delay,1));
-  if conditional_test, ROn_On_PSC_x(n,conditional_indx) = ROn_On_PSC_x(n,conditional_indx) + ROn_On_PSC_q(n,conditional_indx);ROn_On_PSC_q(n,conditional_indx) = ROn_On_PSC_F(n,conditional_indx).*ROn_On_PSC_P(n,conditional_indx);ROn_On_PSC_F(n,conditional_indx) = ROn_On_PSC_F(n,conditional_indx) + p.ROn_On_PSC_fF*(p.ROn_On_PSC_maxF-ROn_On_PSC_F(n,conditional_indx)); ROn_On_PSC_P(n,conditional_indx) = ROn_On_PSC_P(n,conditional_indx)*(1 - p.ROn_On_PSC_fP); end
+  conditional_test=any(any(t == On_tspike+p.ROn_On_PSC3_delay,1));
+  conditional_indx=(any(t == On_tspike+p.ROn_On_PSC3_delay,1));
+  if conditional_test, ROn_On_PSC3_x(n,conditional_indx) = ROn_On_PSC3_x(n,conditional_indx) + ROn_On_PSC3_q(n,conditional_indx);ROn_On_PSC3_q(n,conditional_indx) = ROn_On_PSC3_F(n,conditional_indx).*ROn_On_PSC3_P(n,conditional_indx);ROn_On_PSC3_F(n,conditional_indx) = ROn_On_PSC3_F(n,conditional_indx) + p.ROn_On_PSC3_fF*(p.ROn_On_PSC3_maxF-ROn_On_PSC3_F(n,conditional_indx)); ROn_On_PSC3_P(n,conditional_indx) = ROn_On_PSC3_P(n,conditional_indx)*(1 - p.ROn_On_PSC3_fP); end
   conditional_test=any(any(t == On_tspike+p.SOnOff_On_PSC_delay,1));
   conditional_indx=(any(t == On_tspike+p.SOnOff_On_PSC_delay,1));
   if conditional_test, SOnOff_On_PSC_x(n,conditional_indx) = SOnOff_On_PSC_x(n,conditional_indx) + SOnOff_On_PSC_q(n,conditional_indx);SOnOff_On_PSC_q(n,conditional_indx) = SOnOff_On_PSC_F(n,conditional_indx).*SOnOff_On_PSC_P(n,conditional_indx);SOnOff_On_PSC_F(n,conditional_indx) = SOnOff_On_PSC_F(n,conditional_indx) + p.SOnOff_On_PSC_fF*(p.SOnOff_On_PSC_maxF-SOnOff_On_PSC_F(n,conditional_indx)); SOnOff_On_PSC_P(n,conditional_indx) = SOnOff_On_PSC_P(n,conditional_indx)*(1 - p.SOnOff_On_PSC_fP); end
@@ -566,16 +566,16 @@ for k=2:ntime
   conditional_test=any(any(t == TD_tspike+p.X_TD_PSC_delay,1));
   conditional_indx=(any(t == TD_tspike+p.X_TD_PSC_delay,1));
   if conditional_test, X_TD_PSC_x(n,conditional_indx) = X_TD_PSC_x(n,conditional_indx) + X_TD_PSC_q(n,conditional_indx);X_TD_PSC_q(n,conditional_indx) = X_TD_PSC_F(n,conditional_indx).*X_TD_PSC_P(n,conditional_indx);X_TD_PSC_F(n,conditional_indx) = X_TD_PSC_F(n,conditional_indx) + p.X_TD_PSC_fF*(p.X_TD_PSC_maxF-X_TD_PSC_F(n,conditional_indx)); X_TD_PSC_P(n,conditional_indx) = X_TD_PSC_P(n,conditional_indx)*(1 - p.X_TD_PSC_fP); end
-  conditional_test=any(any(t == ROn_tspike+p.C_ROn_PSC_delay,1));
-  conditional_indx=(any(t == ROn_tspike+p.C_ROn_PSC_delay,1));
-  if conditional_test, C_ROn_PSC_x(n,conditional_indx) = C_ROn_PSC_x(n,conditional_indx) + C_ROn_PSC_q(n,conditional_indx);C_ROn_PSC_q(n,conditional_indx) = C_ROn_PSC_F(n,conditional_indx).*C_ROn_PSC_P(n,conditional_indx);C_ROn_PSC_F(n,conditional_indx) = C_ROn_PSC_F(n,conditional_indx) + p.C_ROn_PSC_fF*(p.C_ROn_PSC_maxF-C_ROn_PSC_F(n,conditional_indx)); C_ROn_PSC_P(n,conditional_indx) = C_ROn_PSC_P(n,conditional_indx)*(1 - p.C_ROn_PSC_fP); end
+  conditional_test=any(any(t == ROn_tspike+p.C_ROn_PSC3_delay,1));
+  conditional_indx=(any(t == ROn_tspike+p.C_ROn_PSC3_delay,1));
+  if conditional_test, C_ROn_PSC3_x(n,conditional_indx) = C_ROn_PSC3_x(n,conditional_indx) + C_ROn_PSC3_q(n,conditional_indx);C_ROn_PSC3_q(n,conditional_indx) = C_ROn_PSC3_F(n,conditional_indx).*C_ROn_PSC3_P(n,conditional_indx);C_ROn_PSC3_F(n,conditional_indx) = C_ROn_PSC3_F(n,conditional_indx) + p.C_ROn_PSC3_fF*(p.C_ROn_PSC3_maxF-C_ROn_PSC3_F(n,conditional_indx)); C_ROn_PSC3_P(n,conditional_indx) = C_ROn_PSC3_P(n,conditional_indx)*(1 - p.C_ROn_PSC3_fP); end
 
   % ------------------------------------------------------------
   % Update monitors:
   % ------------------------------------------------------------
   On_On_IC_iIC(n,:)=p.On_On_IC_g_postIC*(On_On_IC_input(k,:)*On_On_IC_netcon).*(On_V(n,:)-p.On_On_IC_E_exc);
   Off_Off_IC_iIC(n,:)=p.Off_Off_IC_g_postIC*(Off_Off_IC_input(k,:)*Off_Off_IC_netcon).*(Off_V(n,:)-p.Off_Off_IC_E_exc);
-  ROn_On_PSC_syn(n,:)=p.ROn_On_PSC_gSYN.*(ROn_On_PSC_s(n,:)*ROn_On_PSC_netcon).*(ROn_V(n,:)-p.ROn_On_PSC_ESYN);
+  ROn_On_PSC3_syn(n,:)=((ROn_On_PSC3_s(n,:)*(ROn_On_PSC3_netcon.*p.ROn_On_PSC3_gSYN)).*(ROn_V(n,:)-p.ROn_On_PSC3_ESYN));
   SOnOff_On_PSC_syn(n,:)=p.SOnOff_On_PSC_gSYN.*(SOnOff_On_PSC_s(n,:)*SOnOff_On_PSC_netcon).*(SOnOff_V(n,:)-p.SOnOff_On_PSC_ESYN);
   ROn_SOnOff_PSC_syn(n,:)=p.ROn_SOnOff_PSC_gSYN.*(ROn_SOnOff_PSC_s(n,:)*ROn_SOnOff_PSC_netcon).*(ROn_V(n,:)-p.ROn_SOnOff_PSC_ESYN);
   ROff_SOnOff_PSC_syn(n,:)=p.ROff_SOnOff_PSC_gSYN.*(ROff_SOnOff_PSC_s(n,:)*ROff_SOnOff_PSC_netcon).*(ROff_V(n,:)-p.ROff_SOnOff_PSC_ESYN);
@@ -586,7 +586,7 @@ for k=2:ntime
   ROn_TD_PSC_syn(n,:)=p.ROn_TD_PSC_gSYN.*(ROn_TD_PSC_s(n,:)*ROn_TD_PSC_netcon).*(ROn_V(n,:)-p.ROn_TD_PSC_ESYN);
   ROff_TD_PSC_syn(n,:)=p.ROff_TD_PSC_gSYN.*(ROff_TD_PSC_s(n,:)*ROff_TD_PSC_netcon).*(ROff_V(n,:)-p.ROff_TD_PSC_ESYN);
   X_TD_PSC_syn(n,:)=p.X_TD_PSC_gSYN.*(X_TD_PSC_s(n,:)*X_TD_PSC_netcon).*(X_V(n,:)-p.X_TD_PSC_ESYN);
-  C_ROn_PSC_syn(n,:)=p.C_ROn_PSC_gSYN.*(C_ROn_PSC_s(n,:)*C_ROn_PSC_netcon).*(C_V(n,:)-p.C_ROn_PSC_ESYN);
+  C_ROn_PSC3_syn(n,:)=((C_ROn_PSC3_s(n,:)*(C_ROn_PSC3_netcon.*p.C_ROn_PSC3_gSYN)).*(C_V(n,:)-p.C_ROn_PSC3_ESYN));
   n=n+1;
 end
 

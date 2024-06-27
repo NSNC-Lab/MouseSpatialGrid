@@ -1,10 +1,14 @@
-
+% profile on;
 % trialStartTimes and trialEndTimes need to be the same cumsum as the trial
 % lengths
-trialStartTimes = zeros(1,length(subz)); %ms
-for i = 1:length(subz) 
-    trialStartTimes(i) = padToTime; %3500 ms
-end
+
+% trialStartTimes = zeros(1,length(subz)); %ms
+% for i = 1:length(subz) 
+%     trialStartTimes(i) = padToTime; %3500 ms
+% end
+
+trialStartTimes = padToTime * ones(1, length(subz)); %ms
+
 
 % start slicing data by trial lengths
 options.trial_length = padToTime; % [ms]
@@ -148,6 +152,9 @@ if numel(subz) > 1
 end
 
 disp('here')
+
+% profile off;
+% profile viewer
 
 %% peakDrv for spatial grid stimuli
 

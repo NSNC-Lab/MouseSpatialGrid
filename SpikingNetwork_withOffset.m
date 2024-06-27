@@ -1,5 +1,5 @@
 %% Initialize
-profile on;
+% profile on;
 warning('off','all');
 warning
 
@@ -59,12 +59,10 @@ params_4channel_cleanonly_PVinputs;
 [azi,spatialCurves,chanLabels,bestLocs] = genSpatiallyTunedChans(options.nCells);
 
 
-%% Handle Netcons
-
-NetconHandler;
-
 %% load input stimuli (targets and maskers) from ICSimStim
 load('default_STRF_with_offset_200k.mat');
+
+NetconHandler;
 
 % firing rates were generated with sampling rate of 10000 Hz to match old
 % simulation time step, downsample if dt's don't match
@@ -123,7 +121,7 @@ else, options.time_end = padToTime*numel(options.locNum); end
 
 postProcessSims;
 
-profile off;
-profile viewer;
+% profile off;
+% profile viewer;
 
 %4x4   * 1x4   * 4x4

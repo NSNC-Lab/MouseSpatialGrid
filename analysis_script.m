@@ -1,10 +1,15 @@
-test_netcons = containers.Map();
+ex_netcon = [1,2,3,4;
+             4,3,2,1;
+             5,6,7,8;
+             8,7,6,5];
+ex_gsyn = [0.2,0.2,0.2,0.2;
+           0.2,0.2,0.2,0.2;
+           0.2,0.2,0.2,0.2;
+           0.2,0.2,0.2,0.2];
 
-for x=1:length(s.connections)
-    direction = s.connections(x).direction;
-    netcon_index = find(strcmp('netcon', s.connections(x).parameters)) + 1;
-    current_netcon = s.connections(x).parameters{netcon_index};
-    test_netcons(direction) = current_netcon;
-end
+ex_flatg = [0.2,0.2,0.2,0.2];
+s = 5;
+psc = ex_gsyn .* (s * ex_netcon)
+psc3 = s * (ex_netcon .* ex_gsyn)
+rc = s * (ex_netcon .* ex_flatg)
 
-disp(test_netcons)

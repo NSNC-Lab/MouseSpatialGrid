@@ -214,6 +214,7 @@ for u = 1:length(sources)
         end
     % cross channel PV condition
     elseif start_type == 5 && (sources(u) - targets(u) ~= 2) && end_type == 3
+            gsyn = gsyn_m{1};
             end_gsyn = gsyn*100;
             arrow_size = end_gsyn*3;
     else
