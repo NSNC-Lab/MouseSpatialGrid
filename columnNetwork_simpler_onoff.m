@@ -233,11 +233,38 @@ end
 %% simulate
 tic;
 
+
+%Todos
+%7/3
+
+%1.
+
+%Call dynsim
+%In our dynsim call pass in a custom flag
+%Go to where we are building the mex.
+%Check to see if the flag is raised (We will just do this for the first run)
+%Use the flag to retun back to columnNetwork
+
+%Run everything else
+
+%2.
+
+%Create separate script for post processing to just get grids
+
+%3.
+
+%Find a way to use arrays instead os structs in solve file
+%Load in stuff (Find a way to do binary file or go in directly)
+    %Ask Alex about this
+
+
+
+
 % simdata = 0;
 simdata = dsSimulate(s, netcons,'tspan',[dt time_end], 'solver',solverType, 'dt',dt,...
   'downsample_factor',1, 'save_data_flag',0, 'save_results_flag',1,...
   'study_dir',study_dir, 'vary',vary, 'debug_flag', 1, 'verbose_flag',0, ...
-  'parfor_flag',0, 'num_cores', 1, 'compile_flag',1, 'disk_flag',1);
+  'parfor_flag',1, 'num_cores', 24, 'compile_flag',1);
 
 toc;
 

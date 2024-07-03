@@ -8,7 +8,7 @@ mfileinfo = mfilename('fullpath');
 mfiledir = strsplit(mfileinfo,filesep);
 % cd(fullfile(mfiledir{1:end-1}));
 
-dynasimPath = '../DynaSim';
+dynasimPath = 'DynaSim-master';
 
 addpath('mechs');
 addpath('resampled-stimuli');
