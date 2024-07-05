@@ -1,4 +1,4 @@
-function [data,studyinfo,result] = dsSimulate(model,netcons,varargin)
+function [data,studyinfo,result] = dsSimulate(model, netcons, varargin)
 %% data=dsSimulate(model,'option',value,...)
 % Purpose: manage simulation of a DynaSim model. This high-level function
 % offers many options to control the number of simulations, how the model is
@@ -428,7 +428,7 @@ if isempty(options.sim_id) % not in part of a batch sim
   % check for one_solve_file_flag
   if options.one_solve_file_flag && ~options.cluster_flag
     % One file flag only for cluster
-    dsVprintf(options, 'Since cluster_flag==0, setting options.one_solve_file_flag=0 \n')
+    dsVprintf(options, 'Since clusteF_flag==0, setting options.one_solve_file_flag=0 \n')
     options.one_solve_file_flag = 0;
     varargin = modify_varargin(varargin, 'one_solve_file_flag', options.one_solve_file_flag);
     % TODO: this is a temp setting until iss_90 is fully implemented
@@ -726,25 +726,21 @@ if options.parfor_flag % will return after nested dsSimulate calls
     disp('   Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parfor_flag''. In GNU Octave, parfor loops currently default to regular for loops.');
   end
 
-  %Added 7/1: Attempting to limit the number of recursive calls    *****
-  %pool = gcp('nocreate');
-  %numWorkers = pool.NumWorkers;
+  % parpool('local',4);
+    
   
-  %for outer = 1:10
-
-  %   inc = (outer-1)*2;
-
+  % if isfile('params.mat')
+  %     params = load('params.mat', 'p');
+  %     fileStoreObj = parallel.pool.Constant(params)
+  %     test_params = fileStoreObj.Value;
+  % end
+  
+  
   parfor sim=1:length(modifications_set)
-  %parfor sim=inc+1:inc+numWorkers
-
-  %                                                                *****
-  
-    data(sim) = dsSimulate(model, netcons,'modifications', modifications_set{sim}, keyvals{:},...
+    data(sim) = dsSimulate(model, netcons, 'modifications', modifications_set{sim}, keyvals{:},...
         'random_seed',seeds{sim},...                                      % Use unique random seed for each sim if shuffle
         'studyinfo', studyinfo, 'sim_id',sim, 'in_parfor_loop_flag', 1);  % My modification; now specifies a separate study directory for each sim.
     %disp(sim);
-  
-
   end
 
   % Clean up files leftover from sim
@@ -1002,13 +998,28 @@ end % in_parfor_loop_flag
 
         if sim==1 || ( ~isempty(modifications_set{1}) && is_varied_mech_list() )
           % prepare file that solves the model system
-          if isempty(options.solve_file) || (~exist(options.solve_file,'file') &&...
-              ~exist([options.solve_file '.mexa64'],'file') &&...
-              ~exist([options.solve_file '.mexa32'],'file') &&...
-              ~exist([options.solve_file '.mexmaci64'],'file'))
+          len = length(options.solve_file);
 
-            options.solve_file = dsGetSolveFile(model,studyinfo,netcons,options); % store name of solver file in options struct
+          mex_file = [options.solve_file(1:len-2) '_mex'];
+
+          if isempty(options.solve_file) || (~exist(mex_file,'file') &&...
+              ~exist([mex_file '.mexa64'],'file') &&...
+              ~exist([mex_file '.mexa32'],'file') &&...
+              ~exist([mex_file '.mexmaci64'],'file'))
+
+            options.solve_file = dsGetSolveFile(model,studyinfo, netcons, options); % store name of solver file in options struct
           end
+
+          % check if parfor is 0, get out after mex compiles,
+          % if parfor is 1, we assume to have a mex already, keep going
+          % %% LEAVE IF MEX EXISTS NOW - then restart with parfor on SS
+          if options.parfor_flag == 0
+              data = [];
+
+              disp('Hello')
+              % return;
+          end
+              
 
           % TODO: consider providing better support for studies that produce different m-files per sim (e.g., varying mechanism_list)
 
@@ -1057,7 +1068,7 @@ end % in_parfor_loop_flag
           sim_start_time=tic;
 
           if ~options.one_solve_file_flag
-            save(param_file,'p','-v7'); % save params immediately before solving
+              save_params(p, netcons, param_file);
           end
 
           csv_data_file = feval(fname);  % returns name of file storing the simulated data
@@ -1090,11 +1101,7 @@ end % in_parfor_loop_flag
           outputs=cell(1,length(output_variables)); % preallocate for PCT compatibility
 
           if ~options.one_solve_file_flag
-            p.ROn_X_PSC3_netcon = netcons(1).XRnetcon;
-            p.ROn_SOnOff_PSC_netcon = netcons(1).PEnetcon;
-            p.C_ROn_PSC3_netcon = netcons(1).RCnetcon;
-            save(param_file,'p','-v7'); % save params immediately before solving
-
+              save_params(p, netcons, param_file);
           end
 
           % feval solve file
@@ -1166,7 +1173,7 @@ end % in_parfor_loop_flag
       end
 
       % change data precision if needed
-      tmpdata = dsSavedDataPrecision(tmpdata,options);
+      % tmpdata = dsSavedDataPrecision(tmpdata,options);
 
       if (options.auto_gen_test_data_flag || options.unit_test_flag) && isfield(tmpdata, 'simulator_options')
         tmpdata= rmfield(tmpdata, 'simulator_options');
@@ -1437,3 +1444,16 @@ function varargs = modify_varargin(varargs, key, newValue)
     varargs{find(strcmp(varargs, key))+1} = newValue;
   end
 end
+
+function save_params(p, netcons, param_file) % SS
+%% trying to add netcons to params.mat
+  p.ROn_X_PSC3_netcon = netcons(1).XRnetcon;
+  p.ROn_SOnOff_PSC_netcon = netcons(1).PEnetcon;
+  p.C_ROn_PSC3_netcon = netcons(1).RCnetcon;
+  save(param_file, 'p', '-v7');
+  % params = load('params.mat', 'p');
+  % addAttachedFiles(poolobj, 'params.mat');
+  % fileStoreObj = parallel.pool.Constant(params)
+  % % test_params = fileStoreObj.Value;
+end
+

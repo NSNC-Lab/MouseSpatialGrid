@@ -1,5 +1,5 @@
 %% Initialize
-% profile on;
+profile on;
 warning('off','all');
 warning
 
@@ -29,11 +29,41 @@ dt = 0.5; %ms, should be a multiple of 0.1 ms
 
 % study_dir: folder under 'run' where m files and input spikes for simulations are written and saved
 study_dir = fullfile(pwd,'run','4-channel-PV-inputs');
+% 
+% if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
+% mkdir(fullfile(study_dir, 'solve'));
 
-if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
-mkdir(fullfile(study_dir, 'solve'));
+solve_directory = fullfile(study_dir, 'solve');
 
-addpath(fullfile(study_dir, 'solve'));
+if exist(fullfile(study_dir, 'solve'), 'dir')
+    % don't remove the directory
+else
+    if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
+    mkdir(solve_directory); 
+    flag_raised_mex = 0;
+
+    mexes_dir = fullfile(mfiledir{1:end-1}, 'mexes');
+    if isfolder(mexes_dir)
+        m_file_to_copy = 'solve_ode_4_channel_PV_inputs.m';
+        mex_file_to_copy = 'solve_ode_4_channel_PV_inputs_mex';
+        mex_file_path = fullfile(mexes_dir, mex_file_to_copy);
+        mex_files = dir([mex_file_path, '.*']);
+        if ~isempty(mex_files)
+            flag_raised_mex = 1;
+            for num = 1:20
+                simDir = fullfile(solve_directory, ['sim' num2str(num)]);
+                mkdir(simDir);
+                copyfile(fullfile(mexes_dir, mex_files.name), simDir);
+                copyfile(fullfile(mexes_dir, m_file_to_copy), simDir);
+            end
+        end
+    end
+
+end
+
+addpath(solve_directory);
+
+
 
 
 % expName: folder under 'simData' where results are saved
@@ -115,13 +145,13 @@ else, options.time_end = padToTime*numel(options.locNum); end
 
 %[snn_out,s] = columnNetwork_paper(study_dir,varies,options,netcons);
 %[snn_out,s] = columnNetwork_simpler(study_dir,varies,options,netcons);
-[snn_out,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons);
+[snn_out,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons, flag_raised_mex);
 %[snn_out,s] = columnNetwork_alternative(study_dir,varies,options,netcons);
 %% post-process for performance and firing results
 
 postProcessSims;
 
-% profile off;
-% profile viewer;
+profile off;
+profile viewer;
 
 %4x4   * 1x4   * 4x4

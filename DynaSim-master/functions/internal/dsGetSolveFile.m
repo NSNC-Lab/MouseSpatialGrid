@@ -1,4 +1,4 @@
-function solve_file = dsGetSolveFile(model,studyinfo,netcons,varargin)
+function solve_file = dsGetSolveFile(model,studyinfo, netcons, varargin)
 %GETSOLVEFILE - helper function that creates or retrieves the desired solver file.
 %
 % Usage:
@@ -108,6 +108,7 @@ end
 if ~isempty(options.solve_file)
   % use user-provided solve_file
   solve_file = options.solve_file;
+ 
   % note: options.solve_file is used by cluster sim jobs (see dsCreateBatch())
 elseif isfield(studyinfo,'solve_file')
   % use study-associated solve_file
@@ -116,9 +117,9 @@ elseif options.auto_gen_test_data_flag || options.unit_test_flag
   solve_file = 'solve_ode.m';
 else
   % set default solve_file name
-  solve_file = ['solve_ode_' num2str(options.sim_id) '.m'];
-  
-  %solve_file = ['solve_ode_' datestr(now,'yyyymmddHHMMSS_FFF') '.m'];
+  solve_file = 'solve_ode_4_channel_PV_inputs.m';
+  % solve_file = ['solve_ode_' num2str(options.sim_id) '.m'];
+  % solve_file = ['solve_ode_' datestr(now,'yyyymmddHHMMSS_FFF') '.m'];
 end
 
 if ~strcmp(reportUI,'matlab') && ~strcmp(solve_file,'solve_ode.m')
@@ -172,7 +173,7 @@ if ~exist(solve_file,'file')
   keyvals = dsOptions2Keyval(options);
   switch solver_type
     case 'dynasim'  % write DynaSim solver function (solve_ode.m)
-      solve_file_m = dsWriteDynaSimSolver(model,netcons,keyvals{:},'filename',solve_file); % create DynaSim solver m-file
+      solve_file_m = dsWriteDynaSimSolver(model, netcons, keyvals{:},'filename',solve_file); % create DynaSim solver m-file
     case {'matlab', 'matlab_no_mex'} % prepare model function handle etc for built-in solver (@odefun)
       solve_file_m = dsWriteMatlabSolver(model,keyvals{:},'filename',solve_file, 'solver_type',solver_type); % create Matlab solver m-file
                 % design: dsWriteMatlabSolver should be very similar to

@@ -7,8 +7,8 @@
 tic
 
 if ~contains(pwd,'ICSimStim'), cd('ICSimStim'); end
-clearvars
-clc
+%clearvars
+%clc
 close all
 
 addpath(genpath('strflab_v1.45'))

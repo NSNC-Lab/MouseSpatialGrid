@@ -354,12 +354,42 @@ if options.save_parameters_flag
   fprintf(fid,'%% ------------------------------------------------------------\n');
   fprintf(fid,'%% Parameters:\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
+  fprintf(fid,'mytic = tic;\n');
   fprintf(fid,'params = load(''params.mat'',''p'');\n');
+    
   if options.one_solve_file_flag && options.mex_flag
     fprintf(fid,'pVecs = params.p;\n');
   else
     fprintf(fid,'p = params.p;\n');
   end
+  fprintf(fid, 'storeFields = fieldnames(p);\n');
+  %fprintf(fid,'eval([storeFields{1} ''=10;'']);\n');
+
+  %We know that we can skip the coder here using if code.target('matlab')
+  %Still trying to find out how to get stuff to work if we exlude it.
+
+  %Friday look at doing this eval deal before and then just passing in the
+  %variables.
+
+  fprintf(fid, 'if coder.target(''MATLAB'')');
+  fprintf(fid, 'numFields = length(fieldnames(p));\n');
+  fprintf(fid, 'storeFields = fieldnames(p);\n');
+  fprintf(fid,'for variables = 1:numFields;\n');
+  fprintf(fid,'eval([storeFields{variables} ''=10;'']) ;\n');
+
+
+  %eval([variableNames{i} ' = 10;']);
+
+  fprintf(fid, 'disp(''made it'');\n');
+
+  fprintf(fid, 'end;\n');
+  fprintf(fid, 'end;\n');
+
+  
+
+  %for variables = 1:length()
+
+
 end
 
 if options.one_solve_file_flag
@@ -402,6 +432,8 @@ end
 
 % write calculation of time vector and derived parameters: ntime, nsamp
 fprintf(fid,'ntime=length(T);\nnsamp=length(1:downsample_factor:ntime);\n\n');
+fprintf(fid,'toc(mytic);\n');
+fprintf(fid,'disp(''After Load'');\n');
 
 % 2.3 set random seed
 setup_randomseed(options,fid,rng_function,parameter_prefix);
@@ -433,6 +465,8 @@ if ~isempty(model.fixed_variables)
       fprintf(fid,'%s = sparse(%s);\n',names{i},names{i});
     end
   end
+  fprintf(fid,'toc(mytic);\n');
+  fprintf(fid,'disp(''Fixed Variables'');\n');
 end
 
 % 2.5 evaluate function handles
@@ -621,6 +655,9 @@ for i=1:length(state_variables)
     end
   end %disk_flag
 end %state_variables
+
+fprintf(fid,'toc(mytic);\n');
+fprintf(fid,'disp(''State Variables'');\n');
 
 % determine how to index each state variable based on how often state
 % variables are stored, whether they are written to disk or stored in
@@ -963,6 +1000,8 @@ if options.disk_flag==1
   % go to new line for next time point
   fprintf(fid,'fprintf(fileID,''\\n'');\n');
 end
+fprintf(fid,'toc(mytic);\n');
+fprintf(fid,'disp(''After Numerical Integration'');\n');
 
 % add index to state variables in ODEs and look for delay differential equations
 delayinfo=[];
@@ -1177,6 +1216,9 @@ else % store every downsample_factor time point in memory or on disk
   fprintf(fid,'  end\n');
 end
 
+%fprintf(fid,'toc(mytic);\n');
+
+
 % update delay matrices
 if ~isempty(delayinfo)
   fprintf(fid,'\n');
@@ -1258,6 +1300,8 @@ end
 
 %% end solve function
 %fprintf(fid,'pause');
+fprintf(fid,'toc(mytic);\n');
+fprintf(fid,'disp(''Final'');\n');
 fprintf(fid,'\nend\n');
 
 

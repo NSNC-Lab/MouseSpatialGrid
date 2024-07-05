@@ -3,6 +3,7 @@ function [T,On_V,On_g_ad,Off_V,Off_g_ad,ROn_V,ROn_g_ad,ROff_V,ROff_g_ad,SOnOff_V
 % ------------------------------------------------------------
 % Parameters:
 % ------------------------------------------------------------
+mytic = tic;
 params = load('params.mat','p');
 p = params.p;
 downsample_factor=p.downsample_factor;
@@ -11,6 +12,7 @@ T=(p.tspan(1):dt:p.tspan(2))';
 ntime=length(T);
 nsamp=length(1:downsample_factor:ntime);
 
+toc(mytic);
 % seed the random number generator
 rng(p.random_seed);
 
@@ -73,6 +75,7 @@ X_TD_PSC_netcon = [+1.000000000000000e+00   +0.000000000000000e+00   +0.00000000
 X_TD_PSC_scale = (p.X_TD_PSC_tauD/p.X_TD_PSC_tauR)^(p.X_TD_PSC_tauR/(p.X_TD_PSC_tauD-p.X_TD_PSC_tauR));
 C_ROn_PSC3_netcon = p.C_ROn_PSC3_netcon;
 C_ROn_PSC3_scale = (p.C_ROn_PSC3_tauD/p.C_ROn_PSC3_tauR)^(p.C_ROn_PSC3_tauR/(p.C_ROn_PSC3_tauD-p.C_ROn_PSC3_tauR));
+toc(mytic);
 
 % ------------------------------------------------------------
 % Initial conditions:
@@ -236,6 +239,7 @@ C_ROn_PSC3_P = zeros(2,p.ROn_Npop);
 C_ROn_PSC3_P(1,:) =  ones(1,p.ROn_Npop);
 C_ROn_PSC3_q = zeros(2,p.ROn_Npop);
 C_ROn_PSC3_q(1,:) =  ones(1,p.ROn_Npop);
+toc(mytic);
 
 % MONITORS:
 On_tspike = -1e32*ones(5,p.On_Npop);
@@ -290,6 +294,7 @@ X_TD_PSC_syn = zeros(nsamp,p.X_Npop);
 X_TD_PSC_syn(1,:)=p.X_TD_PSC_gSYN.*(X_TD_PSC_s(1,:)*X_TD_PSC_netcon).*(X_V(1,:)-p.X_TD_PSC_ESYN);
 C_ROn_PSC3_syn = zeros(nsamp,p.C_Npop);
 C_ROn_PSC3_syn(1,:)=((C_ROn_PSC3_s(1,:)*(C_ROn_PSC3_netcon.*p.C_ROn_PSC3_gSYN)).*(C_V(1,:)-p.C_ROn_PSC3_ESYN));
+toc(mytic);
 
 % ###########################################################
 % Numerical integration:
@@ -670,8 +675,10 @@ C_ROn_PSC3_F(1,:)=C_ROn_PSC3_F(2,:);
 C_ROn_PSC3_P(1,:)=C_ROn_PSC3_P(2,:);
 C_ROn_PSC3_q(1,:)=C_ROn_PSC3_q(2,:);
   n=n+1;
+toc(mytic);
 end
 
 T=T(1:downsample_factor:ntime);
+toc(mytic);
 
 end
