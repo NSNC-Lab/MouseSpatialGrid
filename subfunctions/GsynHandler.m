@@ -16,4 +16,4 @@ gsyncons.XRgsyncon =   [0.005,0.005,0.005,0.005;
 
 % RCgsyncon: E (Ron) -> C
 % needs to be transposed for PSC3 mech
-gsyncons.RCgsyncon = [0.003, 0.003, 0.003, 0.0015].';
+gsyncons.RCgsyncon = [0.003, 0.003, 0.003, 0.003].';

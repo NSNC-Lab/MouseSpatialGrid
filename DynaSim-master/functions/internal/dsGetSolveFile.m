@@ -203,11 +203,32 @@ end
 %   the dynasim solve file. this is called from dsWriteMatlabSolver
 
 if options.mex_flag && ~strcmp(solver_type,'matlab_no_mex') % compile solver function
-  if options.one_solve_file_flag
-    options.codegen_args = {0};
-  end
-  solve_file = dsPrepareMEX(solve_file, options);
-end
+  
+    %Changed 7/5 to handle issues with codegen needing the datatype
+    %specified
+    params = load('params.mat','p');
+    p = params.p;
+    
+    fields = fieldnames(p);
+    
+    empary = {};
+    for f = 1:length(fields)
+        empary{f} = p.(fields{f});
+    end
+    %for f = 1:length(fields)
+    %    fields{f} = [class(p.(fields{f})) '(' p.(fields{f}) ')'];
+    %end
+
+    %input_string = ['(' strjoin(fields, ', ') ')'];
+    options.codegen_args = empary;
+    %options.codegen_args = {1,[5,7,9,11;5,7,9,11],'hello world'};
+    
+    if options.one_solve_file_flag
+        options.codegen_args = empary;
+        %options.codegen_args = {1,[5,7,9,11;5,7,9,11],'hello world'};
+    end
+        solve_file = dsPrepareMEX(solve_file, options);
+    end
 
 %%
 if ~strcmp(cwd,fpath)

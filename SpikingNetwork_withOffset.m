@@ -31,12 +31,13 @@ dt = 0.5; %ms, should be a multiple of 0.1 ms
 study_dir = fullfile(pwd,'run','4-channel-PV-inputs');
 % 
 % if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
-% mkdir(fullfile(study_dir, 'solve'));
+%mkdir(fullfile(study_dir, 'solve'));
 
 solve_directory = fullfile(study_dir, 'solve');
-
+% 
 if exist(fullfile(study_dir, 'solve'), 'dir')
-    % don't remove the directory
+    %don't remove the directory
+    flag_raised_mex = 1;
 else
     if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
     mkdir(solve_directory); 
@@ -45,21 +46,17 @@ else
     mexes_dir = fullfile(mfiledir{1:end-1}, 'mexes');
     if isfolder(mexes_dir)
         m_file_to_copy = 'solve_ode_4_channel_PV_inputs.m';
-        mex_file_to_copy = 'solve_ode_4_channel_PV_inputs_mex';
+        mex_file_to_copy = 'solve_ode_4_channel_PV_inputs_mex.mexw64';
         mex_file_path = fullfile(mexes_dir, mex_file_to_copy);
         mex_files = dir([mex_file_path, '.*']);
         if ~isempty(mex_files)
             flag_raised_mex = 1;
-            for num = 1:20
-                simDir = fullfile(solve_directory, ['sim' num2str(num)]);
-                mkdir(simDir);
-                copyfile(fullfile(mexes_dir, mex_files.name), simDir);
-                copyfile(fullfile(mexes_dir, m_file_to_copy), simDir);
+
             end
         end
     end
 
-end
+
 
 addpath(solve_directory);
 

@@ -1107,7 +1107,38 @@ end % in_parfor_loop_flag
           % feval solve file
           if ~options.independent_solve_file_flag
             if ~options.one_solve_file_flag
-              [outputs{1:length(output_variables)}] = feval(fname);
+                
+                %Added 7/5
+                save_params(p, netcons, param_file);
+
+                params = load('params.mat','p');
+                p = params.p;
+
+                
+                fields = fieldnames(p);
+                
+                args = {};
+
+                for zz = 1:numel(fields)
+                    fieldName = fields{zz};
+                    value = p.(fieldName);
+                    args{zz} = value;
+                    assignin('base', fieldName, value);
+                end
+                    
+
+              % 
+              % input1 = 1;
+              % input2 = [1,2,3,4;1,2,3,4];
+              % input3 = 'hello world';
+              % 
+              % 
+              % args = {input1,input2,input3};
+                
+
+              %[outputs{1:length(output_variables)}] = feval(fname,args{:});
+
+              [outputs{1:length(output_variables)}] = feval(fname,args{:});
             else % one_solve_file_flag
               % pass sim_id for slicing params
               [outputs{1:length(output_variables)}] = feval(fname, sim_id);

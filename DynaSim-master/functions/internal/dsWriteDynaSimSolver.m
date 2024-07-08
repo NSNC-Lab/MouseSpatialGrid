@@ -96,6 +96,8 @@ model=dsCheckModel(model, varargin{:});
 separator=','; % ',', '\\t'
 
 %% 1.0 prepare model info
+%Changed 7/7 IB
+%parameter_prefix='';
 parameter_prefix='p.';
 state_variables=model.state_variables;
 
@@ -329,7 +331,19 @@ if options.disk_flag==1
   fprintf(fid,'fprintf(fileID,''\\n'');\n');
 else %options.disk_flag==0
   if ~options.one_solve_file_flag
-    fprintf(fid,'function %s=solve_ode\n',output_string);
+    params = load('params.mat','p');
+    p = params.p;
+    
+    fields = fieldnames(p);
+
+
+
+    input_string = ['(' strjoin(fields, ', ') ')'];
+
+    %input_string ='(test_input1,test_input2,input_test3)';
+    
+
+    fprintf(fid,'function %s=solve_ode%s\n',output_string,input_string);
   else
     fprintf(fid,'function %s=solve_ode(simID)\n',output_string);
     if options.mex_flag
@@ -371,19 +385,19 @@ if options.save_parameters_flag
   %Friday look at doing this eval deal before and then just passing in the
   %variables.
 
-  fprintf(fid, 'if coder.target(''MATLAB'')');
-  fprintf(fid, 'numFields = length(fieldnames(p));\n');
-  fprintf(fid, 'storeFields = fieldnames(p);\n');
-  fprintf(fid,'for variables = 1:numFields;\n');
-  fprintf(fid,'eval([storeFields{variables} ''=10;'']) ;\n');
+  %fprintf(fid, 'if coder.target(''MATLAB'')');
+  %fprintf(fid, 'numFields = length(fieldnames(p));\n');
+  %fprintf(fid, 'storeFields = fieldnames(p);\n');
+  %fprintf(fid,'for variables = 1:numFields;\n');
+  %fprintf(fid,'eval([storeFields{variables} ''=10;'']) ;\n');
 
 
   %eval([variableNames{i} ' = 10;']);
 
-  fprintf(fid, 'disp(''made it'');\n');
+  %fprintf(fid, 'disp(''made it'');\n');
 
-  fprintf(fid, 'end;\n');
-  fprintf(fid, 'end;\n');
+  %fprintf(fid, 'end;\n');
+  %fprintf(fid, 'end;\n');
 
   
 
@@ -425,6 +439,9 @@ if options.save_parameters_flag
   fprintf(fid,'downsample_factor=%sdownsample_factor;\n',parameter_prefix);
   fprintf(fid,'dt=%sdt;\n',parameter_prefix);
   fprintf(fid,'T=(%stspan(1):dt:%stspan(2))'';\n',parameter_prefix,parameter_prefix);
+  %fprintf(fid,'downsample_factor=downsample_factor;\n');
+  %fprintf(fid,'dt=p.dt;\n');
+  %fprintf(fid,'T=(tspan(1):dt:tspan(2))'';\n');
 else
   fprintf(fid,'tspan=[%g %g];\ndt=%g;\ndownsample_factor=%g;\n',options.tspan,options.dt,options.downsample_factor);
   fprintf(fid,'T=(tspan(1):dt:tspan(2))'';\n');
@@ -450,13 +467,21 @@ if ~isempty(model.fixed_variables)
 
   names=fieldnames(model.fixed_variables);
   expressions=struct2cell(model.fixed_variables);
+    
+  %IB So here instead go through expressions and do a string switch to
+  %replace p. with nothing
+
+  for n = 1:length(expressions)
+    expressions{n} = strrep(expressions{n}, 'p.', '');
+  end
+
   for i=1:length(names)
     if strcmp(names{i}, 'ROn_X_PSC3_netcon')
-        fprintf(fid,'%s = %s;\n',names{i},'p.ROn_X_PSC3_netcon');
+        fprintf(fid,'%s = %s;\n',names{i},'ROn_X_PSC3_netcon');
     elseif strcmp(names{i}, 'ROn_SOnOff_PSC_netcon')
-        fprintf(fid,'%s = %s;\n',names{i},'p.ROn_SOnOff_PSC_netcon');
+        fprintf(fid,'%s = %s;\n',names{i},'ROn_SOnOff_PSC_netcon');
     elseif strcmp(names{i}, 'C_ROn_PSC3_netcon')
-        fprintf(fid,'%s = %s;\n',names{i},'p.C_ROn_PSC3_netcon');
+        fprintf(fid,'%s = %s;\n',names{i},'C_ROn_PSC3_netcon');
     else
         fprintf(fid,'%s = %s;\n',names{i},expressions{i});
     end
@@ -514,7 +539,17 @@ end
 
 %% STATE_VARIABLES
 fprintf(fid,'\n%% STATE_VARIABLES:\n');
+
+
+
 IC_expressions=struct2cell(model.ICs);
+
+%7/7 IB
+
+for n = 1:length(IC_expressions)
+    IC_expressions{n} = strrep(IC_expressions{n}, 'p.', '');
+end
+
 nvals_per_var=zeros(1,length(state_variables)); % number of elements
 ndims_per_var=zeros(1,length(state_variables)); % number of dimensions
 sizes_per_var=cell(1,length(state_variables));
@@ -578,14 +613,14 @@ for i=1:length(state_variables)
 
           %%%
 
-          fprintf(fid,'%s = zeros(2,%s%s_Npop);\n',state_variables{i},parameter_prefix,pop_name);
+          fprintf(fid,'%s = zeros(2,%s_Npop);\n',state_variables{i},pop_name);%parameter_prefix,pop_name);
         
           %%%%
         
         
         elseif isequal(sizes_per_var{i},model.parameters.([target '_Npop']))
           % case where connection variable has size of target population
-          fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',state_variables{i},parameter_prefix,target);
+          fprintf(fid,'%s = zeros(nsamp,%s_Npop);\n',state_variables{i},target);%parameter_prefix,target);
         else
           warning('Failed to find population with size of %s. Setting fixed size = [1 x %g].',state_variables{i},nvals_per_var(i));
           fprintf(fid,'%s = zeros(nsamp,%g);\n',state_variables{i},nvals_per_var(i));
@@ -596,23 +631,26 @@ for i=1:length(state_variables)
         % note: supports var for either a 2D pop or relating two 1D pops
         if isequal(sizes_per_var{i},pop_size)
           % case where assumptions in dsGetPopSizeFromName hold true (i.e., state var for 2D pop)
-          fprintf(fid,'%s = zeros([%s%s_Npop,nsamp]);\n',state_variables{i},parameter_prefix,pop_name);
+          %fprintf(fid,'%s = zeros([%s%s_Npop,nsamp]);\n',state_variables{i},parameter_prefix,pop_name);
+          fprintf(fid,'%s = zeros([%s_Npop,nsamp]);\n',state_variables{i},pop_name);
         else
           % other cases (e.g., 2D state variables for connection mechanisms)
           A=model.parameters.([pop_name '_Npop']); % pre
           B=model.parameters.([target '_Npop']);   % post
+
+          %Changed all of these to get rid of parameter prefix
           if isequal(sizes_per_var{i},[A B])
             % connection variable with 2D [N_pre x N_post]
-            fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',state_variables{i},parameter_prefix,pop_name,parameter_prefix,target);
+            fprintf(fid,'%s = zeros([%s_Npop,%s_Npop,nsamp]);\n',state_variables{i},pop_name,target);%parameter_prefix,pop_name,parameter_prefix,target);
           elseif isequal(sizes_per_var{i},[B A])
             % connection variable with 2D [N_post x N_pre]
-            fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',state_variables{i},parameter_prefix,target,parameter_prefix,pop_name);
+            fprintf(fid,'%s = zeros([%s_Npop,%s_Npop,nsamp]);\n',state_variables{i},target,pop_name);%parameter_prefix,target,parameter_prefix,pop_name);
           elseif isequal(sizes_per_var{i},[A A])
             % connection variable with 2D [N_pre x N_pre]
-            fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',state_variables{i},parameter_prefix,pop_name,parameter_prefix,pop_name);
+            fprintf(fid,'%s = zeros([%s_Npop,%s_Npop,nsamp]);\n',state_variables{i},pop_name,pop_name);%parameter_prefix,pop_name,parameter_prefix,pop_name);
           elseif isequal(sizes_per_var{i},[B B])
             % connection variable with 2D [N_post x N_post]
-            fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',state_variables{i},parameter_prefix,target,parameter_prefix,target);
+            fprintf(fid,'%s = zeros([%s_Npop,%s_Npop,nsamp]);\n',state_variables{i},target,target);%parameter_prefix,target,parameter_prefix,target);
           else
             warning('Failed to find pop or pop pairs with size of %s. Setting fixed size = [%s].',state_variables{i},num2str(sizes_per_var{i}));
             fprintf(fid,'%s = zeros([[%s],nsamp]);\n',state_variables{i},num2str(sizes_per_var{i}));
@@ -638,7 +676,7 @@ for i=1:length(state_variables)
         fprintf(fid,'%s(1,:) = %s;\n',state_variables{i},IC_expressions{i});
       elseif ndims_per_var(i)==2
         % set var(:,:,1)=IC;
-        fprintf(fid,'%s(:,:,1) = %s;\n',state_variables{i},IC_expressions{i});
+        fprintf(fid,'%s(:,:,1) = %s;\n',state_variables{i},IC_expressions{i}); %This one
       else
         error('only 1D and 2D populations are supported a this time.');
       end
@@ -823,8 +861,11 @@ if ~isempty(model.monitors)
       % initialize spike buffer and buffer index
       if options.save_parameters_flag
         % tspike = -inf(buffer_size,npop):
-        fprintf(fid,'%s = -1e32*ones(%g,%s%s_Npop);\n',var_tspikes,spike_buffer_size,parameter_prefix,pop_name);
-        fprintf(fid,'%s = ones(1,%s%s_Npop);\n',var_buffer_index,parameter_prefix,pop_name);
+        %fprintf(fid,'%s = -1e32*ones(%g,%s%s_Npop);\n',var_tspikes,spike_buffer_size,parameter_prefix,pop_name);
+        %fprintf(fid,'%s = ones(1,%s%s_Npop);\n',var_buffer_index,parameter_prefix,pop_name);
+        fprintf(fid,'%s = -1e32*ones(%g,%s_Npop);\n',var_tspikes,spike_buffer_size,pop_name);
+        fprintf(fid,'%s = ones(1,%s_Npop);\n',var_buffer_index,pop_name);
+    
       else
         fprintf(fid,'%s = -1e32*ones(%g,%g);\n',var_tspikes,spike_buffer_size,model.parameters.([pop_name '_Npop']));
         fprintf(fid,'%s = ones(1,%g);\n',var_buffer_index,model.parameters.([pop_name '_Npop']));
@@ -903,13 +944,16 @@ if ~isempty(model.monitors)
           % 1D monitor (time index is first dimension)
           if isequal(sizes_per_mon{i},pop_size) || ismember(i,spike_mon_inds)
             % case where assumptions in dsGetPopSizeFromName hold true
-            fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',monitor_names{i},parameter_prefix,pop_name);
+            %fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',monitor_names{i},parameter_prefix,pop_name);
+            fprintf(fid,'%s = zeros(nsamp,%s_Npop);\n',monitor_names{i},pop_name);
           elseif isequal(sizes_per_mon{i},model.parameters.([target '_Npop']))
             % case where connection monitor has size of target population
-            fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',monitor_names{i},parameter_prefix,target);
+            %fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',monitor_names{i},parameter_prefix,target);
+            fprintf(fid,'%s = zeros(nsamp,%s_Npop);\n',monitor_names{i},target);
           elseif isequal(sizes_per_mon{i},model.parameters.([source '_Npop']))
             % case where connection monitor has size of source population
-            fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',monitor_names{i},parameter_prefix,source);
+            %fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',monitor_names{i},parameter_prefix,source);
+            fprintf(fid,'%s = zeros(nsamp,%s_Npop);\n',monitor_names{i},source);
           else
             warning('Failed to find population with size of %s. Setting fixed size = [1 x %g].',monitor_names{i},nvals_per_mon(i));
             fprintf(fid,'%s = zeros(nsamp,%g);\n',monitor_names{i},nvals_per_mon(i));
@@ -920,23 +964,29 @@ if ~isempty(model.monitors)
           % note: supports mon for either a 2D pop or relating two 1D pops
           if isequal(sizes_per_mon{i},pop_size)
             % case where assumptions in dsGetPopSizeFromName hold true (i.e., monitor for 2D pop)
-            fprintf(fid,'%s = zeros([%s%s_Npop,nsamp]);\n',monitor_names{i},parameter_prefix,pop_name);
+            %fprintf(fid,'%s = zeros([%s%s_Npop,nsamp]);\n',monitor_names{i},parameter_prefix,pop_name);
+            fprintf(fid,'%s = zeros([%s_Npop,nsamp]);\n',monitor_names{i},pop_name);
           else
             % other cases (e.g., 2D monitors for connection mechanisms)
             A=model.parameters.([source '_Npop']);   % pre
             B=model.parameters.([target '_Npop']);   % post
             if isequal(sizes_per_mon{i},[A B])
               % connection monitor with 2D [N_pre x N_post]
-              fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',monitor_names{i},parameter_prefix,source,parameter_prefix,target);
+              %fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',monitor_names{i},parameter_prefix,source,parameter_prefix,target);
+              fprintf(fid,'%s = zeros([%s_Npop,%s_Npop,nsamp]);\n',monitor_names{i},source,target);  
             elseif isequal(sizes_per_mon{i},[B A])
               % connection monitor with 2D [N_post x N_pre]
-              fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',monitor_names{i},parameter_prefix,target,parameter_prefix,source);
+              %fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',monitor_names{i},parameter_prefix,target,parameter_prefix,source);
+              fprintf(fid,'%s = zeros([%s_Npop,%s_Npop,nsamp]);\n',monitor_names{i},target,source);
             elseif isequal(sizes_per_mon{i},[A A])
               % connection monitor with 2D [N_pre x N_pre]
-              fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',monitor_names{i},parameter_prefix,source,parameter_prefix,source);
+              %fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',monitor_names{i},parameter_prefix,source,parameter_prefix,source);
+              fprintf(fid,'%s = zeros([%s_Npop,%s_Npop,nsamp]);\n',monitor_names{i},source,source);
+            
             elseif isequal(sizes_per_mon{i},[B B])
               % connection monitor with 2D [N_post x N_post]
-              fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',monitor_names{i},parameter_prefix,target,parameter_prefix,target);
+              %fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',monitor_names{i},parameter_prefix,target,parameter_prefix,target);
+              fprintf(fid,'%s = zeros([%s_Npop,%s_Npop,nsamp]);\n',monitor_names{i},target,target);
             else
               warning('Failed to find pop or pop pairs with size of %s. Setting fixed size = [%s].',monitor_names{i},num2str(sizes_per_mon{i}));
               fprintf(fid,'%s = zeros([[%s],nsamp]);\n',monitor_names{i},num2str(sizes_per_mon{i}));
@@ -1006,6 +1056,12 @@ fprintf(fid,'disp(''After Numerical Integration'');\n');
 % add index to state variables in ODEs and look for delay differential equations
 delayinfo=[];
 odes = struct2cell(model.ODEs);
+
+for z = 1:length(odes)
+    odes{z} = strrep(odes{z}, 'p.', '');
+end
+
+
 for i=1:length(odes)
   for j=1:length(state_variables)
     odes{i}=dsStrrep(odes{i}, state_variables{j}, [state_variables{j} index_lasts{j}], '', '', varargin{:});
@@ -1040,6 +1096,7 @@ for i=1:length(odes)
 
         if iscell(delay) && ischar(delay{1})
           delay=strrep(delay{1},parameter_prefix,''); % remove parameter prefix
+          
           delay=strrep(delay,',:',''); % remove population dimension from index to delay matrix
           % look for parameter with delay length
           if isfield(model.parameters,delay)
@@ -1283,7 +1340,7 @@ if options.independent_solve_file_flag
   cellfun(@addVar2StructOutput, model.state_variables,'uni',0);
 
   if ~isempty(model.monitors)
-    fprintf(fid,'\n%% Monitors:\n');
+    fprintf(fid,'\n%:\n');
     cellfun(@addVar2StructOutput, fieldnames(model.monitors),'uni',0);
   end
 
@@ -1502,8 +1559,10 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
           
 
           action = strrep(action, 'n,', '2,');
+          action = strrep(action, 'p.', '');
           action_index = strrep(action_index, 'n,', '2,');
           action_index = strrep(action_index, 'n-1', '1');
+          action_index = strrep(action_index, 'p.', '');
            
           
           action=dsStrrep(action, state_variables{j}, [state_variables{j} action_index], '', '', varargin{:});
@@ -1527,6 +1586,7 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
       %IB
       condition{j} = strrep(condition{j}, 'n-1', '1');
       condition{j} = strrep(condition{j}, 'n,', '2,');
+      condition{j} = strrep(condition{j}, 'p.', '');
       
 
       fprintf(fid,['  conditional_test=any(%s);\n'],condition{j}); % JSS edit
@@ -1613,6 +1673,13 @@ function print_monitor_update(fid,nwsp,monitors,index_nexts_mon,state_variables,
   % Adjust indexing and print monitor updates
   monitor_names=fieldnames(monitors);
   monitor_expressions=struct2cell(monitors);
+
+  %Get rid of p. in monitor_expressions
+  
+  
+    
+
+
   for i=1:length(monitor_names)
     % add indexes to state variables in monitor expressions
     for j=1:length(state_variables)
@@ -1621,6 +1688,7 @@ function print_monitor_update(fid,nwsp,monitors,index_nexts_mon,state_variables,
 
     % write monitors to solver function
     monitor_expressions{i} = strrep(monitor_expressions{i}, 'n,', '2,');
+    monitor_expressions{i} = strrep(monitor_expressions{i}, 'p.', '');
     fprintf(fid,'%s%s%s=%s;\n',blanks(nwsp),monitor_names{i},index_nexts_mon{i},monitor_expressions{i});
   end
 
