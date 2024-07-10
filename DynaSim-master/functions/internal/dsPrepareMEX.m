@@ -126,6 +126,7 @@ if isempty(options.codegen_args)
   eval(sprintf('codegen -d codemex -config cfg ''%s'' ', file));
 else % codegen_args specified
   %eval(sprintf('codegen -args %s -d codemex -config cfg %s', 'options.codegen_args', file));
+  %warning('off','all');
   eval(sprintf('codegen -args options.codegen_args -d codemex -config cfg ''%s'' ', file));
 end
 % TODO: convert eval to feval or call to codegen

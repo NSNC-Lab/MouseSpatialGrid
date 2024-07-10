@@ -1,4 +1,4 @@
-function [simdata,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons, flag_raised_mex)
+function [simdata,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons, flag_raised_mex,varied_struct)
 
 % Generates and simulates a network featuring columns of excitatory cells 
 % that respond to onsets and offsets in auditory stimuli
@@ -63,6 +63,7 @@ PEnetcon = netcons.PEnetcon;
 XRgsyncon = gsyncons.XRgsyncon;
 RCgsyncon = gsyncons.RCgsyncon;
 OnRgsyncon = gsyncons.OnRgsyncon;
+PEgsyncon = gsyncons.PEgsyncon;
 
 %% onset column
 
@@ -147,15 +148,17 @@ s.connections(end).parameters={'g_postIC',0.165,'label','off','trial',1,'locNum'
 % excitatory inputs
 s.connections(end+1).direction='On->ROn';
 s.connections(end).mechanism_list={'PSC3'};
-s.connections(end).parameters={'gSYN',OnRgsyncon,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30,'netcon',eye(nCells,nCells)};
+%varied_params
+s.connections(end).parameters={'gSYN',transpose(OnRgsyncon),'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30,'netcon',eye(nCells,nCells)};
+%s.connections(end).parameters={'gSYN',OnRgsyncon,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30,'netcon',eye(nCells,nCells)};
 
 s.connections(end+1).direction='On->SOnOff';
 s.connections(end).mechanism_list={'PSC'};
 s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80,'netcon',eye(nCells,nCells)};
 
 s.connections(end+1).direction='SOnOff->ROn';
-s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.025,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.5,'tauP',120,'netcon',PEnetcon}; 
+s.connections(end).mechanism_list={'PSC3'};
+s.connections(end).parameters={'gSYN',gsyncons.PEgsyncon,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.5,'tauP',120,'netcon',PEnetcon}; 
 
 s.connections(end+1).direction='SOnOff->ROff';
 s.connections(end).mechanism_list={'PSC'};
@@ -231,7 +234,7 @@ end
 end
 
 %% simulate
-tic;
+%tic;
 
 % simdata = 0;
 % Check if the pool is already open and close it
@@ -243,7 +246,7 @@ tic;
 if ~flag_raised_mex
    simdata = dsSimulate(s, netcons, 'tspan',[dt time_end], 'solver',solverType, 'dt',dt,...
   'downsample_factor',1, 'save_data_flag',0, 'save_results_flag',1,...
-  'study_dir',study_dir, 'vary',vary, 'debug_flag', 1, 'verbose_flag',1, ...
+  'study_dir',study_dir, 'vary',vary, 'debug_flag', 1, 'verbose_flag',0, ...
   'parfor_flag',0, 'compile_flag',1);
    copyfile('run\4-channel-PV-inputs\solve\solve_ode_4_channel_PV_inputs.m','mexes')
    copyfile('run\4-channel-PV-inputs\solve\solve_ode_4_channel_PV_inputs_mex.mexw64','mexes')
@@ -256,8 +259,9 @@ if ~flag_raised_mex
     solve_directory = fullfile(study_dir, 'solve');
     mfileinfo = mfilename('fullpath');
 
+    warning('off','all');
     mkdir('backup');
-
+    
     mfiledir = strsplit(mfileinfo,filesep);
 
     copyfile('run\4-channel-PV-inputs\solve\params.mat', 'backup');
@@ -295,9 +299,9 @@ end
 
 simdata = dsSimulate(s, netcons, 'tspan',[dt time_end], 'solver',solverType, 'dt',dt,...
   'downsample_factor',1, 'save_data_flag',0, 'save_results_flag',1,...
-  'study_dir',study_dir, 'vary',vary, 'debug_flag', 1, 'verbose_flag',1, ...
+  'study_dir',study_dir, 'vary',vary, 'debug_flag', 1, 'verbose_flag',0, ...
   'parfor_flag',1, 'compile_flag',1);
-toc;
+%toc;
 
 
 % create_structure;

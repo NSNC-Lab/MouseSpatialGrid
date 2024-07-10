@@ -79,6 +79,10 @@ spatialCurves(4,:) = curve_data{4};
 azi = fliplr(linspace(-90,90, 181));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+plot_flag = 0;
+
+if(plot_flag == 1)
+
 figure;
 plot(azi,spatialCurves','linewidth',1);
 chanNums = cellstr(string((1:nCells)'));
@@ -93,5 +97,8 @@ for i = 1:4
     line([1 1]*locs(i),[0 1],'color','k','linestyle','--','displayname','')
 end
 legend(strcat(chanNums,{':'},chanLabels'),'location','best');
+
+
+end
 
 end

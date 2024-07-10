@@ -1,7 +1,5 @@
 %% Initialize
-profile on;
 warning('off','all');
-warning
 
 % change current directory to folder where this script is stored
 mfileinfo = mfilename('fullpath');
@@ -142,13 +140,11 @@ else, options.time_end = padToTime*numel(options.locNum); end
 
 %[snn_out,s] = columnNetwork_paper(study_dir,varies,options,netcons);
 %[snn_out,s] = columnNetwork_simpler(study_dir,varies,options,netcons);
-[snn_out,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons, flag_raised_mex);
+[snn_out,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons, flag_raised_mex,varied_struct);
 %[snn_out,s] = columnNetwork_alternative(study_dir,varies,options,netcons);
 %% post-process for performance and firing results
 
 postProcessSims;
 
-profile off;
-profile viewer;
 
 %4x4   * 1x4   * 4x4

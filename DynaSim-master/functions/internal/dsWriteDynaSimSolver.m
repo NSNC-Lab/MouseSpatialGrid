@@ -358,9 +358,9 @@ if options.mex_flag && options.one_solve_file_flag && options.cluster_flag
 end
 
 % Benchmark tic
-if options.benchmark_flag
-  fprintf(fid, 'tic;');
-end
+%if options.benchmark_flag
+%  fprintf(fid, 'tic;');
+%end
 
 % 2.2 load parameters
 if options.save_parameters_flag
@@ -368,7 +368,7 @@ if options.save_parameters_flag
   fprintf(fid,'%% ------------------------------------------------------------\n');
   fprintf(fid,'%% Parameters:\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
-  fprintf(fid,'mytic = tic;\n');
+  %fprintf(fid,'mytic = tic;\n');
   fprintf(fid,'params = load(''params.mat'',''p'');\n');
     
   if options.one_solve_file_flag && options.mex_flag
@@ -449,8 +449,8 @@ end
 
 % write calculation of time vector and derived parameters: ntime, nsamp
 fprintf(fid,'ntime=length(T);\nnsamp=length(1:downsample_factor:ntime);\n\n');
-fprintf(fid,'toc(mytic);\n');
-fprintf(fid,'disp(''After Load'');\n');
+%fprintf(fid,'toc(mytic);\n');
+%fprintf(fid,'disp(''After Load'');\n');
 
 % 2.3 set random seed
 setup_randomseed(options,fid,rng_function,parameter_prefix);
@@ -490,8 +490,8 @@ if ~isempty(model.fixed_variables)
       fprintf(fid,'%s = sparse(%s);\n',names{i},names{i});
     end
   end
-  fprintf(fid,'toc(mytic);\n');
-  fprintf(fid,'disp(''Fixed Variables'');\n');
+  %fprintf(fid,'toc(mytic);\n');
+  %fprintf(fid,'disp(''Fixed Variables'');\n');
 end
 
 % 2.5 evaluate function handles
@@ -694,8 +694,8 @@ for i=1:length(state_variables)
   end %disk_flag
 end %state_variables
 
-fprintf(fid,'toc(mytic);\n');
-fprintf(fid,'disp(''State Variables'');\n');
+%fprintf(fid,'toc(mytic);\n');
+%fprintf(fid,'disp(''State Variables'');\n');
 
 % determine how to index each state variable based on how often state
 % variables are stored, whether they are written to disk or stored in
@@ -1050,8 +1050,8 @@ if options.disk_flag==1
   % go to new line for next time point
   fprintf(fid,'fprintf(fileID,''\\n'');\n');
 end
-fprintf(fid,'toc(mytic);\n');
-fprintf(fid,'disp(''After Numerical Integration'');\n');
+%fprintf(fid,'toc(mytic);\n');
+%fprintf(fid,'disp(''After Numerical Integration'');\n');
 
 % add index to state variables in ODEs and look for delay differential equations
 delayinfo=[];
@@ -1351,14 +1351,14 @@ if options.independent_solve_file_flag
 end
 
 %% Benchmark toc
-if options.benchmark_flag
-  fprintf(fid, 'fprintf(''Sim Time: %%g seconds\\n'', toc);');
-end
+%if options.benchmark_flag
+%  fprintf(fid, 'fprintf(''Sim Time: %%g seconds\\n'', toc);');
+%end
 
 %% end solve function
 %fprintf(fid,'pause');
-fprintf(fid,'toc(mytic);\n');
-fprintf(fid,'disp(''Final'');\n');
+%fprintf(fid,'toc(mytic);\n');
+%fprintf(fid,'disp(''Final'');\n');
 fprintf(fid,'\nend\n');
 
 

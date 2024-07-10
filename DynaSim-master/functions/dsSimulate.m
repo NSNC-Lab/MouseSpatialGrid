@@ -741,6 +741,7 @@ if options.parfor_flag % will return after nested dsSimulate calls
         'random_seed',seeds{sim},...                                      % Use unique random seed for each sim if shuffle
         'studyinfo', studyinfo, 'sim_id',sim, 'in_parfor_loop_flag', 1);  % My modification; now specifies a separate study directory for each sim.
     %disp(sim);
+   
   end
 
   % Clean up files leftover from sim
@@ -749,14 +750,20 @@ if options.parfor_flag % will return after nested dsSimulate calls
 
   if strcmp(reportUI,'matlab') % parfor currently acts just as a regular for in Octave
     % Delete any core files in parent directory
-    delete(fullfile(options.study_dir,'core*'));
+    %Added in an attempt to remove warning IB
+    warning('off','all')
+
+    %%%%%%%COMMENTED OUT
+    %delete(fullfile(options.study_dir,'core*'));
 
     % Verify all core files are deleted
-    [~,result] = system('find * -name "core*"','-echo');
-    if ~isempty(result)
-      fprintf(strcat(result,'\n'));
-      warning('Core files found. Consider deleting to free up space');
-    end
+    %[~,result] = system('find * -name "core*"','-echo');
+    %if ~isempty(result)
+      %%%%%%%COMMENTED OUT
+      %Deleted in an etempt to remove warning IB
+      %fprintf(strcat(result,'\n'));
+      %warning('Core files found. Consider deleting to free up space');
+    %end
   end
 
   % TODO: sort data sets by things varied in modifications_set
@@ -815,6 +822,7 @@ else % in parfor loop and/or cluster job
 end
 
 if options.mex_flag
+
   % Ensure mex_dir is absolute
   if (ispc && options.mex_dir(2) == ':') || (~ispc && options.mex_dir(1) == filesep)
     relMexPath = false;
@@ -830,7 +838,7 @@ if options.mex_flag
       options.mex_dir = fullfile(getAbsolutePath(options.study_dir), options.mex_dir);
     end
   end
-
+    
   % Create mex_dir if it does not yet exist
   if ~exist(options.mex_dir,'dir') && ~options.cluster_flag && options.mex_dir_flag
     mkdir(options.mex_dir);
@@ -1016,7 +1024,7 @@ end % in_parfor_loop_flag
           if options.parfor_flag == 0
               data = [];
 
-              disp('Hello')
+              %disp('Hello')
               % return;
           end
               

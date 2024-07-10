@@ -730,7 +730,7 @@ if options.parfor_flag % will return after nested dsSimulate calls
     data(sim) = dsSimulate(model, 'modifications', modifications_set{sim}, keyvals{:},...
         'random_seed',seeds{sim},...                                      % Use unique random seed for each sim if shuffle
         'studyinfo', studyinfo, 'sim_id',sim, 'in_parfor_loop_flag', 1);  % My modification; now specifies a separate study directory for each sim.
-    %disp(sim);
+    disp('Debug1\n');
   end
 
   % Clean up files leftover from sim
@@ -798,6 +798,7 @@ if options.parfor_flag % will return after nested dsSimulate calls
 end % if options.parfor_flag
 
 %% 1.4 prepare study_dir and studyinfo if saving data
+disp('Debug2\n');
 if isempty(options.studyinfo)
   [studyinfo,options] = dsSetupStudy(model,'modifications_set',modifications_set,'simulator_options',options,'process_id',options.sim_id);
 else % in parfor loop and/or cluster job
@@ -859,6 +860,9 @@ else
 end
 
 dsVprintf(options, '\nSimulations complete.\n\n')
+
+
+disp('Debug3\n');
 
 if ~options.in_parfor_loop_flag % if not inside of parfor loop
   %% auto_gen_test_data_flag argout

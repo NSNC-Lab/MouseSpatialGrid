@@ -6,9 +6,9 @@ netcons = struct;
 
 % XRnetcon: SOM (X) -> E (Ron)
 netcons.XRnetcon = [0,0,0,0;
-                    0,0,0,0;
-                    0,0,0,0;
-                    0,0,0,0];
+                    1,0,0,0;
+                    1,0,0,0;
+                    1,0,0,0];
 
 % PEnetcon: PV (SOnOff) -> E (Ron)
 %netcons.PEnetcon = eye(options.nCells);

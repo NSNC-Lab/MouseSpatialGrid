@@ -33,12 +33,17 @@ function [maxY, E, pc] = calcpcStatic(distMat, numTrials, numTargets, selfFlag)
 % cycles through all possible pairs of templates
 if ~selfFlag
     numIterations = numTrials ^ 2;
+    %tempMatrix = []; % Initialize tempMatrix to an empty matrix %IB change if causes problems
 else
     tempMatrix = nchoosek(0:(numTrials-1),2);
     numIterations = size(tempMatrix,1);
 end
 
 s = size(distMat); % [numTrains, numTrains, numTaus]
+
+%Try changing to Parfor to save time 7/9 IB
+
+%parfor at some point
 
 for iterationNum = 1:numIterations
     if ~selfFlag

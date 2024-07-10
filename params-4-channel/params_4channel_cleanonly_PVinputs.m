@@ -28,35 +28,17 @@ varies(1).param = 'trial';
 varies(1).range =  trialInds(:)';
 % % % DO NOT CHANGE THIS % % %
 
-% % E->E connections
-% varies(end+1).conxn = '(On->ROn,Off->ROff)';
+%Lets just start with changing the input gsyn E->E connections. 1 for each
+%channel 4 total
+
+
+
+% (On->ROn) connections
+% varies(end+1).conxn = '(On->ROn)';
 % varies(end).param = 'gSYN';
-% varies(end).range = 0.018;
-% 
-% % E->E connections
-% varies(end+1).conxn = 'ROn->C';
-% varies(end).param = 'gSYN';
-% varies(end).range = 0.013;
-% 
-% % pv inputs
-% varies(end+1).conxn = '(SOn->ROn,SOn->ROff)';
-% varies(end).param = 'gSYN';
-% varies(end).range = 0.015;
-% 
-% % offset pv inhibition
-% varies(end+1).conxn = '(SOff->ROn,SOff->ROff)';
-% varies(end).param = 'gSYN';
-% varies(end).range = 0.01;
-% 
-% % inputs to SOM neurons
-% varies(end+1).conxn = '(ROn->X)';
-% varies(end).param = 'gSYN';
-% varies(end).range = 0.015;
-% 
-% % cross-channel inhibition
-% varies(end+1).conxn = '(X->ROn)';
-% varies(end).param = '(gSYN,tauR,tauD,fF,tauF)';
-% varies(end).range = [0.016 ; 6; 12 ; 0.1 ; 120];
+% varies(end).range = varied_params;
+
+
 
 % noise at intermediate neurons
 varies(end+1).conxn = 'ROn->ROn';

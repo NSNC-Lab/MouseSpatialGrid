@@ -47,9 +47,9 @@ for vv = 1:jump % for each varied parameter
     catch
         variedParamVal = 0;
     end
-    
+
     for currentPop = 1:nPops
-        
+
         if popSizes(currentPop) > 1 && isfield(options,'chansToPlot')
             chansToPlot = options.chansToPlot;
         else
@@ -58,19 +58,27 @@ for vv = 1:jump % for each varied parameter
 
         % skip processing for current population if not within specified subpopulation.
         if ~contains(popNames(currentPop),options.subPops), continue; end
-        
+
         % for each spatial channel
         for channelNum = 1:popSizes(currentPop)
             channel = struct();
-            
+
+            if(strcmp(popNames{currentPop},'C') || strcmp(popNames{currentPop},'ROn'))
+
             % for each trial
            for trial = 1:numTrials
                 channel(channelNum).popSpks(trial,:) = subData(trial).(fieldNames{currentPop})(tstart:tend,channelNum);
-            end
+           end
+
+            %Added this to trim off some time for the GA. Will need to
+            %bring back for further analysis 7/10 IB
+
+            
+
             spks.(popNames{currentPop})(vv).(['channel' num2str(channelNum)]) = channel(channelNum).popSpks;
-            
+
             figName = sprintf('%s_%s%.03f_%s_channel%i_%s',configName,options.variedField,variedParamVal,popNames{currentPop},channelNum,num2str(vv));
-            
+
             if (strcmp(popNames{currentPop},'On') || strcmp(popNames{currentPop},'Off'))  && vv > 1
                 plot_rasters_final = 0;
             elseif ismember(channelNum,chansToPlot)
@@ -78,14 +86,112 @@ for vv = 1:jump % for each varied parameter
             else
                 plot_rasters_final = 0;
             end
-            
+
             [perf.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv),...
                 fr.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv)] = ...
                 calcPCandPlot(channel(channelNum).popSpks,trial_length,numTrials,dt,plot_rasters_final,y1,y2,t,figName);
-            
+            else
+                %Do nothing with the other populations for now. Right now
+                %we just need the populations to create the grid
+            end
         end
     end
 end
+
+
+
+% spks = struct();
+% perf = struct();
+% fr = struct();
+% 
+% for i = 1:nPops
+%     spks.(popNames{i}) = [];
+%     perf.(popNames{i}) = [];
+%     fr.(popNames{i}) = [];
+% end
+% 
+% for vv = 1:jump % for each varied parameter
+%     subData = snn_out(vv:jump:length(snn_out)); % grab data for this param variation
+%     try
+%         variedParamVal = mode([subData.(options.variedField)]); % should all be the same
+%     catch
+%         variedParamVal = 0;
+%     end
+% 
+%     localSpks = struct(); % Preallocate localSpks
+%     localPerf = struct(); % Preallocate localPerf
+%     localFr = struct(); % Preallocate localFr
+% 
+%     for currentPop = 1:nPops
+% 
+%         if popSizes(currentPop) > 1 && isfield(options, 'chansToPlot')
+%             chansToPlot = options.chansToPlot;
+%         else
+%             chansToPlot = 1:popSizes(currentPop);
+%         end
+% 
+%         % skip processing for current population if not within specified subpopulation
+%         if ~contains(popNames(currentPop), options.subPops), continue; end
+% 
+%         % for each spatial channel
+%         for channelNum = 1:popSizes(currentPop)
+%             channel = struct();
+% 
+%             % for each trial
+%             for trial = 1:numTrials
+%                 channel(channelNum).popSpks(trial, :) = subData(trial).(fieldNames{currentPop})(tstart:tend, channelNum);
+%             end
+%             localSpks.(popNames{currentPop})(vv).(['channel' num2str(channelNum)]) = channel(channelNum).popSpks;
+% 
+%             figName = sprintf('%s_%s%.03f_%s_channel%i_%s', configName, options.variedField, variedParamVal, popNames{currentPop}, channelNum, num2str(vv));
+% 
+%             if (strcmp(popNames{currentPop}, 'On') || strcmp(popNames{currentPop}, 'Off')) && vv > 1
+%                 plot_rasters_final = 0;
+%             elseif ismember(channelNum, chansToPlot)
+%                 plot_rasters_final = plot_rasters;
+%             else
+%                 plot_rasters_final = 0;
+%             end
+% 
+%             [localPerf.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv),...
+%                 localFr.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv)] = ...
+%                 calcPCandPlot(channel(channelNum).popSpks, trial_length, numTrials, dt, plot_rasters_final, y1, y2, t, figName);
+% 
+%         end
+%     end
+% 
+%     % Store local results in cell arrays
+%     spksCell{vv} = localSpks;
+%     perfCell{vv} = localPerf;
+%     frCell{vv} = localFr;
+% end
+% 
+% % Combine results outside the parfor loop
+% for vv = 1:jump
+%     spks = combineStructs(spks, spksCell{vv});
+%     perf = combineStructs(perf, perfCell{vv});
+%     fr = combineStructs(fr, frCell{vv});
+% end
+% 
+% % Helper function to combine structs from parallel iterations
+% function combinedStruct = combineStructs(globalStruct, localStruct)
+%     if isempty(localStruct)
+%         combinedStruct = globalStruct;
+%         return;
+%     end
+%     fields = fieldnames(localStruct);
+%     for i = 1:numel(fields)
+%         subfields = fieldnames(localStruct.(fields{i}));
+%         for j = 1:numel(subfields)
+%             if isfield(globalStruct.(fields{i}), subfields{j})
+%                 globalStruct.(fields{i}).(subfields{j}) = [globalStruct.(fields{i}).(subfields{j}); localStruct.(fields{i}).(subfields{j})];
+%             else
+%                 globalStruct.(fields{i}).(subfields{j}) = localStruct.(fields{i}).(subfields{j});
+%             end
+%         end
+%     end
+%     combinedStruct = globalStruct;
+% end
 
 end
 

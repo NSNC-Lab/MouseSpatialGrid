@@ -1,7 +1,9 @@
-function plotPerformanceGrids_v3(data, s, annotTable, subPops, targetIdx, mixedIdx, simOptions, expName)
+function approximate_grid = plotPerformanceGrids_v3(data, s, annotTable, subPops, targetIdx, mixedIdx, simOptions, expName)
     % plot performance grids for specified subpopulation of neurons
     %
     % v3 changes the script into a function
+    
+
 
     subz = simOptions.subz;
     locationLabels = simOptions.locationLabels;
@@ -23,6 +25,8 @@ function plotPerformanceGrids_v3(data, s, annotTable, subPops, targetIdx, mixedI
 
     % check if varied parameter is vector or matrix
     numVars = length(annotTable);
+    
+    approximate_grid = [];
 
     for vv = 1:numVars
         annotStr = annotTable{vv};
@@ -60,6 +64,12 @@ function plotPerformanceGrids_v3(data, s, annotTable, subPops, targetIdx, mixedI
                     end
                     ax = subplot('Position', [xoffset yoffset plotwidth plotheight]);
                     plotPerfGrid(perf.(subPops{pop})', fr.(subPops{pop})', []);
+                    
+                    
+
+                    if pop == 2
+                        approximate_grid = [approximate_grid;flipud(reshape(perf.(subPops{pop}),4,4))];
+                    end
 
                     % add axes
                     if onlyC || (chan == 1 && pop == 1)
@@ -86,7 +96,16 @@ function plotPerformanceGrids_v3(data, s, annotTable, subPops, targetIdx, mixedI
                     end
 
                     ax = subplot('Position', [xoffset yoffset + plotheight + 0.01 plotwidth plotheight * 0.2]);
+
+                    %disp('Plotting the grids')
+                    %disp([perf.(popNamesT{pop})])
+
                     plotPerfGrid([perf.(popNamesT{pop})], [fr.(popNamesT{pop})], '');
+                    
+                    %Double check to make sure this is not reversed
+                    if pop == 2
+                        approximate_grid = [perf.(popNamesT{pop});approximate_grid];
+                    end
 
                     if chan == 1, ylabel(subPops{pop}); end
                 end
