@@ -1,4 +1,4 @@
-function [simdata,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons, flag_raised_mex,varied_struct)
+function [simdata,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons, flag_raised_mex)
 
 % Generates and simulates a network featuring columns of excitatory cells 
 % that respond to onsets and offsets in auditory stimuli
@@ -149,8 +149,8 @@ s.connections(end).parameters={'g_postIC',0.165,'label','off','trial',1,'locNum'
 s.connections(end+1).direction='On->ROn';
 s.connections(end).mechanism_list={'PSC3'};
 %varied_params
-s.connections(end).parameters={'gSYN',transpose(OnRgsyncon),'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30,'netcon',eye(nCells,nCells)};
-%s.connections(end).parameters={'gSYN',OnRgsyncon,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30,'netcon',eye(nCells,nCells)};
+% s.connections(end).parameters={'gSYN',transpose(OnRgsyncon),'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30,'netcon',eye(nCells,nCells)};
+s.connections(end).parameters={'gSYN',OnRgsyncon,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30,'netcon',eye(nCells,nCells)};
 
 s.connections(end+1).direction='On->SOnOff';
 s.connections(end).mechanism_list={'PSC'};
@@ -158,7 +158,7 @@ s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.
 
 s.connections(end+1).direction='SOnOff->ROn';
 s.connections(end).mechanism_list={'PSC3'};
-s.connections(end).parameters={'gSYN',gsyncons.PEgsyncon,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.5,'tauP',120,'netcon',PEnetcon}; 
+s.connections(end).parameters={'gSYN', PEgsyncon, 'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.5,'tauP',120,'netcon',PEnetcon}; 
 
 s.connections(end+1).direction='SOnOff->ROff';
 s.connections(end).mechanism_list={'PSC'};
@@ -190,15 +190,15 @@ s.connections(end).parameters={'gSYN', XRgsyncon,'tauR',XE_rise,'tauD',XE_fall,'
 % apply TD->E and TD->S inhibition
 s.connections(end+1).direction='TD->ROn';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'netcon',eye(nCells,nCells)};
+s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'netcon',zeros(nCells,nCells)};
 
 s.connections(end+1).direction='TD->ROff';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'netcon',eye(nCells,nCells)};
+s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'netcon',zeros(nCells,nCells)};
 
 s.connections(end+1).direction='TD->X';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'netcon',eye(nCells,nCells)};
+s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'netcon',zeros(nCells,nCells)};
 
 % convergence at output from onset-responding neurons
 s.connections(end+1).direction='ROn->C';
