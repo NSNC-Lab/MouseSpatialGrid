@@ -1,0 +1,30 @@
+% Custom Output function
+function [state, optionsGA, optchanged] = ga_output_function(optionsGA, state)
+    optchanged = false;
+
+    % Retrieve the best fitness and best approximate grid from the workspace
+    bestFitness = evalin('base', 'bestFitness');
+    bestApproximateGrid = evalin('base', 'bestApproximateGrid');
+    bestvars = evalin('base', 'bestvars');
+    
+    %Keep track of all vars and fitness values
+    curvars = evalin('base', 'curvars');
+    curfitness = evalin('base', 'curfitness');
+    
+    %Store the best fitness and best approximate grid after each generation
+    if ~isfield(state, 'bestFitnessHistory')
+       state.bestFitnessHistory = [];
+       state.bestApproximateGridHistory = {};
+       state.bestvars = {};
+       state.curvars = {};
+       state.curfitness = [];
+    end
+    state.bestFitnessHistory(end+1) = bestFitness;
+    state.bestApproximateGridHistory{end+1} = bestApproximateGrid;
+    state.bestvars{end+1} = bestvars;
+    state.curvars{end+1} = curvars;
+    state.curfitness(end+1) = curfitness;
+    
+    % Save the updated state to the base workspace
+    assignin('base', 'state', state);
+end

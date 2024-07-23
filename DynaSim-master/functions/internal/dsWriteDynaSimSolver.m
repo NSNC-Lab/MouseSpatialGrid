@@ -236,7 +236,7 @@ if options.save_parameters_flag
   end % one_solve_file_flag
 
   p.ROn_X_PSC3_netcon = netcons(1).XRnetcon;
-  p.ROn_SOnOff_PSC_netcon = netcons(1).PEnetcon;
+  p.ROn_SOnOff_PSC3_netcon = netcons(1).PEnetcon;
   p.C_ROn_PSC3_netcon = netcons(1).RCnetcon;
 
   if options.verbose_flag

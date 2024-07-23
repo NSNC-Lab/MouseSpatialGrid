@@ -1,3 +1,5 @@
+profile on;
+
 %% Initialize
 warning('off','all');
 
@@ -123,7 +125,13 @@ else
 end
 
 % concatenate spike-time matrices, save to study_dir
-prepInputData;
+if exist(fullfile(study_dir, 'solve',['IC_spks_on' '.mat'])) ~= 2
+    prepInputData;
+else
+    load(fullfile(study_dir, 'solve',['IC_spks_on' '.mat']),'spks','dt')
+end
+
+locs = [90 45 0 -90];
 
 %% run simulation
 
@@ -137,14 +145,23 @@ else, options.time_end = padToTime*numel(options.locNum); end
 %The question is, how do we get snn_out to reflect a certain target
 %direction
 
+% approximate_grid = zeros(5,4);
+varied_struct.IntraPV = 0.001;
+varied_struct.RtoC = 0.001;
+varied_struct.XR = 0.03;
 
 %[snn_out,s] = columnNetwork_paper(study_dir,varies,options,netcons);
 %[snn_out,s] = columnNetwork_simpler(study_dir,varies,options,netcons);
-[snn_out,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons, flag_raised_mex,varied_struct);
+[snn_out,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons, flag_raised_mex, varied_struct);
 %[snn_out,s] = columnNetwork_alternative(study_dir,varies,options,netcons);
 %% post-process for performance and firing results
 
 postProcessSims;
 
+create_structure;
+
 
 %4x4   * 1x4   * 4x4
+
+profile off;
+profile viewer

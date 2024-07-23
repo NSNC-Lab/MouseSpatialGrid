@@ -38,6 +38,11 @@ for ICtype = [1 2]
             for ch = 1:options.nCells
 
                 t_wt = spatialCurves(ch,azi == tloc(z));
+                
+                %IB 7/15 decreased the M-weight for sanity check
+
+
+                %m_wt = spatialCurves(ch,azi == mloc(z))*1/100;
                 m_wt = spatialCurves(ch,azi == mloc(z));
 
                 if isempty(t_wt), t_wt = 0; end

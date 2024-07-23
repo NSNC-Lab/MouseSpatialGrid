@@ -91,6 +91,8 @@ nodeMap = containers.Map({'On', 'Off', 'ROn', 'ROff', 'SOnOff', 'TD', 'X', 'C'},
 reverseNodeMap = containers.Map(values(nodeMap), keys(nodeMap));
 
 
+%Current node graph does not handle C nodes?
+
 for c = 1:numChannels
     for x = 1:numConnections
         % grab direction string
@@ -181,6 +183,12 @@ for u = 1:length(sources)
     end
     if end_type == 0
         end_type = 7;
+    end
+
+    %This might be one way to handle it. Assuming we just have the one
+    %cortical netcon and it is always the last one.
+    if(targets(u) == nodeCounter)
+        end_type = 8;
     end
 
     tstring = s.populations(start_type).name + "->" + s.populations(end_type).name;

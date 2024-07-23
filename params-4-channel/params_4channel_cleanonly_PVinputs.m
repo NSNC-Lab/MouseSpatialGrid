@@ -31,6 +31,23 @@ varies(1).range =  trialInds(:)';
 %Lets just start with changing the input gsyn E->E connections. 1 for each
 %channel 4 total
 
+% NetconHandler;
+% GsynHandler;
+% XRnetcon = netcons.XRnetcon;
+% RCnetcon = netcons.RCnetcon;
+% PEnetcon = netcons.PEnetcon;
+% 
+% XRgsyncon = gsyncons.XRgsyncon;
+% RCgsyncon = gsyncons.RCgsyncon;
+% OnRgsyncon = gsyncons.OnRgsyncon;
+% PEgsyncon = gsyncons.PEgsyncon;
+
+%Just going to use this to do our average of 3.
+% Input strength
+% varies(end+1).conxn = '(On->On,Off->Off)';
+% varies(end).param = 'g_postIC';
+% varies(end).range = 0.165*ones(1,3);
+
 
 
 % (On->ROn) connections
@@ -38,6 +55,16 @@ varies(1).range =  trialInds(:)';
 % varies(end).param = 'gSYN';
 % varies(end).range = varied_params;
 
+% % PV->E strength
+% varies(end+1).conxn = 'SOnOff->ROn';
+% varies(end).param = 'gSYN';
+% varies(end).range = {PEgsyncon,PEgsyncon};
+% 
+% 
+% % ROn -> C strength
+% varies(end+1).conxn = 'ROn->C';
+% varies(end).param = 'gSYN';
+% varies(end).range = {RCgsyncon,RCgsyncon};
 
 
 % noise at intermediate neurons

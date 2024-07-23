@@ -167,14 +167,19 @@ if nSims >= 2
     calcMeanOptoPerf(results,nVaried,simDataDir);
 end
 %%
-pc = struct;
-for i = 1:length(subz)
-    [perf,FR] = calcPerfsandFR( data(subz(i)).spks , nVaried ,options.dt , output_pop);
-    pc(subz(i)).fr = FR;
-    pc(subz(i)).perf = perf;
-    pc(subz(i)).config = configName{subz(i)};
-end
-save([simDataDir filesep 'perf_fr_' output_pop '.mat'],'pc');
+
+
+%For GA we are focusing on SPIKE performance for now. This is calculated
+%already in postprocesses_new. This block does not inform our current
+%output.
+% pc = struct;
+% for i = 1:length(subz)
+%     [perf,FR] = calcPerfsandFR( data(subz(i)).spks , nVaried ,options.dt , output_pop);
+%     pc(subz(i)).fr = FR;
+%     pc(subz(i)).perf = perf;
+%     pc(subz(i)).config = configName{subz(i)};
+% end
+% save([simDataDir filesep 'perf_fr_' output_pop '.mat'],'pc');
 
 % make surface plot for 2D parameter searches
 if nVaried >= 10
@@ -222,11 +227,14 @@ if numel(subz) > 1
     simOptions.locationLabels = strtrim(cellstr(num2str(locs'))');
     simOptions.chanLabels = chanLabels;
 
-    subPops = {'C','ROn'};
+    subPops = {'C'};
+    %Taking out ROn to help improve speed 7/19 IB
+    %subPops = {'C'};
     targetIdx = 5:5:20;
     mixedIdx = setdiff(1:24,[1:4 targetIdx]);
 
-    approximate_grid = plotPerformanceGrids_v3(data,s,annotTable,subPops,targetIdx,mixedIdx,simOptions,expName);
+    approximate_grid_cur = plotPerformanceGrids_v3(data,s,annotTable,subPops,targetIdx,mixedIdx,simOptions,expName);
+    %approximate_grid = approximate_grid + approximate_grid_cur;
 end
 
 %disp('here')

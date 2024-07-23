@@ -60,11 +60,15 @@ for vv = 1:jump % for each varied parameter
         if ~contains(popNames(currentPop),options.subPops), continue; end
 
         % for each spatial channel
+        %for channelNum = 1:popSizes(currentPop)
+        %Changed this since for now we are only chaning the upper left on
+        %the spatial grid IB
         for channelNum = 1:popSizes(currentPop)
             channel = struct();
-
-            if(strcmp(popNames{currentPop},'C') || strcmp(popNames{currentPop},'ROn'))
-
+            
+            %Took out ROn bc technically we don't even need it for fitting.
+            %if(strcmp(popNames{currentPop},'C') || strcmp(popNames{currentPop},'ROn'))
+            if(strcmp(popNames{currentPop},'C'))
             % for each trial
            for trial = 1:numTrials
                 channel(channelNum).popSpks(trial,:) = subData(trial).(fieldNames{currentPop})(tstart:tend,channelNum);

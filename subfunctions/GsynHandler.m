@@ -6,20 +6,20 @@ gsyncons = struct;
 
 % OnRgsyncon: Onset (On) -> ROn
 % default was 0.02
-gsyncons.OnRgsyncon = [0.010,0.010,0.010,0.010].';
+gsyncons.OnRgsyncon = [0.010,0.010,0.010,0.010];
 
 % XRgsyncon: SOM (X) -> E (Ron)
-gsyncons.XRgsyncon =   [0.000,0.000,0.000,0.000;
-                        0.005,0.000,0.000,0.000;
-                        0.005,0.000,0.000,0.000;
-                        0.005,0.000,0.000,0.000];
+gsyncons.XRgsyncon =   [0.000,varied_struct.XR,varied_struct.XR,varied_struct.XR;
+                        0.000,0.000,0.000,0.000;
+                        0.000,0.000,0.000,0.000;
+                        0.000,0.000,0.000,0.000];
 
 % RCgsyncon: E (Ron) -> C
 % needs to be transposed for PSC3 mech
 gsyncons.RCgsyncon = [varied_struct.RtoC, 0.003, 0.003, 0.003].';
 
 
-gsyncons.PEgsyncon = [varied_struct.IntraPV,0.000,0.000,0.000;
-                                    0.000,0.020,0.000,0.000;
-                                    0.000,0.000,0.020,0.000;
-                                    0.000,0.000,0.000,0.020];
+gsyncons.PEgsyncon = [varied_struct.IntraPV,0.0,0.00,0.0;
+                      0.0,0.020,0.000,0.000;
+                      0.0,0.000,0.020,0.000;
+                      0.0,0.000,0.000,0.020];
