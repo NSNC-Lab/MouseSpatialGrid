@@ -478,8 +478,8 @@ if ~isempty(model.fixed_variables)
   for i=1:length(names)
     if strcmp(names{i}, 'ROn_X_PSC3_netcon')
         fprintf(fid,'%s = %s;\n',names{i},'ROn_X_PSC3_netcon');
-    elseif strcmp(names{i}, 'ROn_SOnOff_PSC_netcon')
-        fprintf(fid,'%s = %s;\n',names{i},'ROn_SOnOff_PSC_netcon');
+    elseif strcmp(names{i}, 'ROn_SOnOff_PSC3_netcon')
+        fprintf(fid,'%s = %s;\n',names{i},'ROn_SOnOff_PSC3_netcon');
     elseif strcmp(names{i}, 'C_ROn_PSC3_netcon')
         fprintf(fid,'%s = %s;\n',names{i},'C_ROn_PSC3_netcon');
     else
