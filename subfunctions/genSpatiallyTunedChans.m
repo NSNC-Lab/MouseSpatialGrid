@@ -1,4 +1,4 @@
-function [azi,spatialCurves,chanLabels,bestLocs] = genSpatiallyTunedChans(nCells)
+function [azi,spatialCurves,masked_spatialCurves,chanLabels,bestLocs] = genSpatiallyTunedChans(nCells)
 
 % generate spatially-tuned channels based on # channels
  
@@ -49,39 +49,91 @@ chanLabels = {spatial_fits.label};
 % spatialCurves(4,:) = exp(((-1/2)*(azi+90).^2)*(1/100));
 
 %% SOM tuning curves
-contra_avg = [1	0.711835295000650	0.572164835450682	0.543664422258443];
-forty5_avg = [0.769361083556803	1	0.578969909445630	0.475891141620914];
-center_avg = [0.690177636848796	0.705966940305976	1	0.616779885165308];
-ipsi_avg = [0.545588302488780	0.612305937959278	0.635577725387972	1];
+% contra_avg = [1	0.711835295000650	0.572164835450682	0.543664422258443];
+% forty5_avg = [0.769361083556803	1	0.578969909445630	0.475891141620914];
+% center_avg = [0.690177636848796	0.705966940305976	1	0.616779885165308];
+% ipsi_avg = [0.545588302488780	0.612305937959278	0.635577725387972	1];
 
-% contra_avg = [1	0.3	0.1	0];
-% forty5_avg = [0.3	1	0.25	0.2];
-% center_avg = [0.3	0.3	1	0.2];
-% ipsi_avg = [0.25	0.25	0.28	1];
+% SHARPEST SOM tuning curves
+contra_avg = [1,0.707477902424664,0.476197607886939,0.566808122446219];
+forty5_avg = [0.770296095298531,1,0.693331182715444,0.478316132052579];
+center_avg = [0.651372446310364,0.635522000690642,1,0.712131135468840];
+ipsi_avg = [0.657927448550672,0.835066209879243,0.616770901669218,1];
 
-curves = {contra_avg, forty5_avg, center_avg, ipsi_avg};
-curve_data = {};
+spatialCurves(1,:) = contra_avg;
+spatialCurves(2,:) = forty5_avg;
+spatialCurves(3,:) = center_avg;
+spatialCurves(4,:) = ipsi_avg;
+
+Ipsi = [0.514850450713123,0.458987778506694,0.464974123478388,0.471458075175547];
+Center = [0.663586501431304,0.803981880095060,0.634550976161735,0.615880475023880];
+Forty5 = [0.710312866387039,0.963551772496103,0.775877510405394,0.328053274414007];
+Contra = [0.786088278903357,0.526322559668715,0.498512445830263,0.383536562511425];
+
+masked_spatialCurves(1,:) = Contra;
+masked_spatialCurves(2,:) = Forty5;
+masked_spatialCurves(3,:) = Center;
+masked_spatialCurves(4,:) = Ipsi;
+
+%Masked tuning curve
+%contra_mask = [1,0.654,];
+% contra_avg = [1	0	0	0];
+% forty5_avg = [0	1	0	0];
+% center_avg = [0	0	1	0];
+% ipsi_avg = [0	0	0	1];
+
+% curves = {contra_avg, forty5_avg, center_avg, ipsi_avg};
+% curve_data = {};
 bestLocs = [90 45 0 -90];
+% 
+% for i=1:length(curves)
+%     points = [];
+%     curr_values = curves{i};
+%     for j=1:3
+%         rise = curr_values(j+1)-curr_values(j);
+%         run = bestLocs(j) - bestLocs(j+1);
+%         slope = rise/run;
+%         points_temp = (0:run-1)*slope + curr_values(j);
+%         points = [points points_temp];
+%     end
+%     points = [points curves{i}(end)];
+%     curve_data{end+1} = points;
+% end
 
-for i=1:length(curves)
-    points = [];
-    curr_values = curves{i};
-    for j=1:3
-        rise = curr_values(j+1)-curr_values(j);
-        run = bestLocs(j) - bestLocs(j+1);
-        slope = rise/run;
-        points_temp = (0:run-1)*slope + curr_values(j);
-        points = [points points_temp];
-    end
-    points = [points curves{i}(end)];
-    curve_data{end+1} = points;
-end
+% spatialCurves(1,:) = curve_data{1};
+% spatialCurves(2,:) = curve_data{2};
+% spatialCurves(3,:) = curve_data{3};
+% spatialCurves(4,:) = curve_data{4};
+%azi = fliplr(linspace(-90,90, 181));
 
-spatialCurves(1,:) = curve_data{1};
-spatialCurves(2,:) = curve_data{2};
-spatialCurves(3,:) = curve_data{3};
-spatialCurves(4,:) = curve_data{4};
-azi = fliplr(linspace(-90,90, 181));
+
+%Masked 
+
+% curves = {Contra, Forty5, Center, Ipsi};
+% curve_data = {};
+% bestLocs = [90 45 0 -90];
+% 
+% for i=1:length(curves)
+%     points = [];
+%     curr_values = curves{i};
+%     for j=1:3
+%         rise = curr_values(j+1)-curr_values(j);
+%         run = bestLocs(j) - bestLocs(j+1);
+%         slope = rise/run;
+%         points_temp = (0:run-1)*slope + curr_values(j);
+%         points = [points points_temp];
+%     end
+%     points = [points curves{i}(end)];
+%     curve_data{end+1} = points;
+% end
+
+% masked_spatialCurves(1,:) = curve_data{1};
+% masked_spatialCurves(2,:) = curve_data{2};
+% masked_spatialCurves(3,:) = curve_data{3};
+% masked_spatialCurves(4,:) = curve_data{4};
+% azi = fliplr(linspace(-90,90, 181));
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 plot_flag = 0;

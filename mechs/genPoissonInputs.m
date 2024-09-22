@@ -23,18 +23,21 @@ type = label(2:end-1);   % dynasim reads the apostrophes as literals
 
 if strcmp(type, 'on')
     fileData = load('IC_spks_on.mat', 'spks', 'dt');
+    %fileData = load('IC_spks_on.dat', 'spks');
 elseif strcmp(type, 'off')
     fileData = load('IC_spks_off.mat', 'spks', 'dt');
+    %fileData = load('IC_spks_off.dat', 'spks');
 else
 %     fileData = load(['IC_spks_' type '.mat'],'spks','dt');
     fileData = load('IC_spks_on.mat', 'spks', 'dt');
+    %fileData = load('IC_spks_on.dat', 'spks');
 end
 
 
 temp = fileData.spks;
 dt = fileData.dt;
 
-%dt = 0.1;
+%dt = 0.1
 loc_size = size(fileData.spks,1)/24;
 trial_rate = squeeze(temp(:,:,trial)); % time x channel x cells
 

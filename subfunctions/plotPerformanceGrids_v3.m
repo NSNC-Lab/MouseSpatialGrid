@@ -1,4 +1,4 @@
-function approximate_grid = plotPerformanceGrids_v3(data, s, annotTable, subPops, targetIdx, mixedIdx, simOptions, expName)
+function [approximate_grid,fr_grid] = plotPerformanceGrids_v3(data, s, annotTable, subPops, targetIdx, mixedIdx, simOptions, expName, plot_all)
     % plot performance grids for specified subpopulation of neurons
     %
     % v3 changes the script into a function
@@ -31,6 +31,7 @@ function approximate_grid = plotPerformanceGrids_v3(data, s, annotTable, subPops
     numVars = length(annotTable);
     
     approximate_grid = [];
+    fr_grid = [];
 
     for vv = 1:numVars
         annotStr = annotTable{vv};
@@ -39,6 +40,13 @@ function approximate_grid = plotPerformanceGrids_v3(data, s, annotTable, subPops
         figwidth = max(length(popSizes) * 300, 900); % 300 * number of neurons?
         figheight = min(length(popSizes) * 300, 800);
         h = figure('position', [200 50 figwidth figheight]);
+        %IB addeed for speed purposes
+        if plot_all == 0
+            set(h,'Visible','off');
+        else
+            
+        end
+        %set(h,'Visible','off');
 
         plotheight = 1 / numPops * 0.55; % percentage
         xstart = 0.1;
@@ -53,8 +61,15 @@ function approximate_grid = plotPerformanceGrids_v3(data, s, annotTable, subPops
                 plotwidth = 0.14;
             end
 
+            if plot_all == 0
+                pop_tracker = 1;
+            else
+                pop_tracker = popSizes(pop);
+            end
+
             %for chan = 1:popSizes(pop)
-            for chan = 1:1 %Changed 7/19 to just look for upper left corner IB
+            
+            for chan = 1:pop_tracker %Changed 7/19 to just look for upper left corner IB
                 
                 % subfigure positions
                 col = chan - 1;
@@ -74,10 +89,11 @@ function approximate_grid = plotPerformanceGrids_v3(data, s, annotTable, subPops
                     
                     
 
-                    %if pop == 2
+                    if popSizes(pop) == 1
                     %This will need to be changed if Ron this put back in.
                     approximate_grid = [approximate_grid;flipud(reshape(perf.(subPops{pop}),4,4))];
-                    %end
+                    fr_grid = [fr_grid;flipud(reshape(fr.(subPops{pop}),4,4))];
+                    end
 
                     % add axes
                     if onlyC || (chan == 1 && pop == 1)
@@ -111,10 +127,11 @@ function approximate_grid = plotPerformanceGrids_v3(data, s, annotTable, subPops
                     plotPerfGrid([perf.(popNamesT{pop})], [fr.(popNamesT{pop})], '');
                     
                     %Double check to make sure this is not reversed
-                    %if pop == 2
+                    if popSizes(pop) == 1
                     %This will need to be changed if Ron this put back in.
                     approximate_grid = [perf.(popNamesT{pop});approximate_grid];
-                    %end
+                    fr_grid = [fr.(popNamesT{pop});fr_grid];
+                    end
 
                     if chan == 1, ylabel(subPops{pop}); end
                 end
@@ -126,6 +143,12 @@ function approximate_grid = plotPerformanceGrids_v3(data, s, annotTable, subPops
         end
 
         saveas(gcf, fullfile('simData', expName, ['C_grid_vary' num2str(vv) '.png']));
-        %close all;
+        %Might keep in just or memory considerations
+        if plot_all == 0
+            close all;
+        else
+            
+        end
+        %
     end
 end

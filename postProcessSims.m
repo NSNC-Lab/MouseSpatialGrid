@@ -60,107 +60,169 @@ nVaried = length(snn_out)/(20*nSims);
 
 %tic;
 
-% for i = 1:length(subz)
-%     data(subz(i)).perf = [];
-%     data(subz(i)).fr = [];
-%     data(subz(i)).spks = [];
-% end
-% 
-% 
-% for i = 1:length(subz)
-%     trialStart = PPtrialStartTimes(i); trialEnd = PPtrialEndTimes(i);
-% 
-%     figName = [simDataDir filesep configName{subz(i)}];
-%     [data(subz(i)).perf , data(subz(i)).fr , data(subz(i)).spks] = ...
-%         postProcessData_new(snn_out,s,trialStart,trialEnd,figName,options);
-%     data(subz(i)).config = configName{subz(i)};
-% 
-%     % tree-plotting functions: makes figures for all units for each config
-% 
-%     %plotRasterTree(data(subz(i)),figName,options); %close;
-%     %plotPSTHTree(data(subz(i)),figName,options); %close; 
-% 
-%     % make PSTH from spks
-% 
-%     t_bin = 20; % in [ms]
-%     psth_vec = (300:t_bin:(300 + 3000))/dt;
-%     for vv = 1:nVaried
-%         for tid = 1:2
-%             raster = data(subz(i)).spks.(output_pop)(vv).channel1((1:10) + 10*(tid-1),:);
-%             [~,spk_inds] = find(raster);
-%             data(subz(i)).output_PSTH(tid,:,vv) = histcounts(spk_inds,psth_vec);
-%         end
-%     end
-% 
-%     if nVaried == 1
-%         data(subz(i)).output_PSTH = squeeze(data(subz(i)).output_PSTH);
-%     end
-% end
+for i = 1:length(subz)
+    data(subz(i)).perf = [];
+    data(subz(i)).fr = [];
+    data(subz(i)).spks = [];
+end
+
+
+%Note: The following function call was changed slightly. When interfacing
+%with Julia to do MI calculation it wastes a lot of time. No we just
+%calculate the performace fr on the last trial in one batch. This just
+%saves time communicating with Julia
+last_flag = false;
+
+distMats = [];
+
+% % Preallocate the data structure (if it isn't already)
+% data(subz) = struct('perf', [], 'fr', [], 'spks', [], 'perfmed', [], 'config', []);
+
+% Temporary variables for storing results
+perf_temp = cell(1, numel(subz));
+fr_temp = cell(1, numel(subz));
+spks_temp = cell(1, numel(subz));
+perfmed_temp = cell(1, numel(subz));
+config_temp = cell(1, numel(subz));
+
+%Going to try to parfor this for speed on the MI calculation
+parfor i = 1:length(subz)
+    trialStart = PPtrialStartTimes(i); trialEnd = PPtrialEndTimes(i);
+    figName = [simDataDir filesep configName{subz(i)}];
+    
+    %Setup should be something like the following:
+    
+    %Test if we are on the last in subz.
+
+    %For all but last subz
+    
+    % output_perf = [];
+    % 
+    % if(i == length(subz))
+    %     last_flag = true; 
+    % 
+    %     %For the final subz
+    %     [output_perf , data(subz(i)).fr , data(subz(i)).spks, data(subz(i)).perfmed,distMat] = ...
+    %         postProcessData_new(snn_out,s,trialStart,trialEnd,figName,options, plot_all,last_flag,distMats);
+    %     data(subz(i)).config = configName{subz(i)};
+    % 
+    %     distMats = cat(3,distMats,distMat);
+    % 
+    % else
+    % 
+    %     [~, data(subz(i)).fr,data(subz(i)).spks,~,distMat] = postProcessData_new(snn_out,s,trialStart,trialEnd,figName,options, plot_all,last_flag,distMats);
+    %     data(subz(i)).config = configName{subz(i)};
+    % 
+    %     distMats = cat(3,distMats,distMat);
+    % end
+    
+
+    % [data(subz(i)).perf , data(subz(i)).fr , data(subz(i)).spks, data(subz(i)).perfmed] = ...
+    %         postProcessData_new(snn_out,s,trialStart,trialEnd,figName,options, plot_all);
+    % data(subz(i)).config = configName{subz(i)};
+
+    [perf_temp{i}, fr_temp{i}, spks_temp{i}, perfmed_temp{i}] = ...
+        postProcessData_new(snn_out, s, trialStart, trialEnd, figName, options, plot_all);
+    config_temp{i} = configName{subz(i)};
+
+    
+
+    % tree-plotting functions: makes figures for all units for each config
+
+    %plotRasterTree(data(subz(i)),figName,options); %close;
+    %plotPSTHTree(data(subz(i)),figName,options); %close; 
+
+    % make PSTH from spks
+
+    % t_bin = 20; % in [ms]
+    % psth_vec = (300:t_bin:(300 + 3000))/dt;
+    % for vv = 1:nVaried
+    %     for tid = 1:2
+    %         raster = data(subz(i)).spks.(output_pop)(vv).channel1((1:10) + 10*(tid-1),:);
+    %         [~,spk_inds] = find(raster);
+    %         data(subz(i)).output_PSTH(tid,:,vv) = histcounts(spk_inds,psth_vec);
+    %     end
+    % end
+    % 
+    % if nVaried == 1
+    %     data(subz(i)).output_PSTH = squeeze(data(subz(i)).output_PSTH);
+    % end
+end
 %toc;
 
+
+%Fix things since we split up finding the 
+
+
 % Initialize arrays before the parfor loop
-data_perf = cell(1, length(subz));
-data_fr = cell(1, length(subz));
-data_spks = cell(1, length(subz));
-data_output_PSTH = cell(1, length(subz));
-data_config = cell(1, length(subz));
+% data_perf = cell(1, length(subz));
+% data_fr = cell(1, length(subz));
+% data_spks = cell(1, length(subz));
+% data_output_PSTH = cell(1, length(subz));
+% data_config = cell(1, length(subz));
 
 
 %Go through and remove all the things that we do not need to pass into the
 %next part
 
-all_fields = fieldnames(snn_out);
-for fields_input = 1:length(fieldnames(snn_out))
-    if(~strcmp(all_fields{fields_input},'ROn_V_spikes') && ~strcmp(all_fields{fields_input},'C_V_spikes')...
-      && ~strcmp(all_fields{fields_input},options.variedField) && ~strcmp(all_fields{fields_input},'model')...
-      && ~strcmp(all_fields{fields_input},'On_On_trial'))
-        
-        snn_out = rmfield(snn_out, all_fields{fields_input});
 
-    end
-end
+%Temporary adding this so that we can work with the single channel model.
+%(plot all condition^^)
+if plot_all == 0
 
-
-
-for i = 1:length(subz)
-    trialStart = PPtrialStartTimes(i); 
-    trialEnd = PPtrialEndTimes(i);
-
-    figName = [simDataDir filesep configName{subz(i)}];
-    [data_perf{i}, data_fr{i}, data_spks{i}] = ...
-        postProcessData_new(snn_out, s, trialStart, trialEnd, figName, options);
-    data_config{i} = configName{subz(i)};
-
-    % tree-plotting functions: makes figures for all units for each config
-    % plotRasterTree(data(subz(i)),figName,options); %close;
-    % plotPSTHTree(data(subz(i)),figName,options); %close; 
-
-    % make PSTH from spks
-    t_bin = 20; % in [ms]
-    psth_vec = (300:t_bin:(300 + 3000))/dt;
-    output_PSTH = zeros(2, length(psth_vec) - 1, nVaried);
-    for vv = 1:nVaried
-        for tid = 1:2
-            raster = data_spks{i}.(output_pop)(vv).channel1((1:10) + 10*(tid-1), :);
-            [~, spk_inds] = find(raster);
-            output_PSTH(tid, :, vv) = histcounts(spk_inds, psth_vec);
+    all_fields = fieldnames(snn_out);
+    for fields_input = 1:length(fieldnames(snn_out))
+        if(~strcmp(all_fields{fields_input},'ROn_V_spikes') && ~strcmp(all_fields{fields_input},'C_V_spikes')  && ~strcmp(all_fields{fields_input},'On_V_spikes')  && ~strcmp(all_fields{fields_input},'X_V_spikes')...
+          && ~strcmp(all_fields{fields_input},options.variedField) && ~strcmp(all_fields{fields_input},'model')...
+          && ~strcmp(all_fields{fields_input},'On_On_trial'))
+            
+            snn_out = rmfield(snn_out, all_fields{fields_input});
+    
         end
     end
 
-    if nVaried == 1
-        output_PSTH = squeeze(output_PSTH);
-    end
-    data_output_PSTH{i} = output_PSTH;
 end
 
-% Store results back into the data structure
-for i = 1:length(subz)
-    data(subz(i)).perf = data_perf{i};
-    data(subz(i)).fr = data_fr{i};
-    data(subz(i)).spks = data_spks{i};
-    data(subz(i)).output_PSTH = data_output_PSTH{i};
-    data(subz(i)).config = data_config{i};
-end
+
+% for i = 1:length(subz)
+%     trialStart = PPtrialStartTimes(i); 
+%     trialEnd = PPtrialEndTimes(i);
+% 
+%     figName = [simDataDir filesep configName{subz(i)}];
+%     [data_perf{i}, data_fr{i}, data_spks{i}] = ...
+%         postProcessData_new(snn_out, s, trialStart, trialEnd, figName, options,plot_all);
+%     data_config{i} = configName{subz(i)};
+% 
+%     % tree-plotting functions: makes figures for all units for each config
+%     % plotRasterTree(data(subz(i)),figName,options); %close;
+%     plotPSTHTree(data(subz(i)),figName,options); %close; 
+% 
+%     % make PSTH from spks
+%     t_bin = 20; % in [ms]
+%     psth_vec = (300:t_bin:(300 + 3000))/dt;
+%     output_PSTH = zeros(2, length(psth_vec) - 1, nVaried);
+%     for vv = 1:nVaried
+%         for tid = 1:2
+%             raster = data_spks{i}.(output_pop)(vv).channel1((1:10) + 10*(tid-1), :);
+%             [~, spk_inds] = find(raster);
+%             output_PSTH(tid, :, vv) = histcounts(spk_inds, psth_vec);
+%         end
+%     end
+% 
+%     if nVaried == 1
+%         output_PSTH = squeeze(output_PSTH);
+%     end
+%     data_output_PSTH{i} = output_PSTH;
+% end
+% 
+% % Store results back into the data structure
+% for i = 1:length(subz)
+%     data(subz(i)).perf = data_perf{i};
+%     data(subz(i)).fr = data_fr{i};
+%     data(subz(i)).spks = data_spks{i};
+%     data(subz(i)).output_PSTH = data_output_PSTH{i};
+%     data(subz(i)).config = data_config{i};
+% end
 
 % calculate control and laser performance for optogenetic trials
 if nSims >= 2
@@ -226,15 +288,19 @@ if numel(subz) > 1
     simOptions.subz = subz;
     simOptions.locationLabels = strtrim(cellstr(num2str(locs'))');
     simOptions.chanLabels = chanLabels;
-
-    subPops = {'C'};
+    if plot_all == 0
+        subPops = {'C'};
+    else
+        subPops = {'C','On','ROn'};
+    end
     %Taking out ROn to help improve speed 7/19 IB
     %subPops = {'C'};
     targetIdx = 5:5:20;
     mixedIdx = setdiff(1:24,[1:4 targetIdx]);
 
-    approximate_grid_cur = plotPerformanceGrids_v3(data,s,annotTable,subPops,targetIdx,mixedIdx,simOptions,expName);
-    %approximate_grid = approximate_grid + approximate_grid_cur;
+    [approximate_grid_cur,fr_grid_cur] = plotPerformanceGrids_v3(data,s,annotTable,subPops,targetIdx,mixedIdx,simOptions,expName, plot_all);
+    approximate_grid = approximate_grid + approximate_grid_cur;
+    fr_grid = fr_grid + fr_grid_cur;
 end
 
 %disp('here')

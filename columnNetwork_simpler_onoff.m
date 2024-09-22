@@ -59,11 +59,13 @@ GsynHandler;
 XRnetcon = netcons.XRnetcon;
 RCnetcon = netcons.RCnetcon;
 PEnetcon = netcons.PEnetcon;
+% CrossStatnetcon = netcons.CrossStatnetcon;
 
 XRgsyncon = gsyncons.XRgsyncon;
 RCgsyncon = gsyncons.RCgsyncon;
 OnRgsyncon = gsyncons.OnRgsyncon;
 PEgsyncon = gsyncons.PEgsyncon;
+% CrossStatgsyncon = gsyncons.CrossStatgsyncon;
 
 %% onset column
 
@@ -114,6 +116,14 @@ s.populations(end).equations = 'noconLIF';
 s.populations(end).size = nCells;
 s.populations(end).parameters = {'g_L',1/275,'t_ref',1,'V_reset',-55};
 
+% Cross channel static inhibtion stemming from on cells
+% Easier to implement this way
+% s.populations(end+1).name='CrossStat';
+% s.populations(end).equations = 'noconLIF';
+% s.populations(end).size = nCells;
+% s.populations(end).parameters = {'g_L',1/275,'t_ref',1,'V_reset',-55};
+
+
 % output unit
 s.populations(end+1).name='C';
 s.populations(end).equations = 'noconLIF';
@@ -127,6 +137,9 @@ EE_rise = 0.7;  EE_fall = 1.5;   % E->E
 IE_rise = 1;    IE_fall = 4.5;   % PV->E
 EI_rise = 0.55; EI_fall = 1;     % E->PV
 XE_rise = 2;    XE_fall = 8;    % SOM->E
+
+%For tonic Som firing
+Xnew_rise = 4;  Xnew_fall = 50;
 
 % note: all rise times must be greater than dt
 if any([EE_rise,IE_rise,EI_rise,XE_rise,EE_fall,IE_fall,EI_fall,XE_fall] <= dt)
@@ -164,6 +177,14 @@ s.connections(end+1).direction='SOnOff->ROff';
 s.connections(end).mechanism_list={'PSC'};
 s.connections(end).parameters={'gSYN',0.025,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.5,'tauP',120,'netcon',eye(nCells,nCells)}; 
 
+%Going to try connecting to it similarly to how we would a PV cell, but the
+%the actual mechanics of the crossStat cells are differnt.
+% s.connections(end+1).direction='On->CrossStat';
+% s.connections(end).mechanism_list={'PSC'};
+% s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80,'netcon',eye(nCells,nCells)};
+% 
+
+
 % offset channels
 s.connections(end+1).direction='Off->ROff';
 s.connections(end).mechanism_list={'PSC'};
@@ -181,11 +202,18 @@ s.connections(end).parameters={'nSYN',0.015,'tauR_N',EE_rise,'tauD_N',EE_fall,'s
 % cross-channel inhibition
 s.connections(end+1).direction='ROn->X';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.012,'tauR',EE_rise,'tauD',EE_fall,'netcon',eye(nCells,nCells)};
+%This used to be EE_rise and EE_fall. We determined that cross channel
+%inhibtion should not inherent the dyanmics as dynamically. For static
+%inhibtion we changed tauR and tauD from EE to Xnew
+s.connections(end).parameters={'gSYN',0.012,'tauR',Xnew_rise,'tauD',Xnew_fall,'netcon',eye(nCells,nCells)};
 
 s.connections(end+1).direction='X->ROn';
 s.connections(end).mechanism_list={'PSC3'};
 s.connections(end).parameters={'gSYN', XRgsyncon,'tauR',XE_rise,'tauD',XE_fall,'ESYN',-80,'netcon',XRnetcon};
+
+% s.connections(end+1).direction='CrossStat->ROn';
+% s.connections(end).mechanism_list={'PSC3'};
+% s.connections(end).parameters={'gSYN', CrossStatgsyncon,'tauR',XE_rise,'tauD',XE_fall,'ESYN',-80,'netcon',CrossStatnetcon};
 
 % apply TD->E and TD->S inhibition
 s.connections(end+1).direction='TD->ROn';

@@ -1,4 +1,4 @@
-function [perf,fr,spks] = postProcessData_new(snn_out,s,trialStart,trialEnd,configName,options)
+function [perf,fr,spks,perfmed,distMat] = postProcessData_new(snn_out,s,trialStart,trialEnd,configName,options, plot_all)
 % calculate performance and FR for *a single spot on the spatial grid*
 % input:
 %   data structure with length = #sims, containing voltage information of
@@ -68,35 +68,108 @@ for vv = 1:jump % for each varied parameter
             
             %Took out ROn bc technically we don't even need it for fitting.
             %if(strcmp(popNames{currentPop},'C') || strcmp(popNames{currentPop},'ROn'))
-            if(strcmp(popNames{currentPop},'C'))
-            % for each trial
-           for trial = 1:numTrials
-                channel(channelNum).popSpks(trial,:) = subData(trial).(fieldNames{currentPop})(tstart:tend,channelNum);
-           end
 
-            %Added this to trim off some time for the GA. Will need to
-            %bring back for further analysis 7/10 IB
+            if(plot_all == 1)
+                if(strcmp(popNames{currentPop},'C') || strcmp(popNames{currentPop},'ROn')|| strcmp(popNames{currentPop},'On') || strcmp(popNames{currentPop},'X')|| strcmp(popNames{currentPop},'R1On')|| strcmp(popNames{currentPop},'R2On')|| strcmp(popNames{currentPop},'S1OnOff')|| strcmp(popNames{currentPop},'S2OnOff'))
+                         % for each trial
+                   for trial = 1:numTrials
+                        channel(channelNum).popSpks(trial,:) = subData(trial).(fieldNames{currentPop})(tstart:tend,channelNum);
+                   end
+        
+                    %Added this to trim off some time for the GA. Will need to
+                    %bring back for further analysis 7/10 IB
+        
+                    
+        
+                    spks.(popNames{currentPop})(vv).(['channel' num2str(channelNum)]) = channel(channelNum).popSpks;
+        
+                    figName = sprintf('%s_%s%.03f_%s_channel%i_%s',configName,options.variedField,variedParamVal,popNames{currentPop},channelNum,num2str(vv));
+        
+                    if (strcmp(popNames{currentPop},'On') || strcmp(popNames{currentPop},'Off'))  && vv > 1
+                        plot_rasters_final = 0;
+                    elseif ismember(channelNum,chansToPlot)
+                        plot_rasters_final = plot_rasters;
+                    else
+                        plot_rasters_final = 0;
+                    end
+                    
+                    % if last_flag == false
+                    %     [fr.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv),distMat] = calcFR(channel(channelNum).popSpks,numTrials,dt);
+                    %     %Just assigning these as zero for now. Will improve
+                    %     %later. Just building with what I got.
+                    %     perf.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv) = 0;
+                    %     perfmed.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv) = 0;
+                    % 
+                    % else
+                    %     [fr.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv),distMat] = calcFR(channel(channelNum).popSpks,numTrials,dt);
+                    % 
+                    % 
+                    %     perf = calcPC(distMats,channel(channelNum).popSpks,numTrials,trial_length,plot_rasters,y1,y2,t,figName,dt);
+                    %     perfmed.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv) = 0;
+                    % end
 
-            
-
-            spks.(popNames{currentPop})(vv).(['channel' num2str(channelNum)]) = channel(channelNum).popSpks;
-
-            figName = sprintf('%s_%s%.03f_%s_channel%i_%s',configName,options.variedField,variedParamVal,popNames{currentPop},channelNum,num2str(vv));
-
-            if (strcmp(popNames{currentPop},'On') || strcmp(popNames{currentPop},'Off'))  && vv > 1
-                plot_rasters_final = 0;
-            elseif ismember(channelNum,chansToPlot)
-                plot_rasters_final = plot_rasters;
+                    [perf.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv),...
+                        fr.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv)] = ...
+                        calcPCandPlot(channel(channelNum).popSpks,trial_length,numTrials,dt,plot_rasters_final,y1,y2,t,figName);
+                    else
+                        %Do nothing with the other populations for now. Right now
+                        %we just need the populations to create the grid
+                end
             else
-                plot_rasters_final = 0;
-            end
 
-            [perf.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv),...
-                fr.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv)] = ...
-                calcPCandPlot(channel(channelNum).popSpks,trial_length,numTrials,dt,plot_rasters_final,y1,y2,t,figName);
-            else
-                %Do nothing with the other populations for now. Right now
-                %we just need the populations to create the grid
+                if(strcmp(popNames{currentPop},'C'))
+                        
+                        % for each trial
+                   for trial = 1:numTrials
+                        channel(channelNum).popSpks(trial,:) = subData(trial).(fieldNames{currentPop})(tstart:tend,channelNum);
+                   end
+        
+                    %Added this to trim off some time for the GA. Will need to
+                    %bring back for further analysis 7/10 IB
+        
+                    
+        
+                    spks.(popNames{currentPop})(vv).(['channel' num2str(channelNum)]) = channel(channelNum).popSpks;
+        
+                    figName = sprintf('%s_%s%.03f_%s_channel%i_%s',configName,options.variedField,variedParamVal,popNames{currentPop},channelNum,num2str(vv));
+        
+                    if (strcmp(popNames{currentPop},'On') || strcmp(popNames{currentPop},'Off'))  && vv > 1
+                        plot_rasters_final = 0;
+                    elseif ismember(channelNum,chansToPlot)
+                        plot_rasters_final = plot_rasters;
+                    else
+                        plot_rasters_final = 0;
+                    end
+                    
+                    %1. Check if it is the last run -- the last in subz
+                    %2. Save out each of the distMat, but no perf
+                    %3. IF last run calc perf for all.
+
+
+                    % if last_flag == false
+                    %     [fr.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv),distMat] = calcFR(channel(channelNum).popSpks,numTrials,dt);
+                    %     %Just assigning these as zero for now. Will improve
+                    %     %later. Just building with what I got.
+                    %     perf.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv) = 0;
+                    %     perfmed.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv) = 0;
+                    % else
+                    %     [fr.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv),distMat] = calcFR(channel(channelNum).popSpks,numTrials,dt);
+                    % 
+                    %     all_distMats = cat(3,all_distMats,distMat);
+                    % 
+                    %     perf = calcPC(all_distMats,channel(channelNum).popSpks,numTrials,trial_length,plot_rasters,y1,y2,t,figName,dt);
+                    %     perfmed.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv) = 0;
+                    % end
+
+
+                    [perf.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv),...
+                        perfmed.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv),...
+                        fr.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv)] = ...
+                        calcPCandPlot(channel(channelNum).popSpks,trial_length,numTrials,dt,plot_rasters_final,y1,y2,t,figName);
+                    else
+                        %Do nothing with the other populations for now. Right now
+                        %we just need the populations to create the grid
+                end
             end
         end
     end
@@ -199,7 +272,112 @@ end
 
 end
 
-function [pc,fr] = calcPCandPlot(raster,trial_length,numTrials,dt,plot_rasters,y1,y2,t,figName)
+
+%NOTE: Changed this to do firing rate and performance separately. This
+%allowed for a pretty large speedup. Call both calcFR and calcPC in the
+%future.
+% 
+
+%This function calculates the fr and returns the distance matrix so that we
+%can do the performance calculation all in one go.
+function [fr,distMat] = calcFR(raster,numTrials,dt)
+    
+% inputs:
+% raster - 0s and 1s with size [trials x samples]
+% trial_length - simulation time in [ms]
+% calcPC - if performance is calculated == 1
+% numTrials - # trials per target ( #rows in raster / 2 )
+% dt - timestep [in ms]
+% plot_rasters - if plotting config/unit, == 1
+% y1 and y2 - target waveforms
+% t - target time vector
+% figName - figure name
+
+% use dt to calculate indexes for stimulus response
+start_time = 300; % in [ms]
+end_time = start_time + 3000; % in [ms]
+
+% spks to spiketimes in a cell array of 20x2
+spkTimes = cell(numTrials,1);
+for ii = 1:numTrials
+    % convert raster spike indexes to ms
+    spkTimes{ii} = find(raster(ii,:))*dt;
+end
+spkTimes = reshape(spkTimes,numTrials/2,2);
+input = reshape(spkTimes,1,numTrials);
+fr = round(mean(cellfun(@(x) sum(x >= start_time & x < end_time) / 3,input)));
+
+
+%Right here you should be able to plug in the raw data and get something
+%out. Might need to convert spike times to spike indicies?
+
+
+% claculate performance
+STS = SpikeTrainSet(input,start_time,end_time);
+distMat = STS.SPIKEdistanceMatrix(start_time,end_time);
+
+
+end
+
+
+function[pc] = calcPC(distMats,raster,numTrials,trial_length,plot_rasters,y1,y2,t,figName,dt)
+    %So here we would just gather all of the distMat, then we can shove the
+    %whole matrix in and have Julia handle it. Watch out for the returns.
+    
+    
+    %Might onyl need to do this for the upper triangular
+
+    distMats = permute(distMats,[3,1,2]);
+    
+    [~,~,~,pc] = calcpcStatic(distMats, numTrials/2, 2, 0);
+    %PCstr = ['PC = ' num2str(round(pc)) '%'];
+
+    
+    
+    %plot
+    x = 0.86;
+    y_raster = 0.4;
+    y_stim = 0.08;
+    y_psth = 0.12;
+    dy = 0.01;
+    x0 = 0.1;
+    
+    % plot rasters and PSTHs (in seconds)
+    if plot_rasters
+        clf
+    
+        ypos = 0.91 - y_stim;
+        subplot('position',[x0 ypos x y_stim]); % target 2
+        plot(t,y2,'k'); xlim([0 trial_length/1000]);
+        title({PCstr,['FR = ' num2str(fr)]}); set(gca,'xtick',[],'ytick',[])
+    
+        ypos = ypos - dy - y_psth;
+        subplot('position',[x0 ypos x y_psth]);
+        plotPSTH(raster(numTrials/2+1:end,:),dt); set(gca,'xtick',[])
+    
+        ypos = ypos - dy - y_raster;
+        subplot('position',[x0 ypos x y_raster]);
+        plotSpikeRasterFs(flipud(logical(raster)), 'PlotType','vertline');
+        xlim([0 trial_length/dt]);
+        line([0,trial_length/dt],[numTrials/2 + 0.5,numTrials/2 + 0.5],'color',[0.3 0.3 0.3]); set(gca,'xtick',[],'ytick',[])
+    
+        ypos = ypos - dy - y_psth;
+        subplot('position',[x0 ypos x y_psth]);
+        plotPSTH(raster(1:numTrials/2,:),dt); set(gca,'xtick',[])
+    
+        ypos = ypos - dy - y_stim;
+        subplot('position',[x0 ypos x y_stim]); % target 1
+        plot(t,y1,'k'); xlim([0 trial_length/1000]); set(gca,'ytick',[]); 
+    
+        saveas(gcf,[figName '.png'])
+    end
+
+end
+
+
+
+
+function [pc,pc2,fr] = calcPCandPlot(raster,trial_length,numTrials,dt,plot_rasters,y1,y2,t,figName)
 
 % inputs:
 % raster - 0s and 1s with size [trials x samples]
@@ -226,11 +404,22 @@ spkTimes = reshape(spkTimes,numTrials/2,2);
 input = reshape(spkTimes,1,numTrials);
 fr = round(mean(cellfun(@(x) sum(x >= start_time & x < end_time) / 3,input)));
 
+
+%Right here you should be able to plug in the raw data and get something
+%out. Might need to convert spike times to spike indicies?
+
+
 % claculate performance
 STS = SpikeTrainSet(input,start_time,end_time);
 distMat = STS.SPIKEdistanceMatrix(start_time,end_time);
 
-pc = calcpcStatic(distMat, numTrials/2, 2, 0);
+%So here we would just gather all of the distMat, then we can shove the
+%whole matrix in and have Julia handle it. Watch out for the returns.
+
+
+%Might onyl need to do this for the upper triangular
+
+[pc,pc2,~,~] = calcpcStatic(distMat, numTrials/2, 2, 0);
 PCstr = ['PC = ' num2str(round(pc)) '%'];
 
 %plot
@@ -244,22 +433,22 @@ x0 = 0.1;
 % plot rasters and PSTHs (in seconds)
 if plot_rasters
     clf
-    
+
     ypos = 0.91 - y_stim;
     subplot('position',[x0 ypos x y_stim]); % target 2
     plot(t,y2,'k'); xlim([0 trial_length/1000]);
     title({PCstr,['FR = ' num2str(fr)]}); set(gca,'xtick',[],'ytick',[])
-    
+
     ypos = ypos - dy - y_psth;
     subplot('position',[x0 ypos x y_psth]);
     plotPSTH(raster(numTrials/2+1:end,:),dt); set(gca,'xtick',[])
-    
+
     ypos = ypos - dy - y_raster;
     subplot('position',[x0 ypos x y_raster]);
     plotSpikeRasterFs(flipud(logical(raster)), 'PlotType','vertline');
     xlim([0 trial_length/dt]);
     line([0,trial_length/dt],[numTrials/2 + 0.5,numTrials/2 + 0.5],'color',[0.3 0.3 0.3]); set(gca,'xtick',[],'ytick',[])
-    
+
     ypos = ypos - dy - y_psth;
     subplot('position',[x0 ypos x y_psth]);
     plotPSTH(raster(1:numTrials/2,:),dt); set(gca,'xtick',[])
@@ -267,11 +456,13 @@ if plot_rasters
     ypos = ypos - dy - y_stim;
     subplot('position',[x0 ypos x y_stim]); % target 1
     plot(t,y1,'k'); xlim([0 trial_length/1000]); set(gca,'ytick',[]); 
-    
+
     saveas(gcf,[figName '.png'])
 end
-    
+
 end
+
+
 
 function plotPSTH(raster,dt)
 

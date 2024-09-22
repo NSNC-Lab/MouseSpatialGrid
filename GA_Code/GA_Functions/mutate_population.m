@@ -41,13 +41,20 @@ function mutant = mutate_population(parents, optionsGA, nvars, FitnessFcn, state
     % 
     % 
     % %%%%%%%%%%%%%%%%%%%%%%%%%
-
+    %Original
+    %mutationStrength = 0.2;  
     mutationStrength = 0.2;
     mutationRate = 0.2;
 
     %disp(mutationRate);
     %disp(mutationStrength);
     
+    %Currently mutates every parameter of a given creature.
+    %Instead we should mutate along each axis, given by the importance of
+    %the mutation. Each gene should have a chance to mutate instead of each
+    %creature.
+
+
     mutant = thisPopulation(parents,:);
     for i = 1:size(mutant, 1)
         if rand < mutationRate

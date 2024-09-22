@@ -3,10 +3,27 @@ function population = create_population(GenomeLength, ~, optionsGA)
     
     %%%%  OPTION 1 %%%%%    (Random initilization)
     n = optionsGA.PopulationSize;
-    population = rand(n, GenomeLength)*0.15;
+    %population = rand(n, GenomeLength)*0.15;
+    
+    %More optimal start
 
     %Shift to the right
-    population(:,1) = population(:,1) + 0.15;
+    %population(:,1) = population(:,1) + 0.15;
+
+    %a = fieldnames(optionsGA);
+
+    %More optimal start
+    population = rand(n, GenomeLength)*0.05;
+    % population(:,3) = population(:,3)*2;
+    % population(:,2) = population(:,2)*6;
+    
+
+    % for k = 1:length(a)
+    %     if strcmp(a{k},'InitialPopulationMatrix')
+    %         disp('hello')
+    %         population = optionsGA.InitialPopulationMatrix
+    %     end
+    % end
 
     %%%%  OPTION 2 %%%%%    (Evenly spaced starting)
     % %Try an evenly spaced grid

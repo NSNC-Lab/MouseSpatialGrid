@@ -234,10 +234,14 @@ if options.save_parameters_flag
       p.(mod_params{iParam}) = param_values(iParam,:);
     end
   end % one_solve_file_flag
-
-  p.ROn_X_PSC3_netcon = netcons(1).XRnetcon;
-  p.ROn_SOnOff_PSC3_netcon = netcons(1).PEnetcon;
-  p.C_ROn_PSC3_netcon = netcons(1).RCnetcon;
+  
+  %Replace for single channel model
+  %if exist('netcons(1).PEnetcon')
+      p.ROn_X_PSC3_netcon = netcons(1).XRnetcon;
+      p.ROn_SOnOff_PSC3_netcon = netcons(1).PEnetcon;
+      p.C_ROn_PSC3_netcon = netcons(1).RCnetcon;
+      % p.ROn_CrossStat_PSC3_netcon = netcons(1).CrossStatnetcon;
+  %end
 
   if options.verbose_flag
     fprintf('Saving params.mat\n');
@@ -476,12 +480,16 @@ if ~isempty(model.fixed_variables)
   end
 
   for i=1:length(names)
-    if strcmp(names{i}, 'ROn_X_PSC3_netcon')
+    if strcmp(names{i}, 'ROn_X_PSC3_ ')
         fprintf(fid,'%s = %s;\n',names{i},'ROn_X_PSC3_netcon');
     elseif strcmp(names{i}, 'ROn_SOnOff_PSC3_netcon')
         fprintf(fid,'%s = %s;\n',names{i},'ROn_SOnOff_PSC3_netcon');
     elseif strcmp(names{i}, 'C_ROn_PSC3_netcon')
         fprintf(fid,'%s = %s;\n',names{i},'C_ROn_PSC3_netcon');
+    % elseif strcmp(names{i}, 'ROn_CrossStat_PSC3_netcon')
+    %     fprintf(fid,'%s = %s;\n',names{i},'ROn_CrossStat_PSC3_netcon');
+
+        %p.ROn_CrossStat_PSC3_netcon = netcon(1).CrossStatnetcon;
     else
         fprintf(fid,'%s = %s;\n',names{i},expressions{i});
     end

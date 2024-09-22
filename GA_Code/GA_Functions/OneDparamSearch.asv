@@ -1,0 +1,99 @@
+%Get our best variables.
+%Best_Vars = state.bestvars{end};
+
+%Remove this
+Best_Vars = [0];
+Target_grid = [86,85,85,87;87,69,71,56;86,71,47,52;63,60,56,60;58,63,65,58];
+Target_fr_grid = [28.733,17.1333,13.2,13.566;20.733,13.556,10.66,9;0,0,0,0;0,0,0,0;0,0,0,0];
+
+varied_struct.CrossStat1 = 0;
+
+%Create an array to search around each point
+%Option 1: Full range
+
+%Get the names of all the best Params
+Init_Best_Params_1D;
+Var_Names = fieldnames(varied_struct);
+
+
+%Go through each variable
+
+
+
+serach_area = linspace(0,0.5,100);
+%serach_area = [ones(1,30)*0,ones(1,30)*0.2];
+
+
+
+averager = [];
+
+%Store all fitness values
+Total_search_fitness = [];
+
+for v = 1:length(Best_Vars)
+    OneDFitness = [];
+    disp(['Testing Param: #' num2str(v)])
+    for a = serach_area
+            %Initilize the Best params
+            Init_Best_Params_1D;
+
+            %Change variable of interest
+            varied_struct.(Var_Names{v}) = a;
+            
+            %Intilize our grids of interest
+            approximate_grid = zeros(5,4);
+            fr_grid = zeros(5,4);
+            
+            %Run the network
+            SpikingNetwork_withOffset;
+                        
+
+            %1. Clean performance
+                perf_diffs = abs(Target_grid(1,:) - approximate_grid(1,:));
+                fitness1 = sum(perf_diffs);
+
+            
+            
+            %2. Clean firing rate
+
+                Target_fr = Target_fr_grid(1,:);
+                approx_fr = fr_grid(1,:);
+                fitness2 = sum(abs(Target_fr-approx_fr));
+
+            %3. Absolute hotspot difference
+                
+                fitness3 = abs(Target_grid(2,1) - (approximate_grid(2,1)));
+
+            
+            %4. Final Fitness calculation
+
+                fw1 = 1;
+                fw2 = 8;
+                fw3 = 1;
+            
+            
+            fitness = fitness3;
+
+
+            %fitness = sum(sum(abs(Target_fr_grid(1:2,:)-fr_grid(1:2,:))))*Fr_Frac...
+            %    + abs(Target_grid(2,1) - (approximate_grid(2,1)))*Perf_Frac;
+        
+            OneDFitness = [OneDFitness,fitness];
+    end
+    Total_search_fitness = [Total_search_fitness;OneDFitness];
+end
+
+imagesc(Total_search_fitness,'AlphaData', 0.5);  hold on;
+set(gca, 'YDir', 'normal'); 
+set(gca, 'YTick', 1:length(Best_Vars), 'YTickLabel', transpose(Var_Names));
+set(gca, 'XTick', 1:length(serach_area), 'XTickLabel', serach_area);
+colormap(jet);
+caxis([20 40]);
+
+
+
+
+%Option 2: Until degredation
+
+
+%Option 3: Proportional Range

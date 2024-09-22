@@ -1485,14 +1485,18 @@ function varargs = modify_varargin(varargs, key, newValue)
 end
 
 function save_params(p, netcons, param_file) % SS
-%% trying to add netcons to params.mat
-  p.ROn_X_PSC3_netcon = netcons(1).XRnetcon;
-  p.ROn_SOnOff_PSC3_netcon = netcons(1).PEnetcon;
-  p.C_ROn_PSC3_netcon = netcons(1).RCnetcon;
-  save(param_file, 'p', '-v7');
-  % params = load('params.mat', 'p');
-  % addAttachedFiles(poolobj, 'params.mat');
-  % fileStoreObj = parallel.pool.Constant(params)
-  % % test_params = fileStoreObj.Value;
+%Replace for single channel model  
+%if exist('netcons(1).PEnetcon')
+    %% trying to add netcons to params.mat
+      p.ROn_X_PSC3_netcon = netcons(1).XRnetcon;
+      p.ROn_SOnOff_PSC3_netcon = netcons(1).PEnetcon;
+      p.C_ROn_PSC3_netcon = netcons(1).RCnetcon;
+      % p.ROn_CrossStat_PSC3_netcon = netcons(1).CrossStatnetcon;
+      save(param_file, 'p', '-v7');
+      % params = load('params.mat', 'p');
+      % addAttachedFiles(poolobj, 'params.mat');
+      % fileStoreObj = parallel.pool.Constant(params)
+      % % test_params = fileStoreObj.Value;
+  %end
 end
 

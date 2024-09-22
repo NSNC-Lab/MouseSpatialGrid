@@ -1,33 +1,28 @@
-%Add a path to the GA functions
-addpath('GA_Functions\')
-clc;
-%clear all;
+%0. Set up paths, and things that will be the same across all sims.
+Init_Handler;
 
-%Move to the correct simulation path
-cd('..');
+%Changed upper left to 87 7/31 (Might allow us to get better firing rates)
 
 %1. Load in target spatial grid (Practice grid for now)
-Target_grid = [98,85,80,75;80,65,63,60;65,63,60,50;65,63,60,50;65,50,50,50];
+Target_grid = [86,85,85,87;87,69,71,56;86,71,47,52;63,60,56,60;58,63,65,58];
+Target_fr_grid = [28.733,17.1333,13.2,13.566;20.733,13.556,10.66,9;0,0,0,0;0,0,0,0;0,0,0,0];
 
-%2. Define the number of variables
-nVars = 3;
+%2. Define the number of var iables
+nVars = 4;
 
 %3. Set GA options
-%initialPopulation = state.Population;
-optionsGA = optimoptions('ga', 'PopulationSize', 100, 'MaxGenerations', 30, ...
-                         'Display', 'iter', 'CreationFcn', @create_population, ...
-                         'MutationFcn', @mutate_population, 'OutputFcn', @ga_output_function);
+optionsGA = optimoptions('ga', 'PopulationSize',1, 'MaxGenerations', 1, 'Display', 'iter', 'CreationFcn', @create_population,...
+                         'MutationFcn', @mutate_populationV2, 'OutputFcn', @ga_output_function,'CrossoverFraction',0.5, ...
+                         'SelectionFcn','selectiontournament','CrossoverFcn','crossovertwopoint');  
 
-                         %'InitialPopulationMatrix', initialPopulation, ...
-                         % 'MutationFcn',{@mutationgaussian 1 1}, ...
-
-
+% optionsGA = optimoptions('ga', '=frew\][[poiuy76t5r4e321  `PopulationSize', 150, 'MaxGenerations', 50, 'Display', 'iter', 'CreationFcn', @create_population,...
+%                          'MutationFcn', @mutate_population, 'OutputFcn', @ga_output_function,'InitialPopulationMatrix', state.Population);
 %4. Define the fitness function
-fitnessFunction = @(x) fitness_fun(Target_grid, reshape(x, [1, nVars]),optionsGA);
+%fitnessFunction = @(x) fitness_fun(Target_grid,Target_fr_grid, reshape(x, [1, nVars]),optionsGA);
+fitnessFunction = @(x) fitness_fun_4D(Target_grid,Target_fr_grid, reshape(x, [1, nVars]),optionsGA, plot_all,toggle_real);
 
 %5. Run the GA
-[x, fval] = ga(fitnessFunction, nVars, [], [], [], [], zeros(1, nVars), 100*ones(1, nVars), [], optionsGA);
+[x, fval] = ga(fitnessFunction, nVars, [], [], [], [], [], [], [], optionsGA);
 
 %Plot the evolution
 %animationPlotter
-

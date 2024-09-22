@@ -33,12 +33,12 @@ varies(end).range = 0.165;
 %Switch back Off->R1On to On->R1On
     
 % E->E connections
-varies(end+1).conxn = '(On->R1On,R1On->R2On,Off->R1Off,R1Off->R2Off)';
+varies(end+1).conxn = '(On->R1On,R1On->R2On,Off->R1On)';
 varies(end).param = 'gSYN';
 varies(end).range = 0.02;
 
 %PVs
-varies(end+1).conxn = '(S1OnOff->R1On,S1OnOff->R1Off,S2OnOff->R2On,S2OnOff->R2Off)';
+varies(end+1).conxn = '(S1OnOff->R1On,S2OnOff->R2On)';
 varies(end).param = 'gSYN';
 varies(end).range = 0.025;
 
@@ -48,7 +48,7 @@ varies(end).param = 'gSYN';
 varies(end).range = 0.01;
 
 % Off-> PV
-varies(end+1).conxn = '(Off->S1OnOff,R1Off->S2OnOff)';
+varies(end+1).conxn = '(Off->S1OnOff)';
 varies(end).param = 'gSYN';
 varies(end).range = 0.005;
 

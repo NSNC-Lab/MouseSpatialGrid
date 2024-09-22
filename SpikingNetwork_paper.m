@@ -1,5 +1,8 @@
 % This mainscript will help you create Figures 3 through 5 in the bioRxiv
 % manuscript. - Jio
+tic;
+plot_all = 1;
+
 
 %% Initialize
 
@@ -8,7 +11,9 @@ mfileinfo = mfilename('fullpath');
 mfiledir = strsplit(mfileinfo,filesep);
 % cd(fullfile(mfiledir{1:end-1}));
 
-dynasimPath = fullfile('..','DynaSim');
+%dynasimPath = fullfile('..','DynaSim');
+dynasimPath = 'DynaSim-master';
+
 
 addpath('mechs');
 addpath('resampled-stimuli');
@@ -30,7 +35,39 @@ dt = 0.1; %ms, should be a multiple of 0.1 ms
 study_dir = fullfile(pwd,'run','1-channel-paper');
 
 if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
-mkdir(fullfile(study_dir, 'solve'));
+%mkdir(fullfile(study_dir, 'solve'));
+
+
+solve_directory = fullfile(study_dir, 'solve');
+% 
+if exist(fullfile(study_dir, 'solve'), 'dir')
+    %don't remove the directory
+    flag_raised_mex = 1;
+else
+    if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
+    mkdir(solve_directory); 
+    flag_raised_mex  = 0;
+
+    mexes_dir = fullfile(mfiledir{1:end-1}, 'mexes');
+    if isfolder(mexes_dir)
+        %These might need to be changed for this model!!!!
+        m_file_to_copy = 'solve_ode_1_channel_paper.m';
+        mex_file_to_copy = 'solve_ode_1_channel_paper_mex.mexw64';
+        mex_file_path = fullfile(mexes_dir, mex_file_to_copy);
+        mex_files = dir([mex_file_path, '.*']);
+        if ~isempty(mex_files)
+            flag_raised_mex = 1;
+
+            end
+        end
+end
+
+
+
+addpath(solve_directory);
+
+
+
 
 % expName: folder under 'simData' where results are saved
 expName = '12-18-23 test run';
@@ -47,7 +84,7 @@ addpath('params');
 %params_5_rate_based_onoff_offNonSupressed;
 %params_opto_onoff_2
 %params_5_off_dominated
-params_5_rate_based_onoff;
+onoff_con;
 %params_AM_best_onoff;
 
 
@@ -110,8 +147,14 @@ options.dt = dt;
 
 if isempty(options.locNum), options.time_end = size(spks,1)*dt; % [ms];
 else, options.time_end = padToTime*numel(options.locNum); end
-[snn_out,s] = columnNetwork_paper_onoff(study_dir,varies,options,netcons);
+[snn_out,s] = columnNetwork_paper_onoff_Excitatory(study_dir,varies,options,netcons,flag_raised_mex);
+
+%Going to try rerunning old stuff to see if it is broken.
+%[snn_out,s] = columnNetwork_paper_onoff(study_dir,varies,options,netcons,flag_raised_mex);
+
+
 
 %% post-process for performance and firing results
 
 postProcessSims;
+toc;

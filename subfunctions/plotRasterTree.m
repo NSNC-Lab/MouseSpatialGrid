@@ -13,7 +13,8 @@ jump = length(data.spks.On);
 
 % network properties
 %popNames = fieldnames(data.fr);
-popNames = {'SOnOff','ROn'};
+% popNames = {'SOnOff','ROn'};
+popNames = {'S1OnOff','R1On','R2On'};
 
 
 

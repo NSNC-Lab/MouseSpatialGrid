@@ -7,7 +7,8 @@ data_channel = 1;
 fig_num = 6;
 
 
-titles = {'on','off','R1on','R2on','R1off','R2off','S1OnOff','S2OnOff'};
+%titles = {'on','off','R1on','R2on','R1off','R2off','S1OnOff','S2OnOff'};
+titles = {'on','R1on','S1OnOff'};
 
 for j = 1:length(titles)
     plotting_data = [];
@@ -21,16 +22,17 @@ for j = 1:length(titles)
         %% Rasters
         %Grab the spikes that we are interested in
         on = transpose(data(subz).spks.On(data_channel).channel1(k,:));
-        off = transpose(data(subz).spks.Off(data_channel).channel1(k,:));
+        %off = transpose(data(subz).spks.Off(data_channel).channel1(k,:));
         R1on = transpose(data(subz).spks.R1On(data_channel).channel1(k,:));
-        R2on = transpose(data(subz).spks.R2On(data_channel).channel1(k,:));
-        R1off = transpose(data(subz).spks.R1Off(data_channel).channel1(k,:));
-        R2off = transpose(data(subz).spks.R2Off(data_channel).channel1(k,:));
+        %R2on = transpose(data(subz).spks.R2On(data_channel).channel1(k,:));
+        %R1off = transpose(data(subz).spks.R1Off(data_channel).channel1(k,:));
+        %R2off = transpose(data(subz).spks.R2Off(data_channel).channel1(k,:));
         S1OnOff = transpose(data(subz).spks.S1OnOff(data_channel).channel1(k,:));
-        S2OnOff = transpose(data(subz).spks.S2OnOff(data_channel).channel1(k,:));
+        %S2OnOff = transpose(data(subz).spks.S2OnOff(data_channel).channel1(k,:));
 
-        reference_cell = {on,off,R1on,R2on,R1off,R2off,S1OnOff,S2OnOff};
-        
+        %reference_cell = {on,off,R1on,R2on,R1off,R2off,S1OnOff,S2OnOff};
+        reference_cell = {on,R1on,S1OnOff};
+
         
         
 

@@ -1,25 +1,5 @@
-profile on;
 
-%% Initialize
-warning('off','all');
-
-% change current directory to folder where this script is stored
-mfileinfo = mfilename('fullpath');
-mfiledir = strsplit(mfileinfo,filesep);
-% cd(fullfile(mfiledir{1:end-1}));
-
-dynasimPath = 'DynaSim-master';
-
-addpath('mechs');
-addpath('resampled-stimuli');
-addpath(genpath('ICSimStim'));
-addpath('genlib');
-addpath(genpath(dynasimPath));
-addpath('cSPIKE'); InitializecSPIKE;
-addpath('plotting');
-addpath('subfunctions');
-
-
+% profile on;
 %% Make ICfiles.mat if it's not in your directory
 
 if ~isfile('ICfiles.mat'), makeICfiles; end
@@ -41,7 +21,7 @@ if exist(fullfile(study_dir, 'solve'), 'dir')
 else
     if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
     mkdir(solve_directory); 
-    flag_raised_mex = 0;
+    flag_raised_mex  = 0;
 
     mexes_dir = fullfile(mfiledir{1:end-1}, 'mexes');
     if isfolder(mexes_dir)
@@ -83,7 +63,7 @@ params_4channel_cleanonly_PVinputs;
 %% Creating TuningCurves
 
 % spatial tuning at inputs
-[azi,spatialCurves,chanLabels,bestLocs] = genSpatiallyTunedChans(options.nCells);
+[azi,spatialCurves,masked_spatialCurves,chanLabels,bestLocs] = genSpatiallyTunedChans(options.nCells);
 
 
 %% load input stimuli (targets and maskers) from ICSimStim
@@ -126,9 +106,15 @@ end
 
 % concatenate spike-time matrices, save to study_dir
 if exist(fullfile(study_dir, 'solve',['IC_spks_on' '.mat'])) ~= 2
+%if exist(fullfile(study_dir, 'solve',['IC_spks_on' '.dat'])) ~= 2
     prepInputData;
+    assignin('base', 'spks', spks);
+elseif exist('spks') == 1
+
 else
+    %load(fullfile(study_dir, 'solve',['IC_spks_on' '.dat']),'spks')
     load(fullfile(study_dir, 'solve',['IC_spks_on' '.mat']),'spks','dt')
+    assignin('base', 'spks', spks);
 end
 
 locs = [90 45 0 -90];
@@ -146,22 +132,35 @@ else, options.time_end = padToTime*numel(options.locNum); end
 %direction
 
 % approximate_grid = zeros(5,4);
-varied_struct.IntraPV = 0.001;
-varied_struct.RtoC = 0.001;
-varied_struct.XR = 0.03;
+% varied_struct.IntraPV = 0.001;
+% varied_struct.RtoC = 0.03;
+% varied_struct.XR = 0.03;
 
 %[snn_out,s] = columnNetwork_paper(study_dir,varies,options,netcons);
 %[snn_out,s] = columnNetwork_simpler(study_dir,varies,options,netcons);
+
+%REMOVE THIS FOR GA START
+% varied_struct = {};
+% approximate_grid = zeros(5,4);
+% fr_grid = zeros(5,4);
+
+%saveout815(2)
+%varied_struct.RtoC1 = 0.0085;
+% varied_struct.RtoC2 = 0.000;
+% varied_struct.RtoC3 = 0.000;
+% varied_struct.RtoC4 = 0.000;
+% varied_struct.XR3 = 0.013;
+
+
 [snn_out,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons, flag_raised_mex, varied_struct);
 %[snn_out,s] = columnNetwork_alternative(study_dir,varies,options,netcons);
 %% post-process for performance and firing results
 
 postProcessSims;
 
-create_structure;
-
+%create_structure;
 
 %4x4   * 1x4   * 4x4
 
-profile off;
-profile viewer
+% profile off;
+% profile viewer;

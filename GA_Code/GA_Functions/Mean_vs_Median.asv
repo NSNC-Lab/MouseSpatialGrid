@@ -1,0 +1,10 @@
+mean_vals = [];
+median_vals = [];
+
+
+for j = 1:length(data_tracker)
+    for k = 1:length(data_tracker{j})
+            mean_vals = [mean_vals,data_tracker{j}(k)];
+     
+    end
+end

@@ -1,0 +1,121 @@
+% Create a figures for the animations
+%figure('Position', [0 0 1000 500]);hold on;
+
+%Set plot boundaries
+y_bound = 0.3;
+x_bound = 0.4;
+Topo_plot_resolution = 200;
+Num_Neighbors = 2;
+
+var1 = 1;
+var2 = 3;
+
+%Track cumulative fitness at each area
+total_fit = zeros(Topo_plot_resolution,Topo_plot_resolution);
+
+% Animation loop
+for gen = 1:length(state.curvars)
+
+    %Clear the figures
+    clf;
+    hold on;
+    axis([-0.5 x_bound -0.5 y_bound]);
+    
+    
+    %General Plot
+    %current_iteration =  reshape(state.curvars{gen},nVars,optionsGA.PopulationSize);
+    current_iteration =  transpose([state.curvars{gen}(:,var1),state.curvars{gen}(:,var2)]);
+
+    %Topo plot
+    %1. Split the grid into a ton of little pieces.
+    xEdges = linspace(0, x_bound, Topo_plot_resolution); 
+    yEdges = linspace(0, y_bound, Topo_plot_resolution);
+
+    all_fit = [];
+    for i = 1:length(xEdges)
+        columns_fit = [];
+        for j = 1:length(yEdges)
+            
+            Distance_array = [];
+            %Track the nearest nearest neightbors to each pixel on the
+            %grid. Once nearest neighbors are found, take their avg.
+            %fitness
+            for k = 1:length(current_iteration)
+                %L1
+                %distFit = abs((current_iteration(1,k)-xEdges(i)))^2 + abs((current_iteration(2,k)-yEdges(j)))
+                %L2
+                distFit = sqrt(abs((current_iteration(1,k)-xEdges(i)))^2 + abs((current_iteration(2,k)-yEdges(j)))^2); 
+                Distance_array = [Distance_array,distFit];
+            end
+
+            [~, sortedIndices] = sort(Distance_array);
+            smallestIndices = sortedIndices(1:Num_Neighbors);
+            
+            accumulator = 0;
+            for m = 1:Num_Neighbors
+                accumulator = accumulator + state.curfitness{gen}(smallestIndices(m));
+            end
+            avg_fit = accumulator/Num_Neighbors;
+
+            columns_fit = [columns_fit;avg_fit];
+
+        end
+        all_fit = [all_fit,columns_fit];
+
+    end
+    
+    %0.5 alpha makes the image look softer.
+    %Plot inidvidual trials
+
+    %imagesc(xEdges, yEdges, all_fit,'AlphaData', 0.5);  
+    %scatter(current_iteration(1, :), current_iteration(2, :), 200, state.curfitness{gen}, 'filled');
+
+    %colormap(jet); 
+    %caxis([58 60]); 
+    
+    % Add a color bar to show the mapping
+    colorbar;
+
+    %pause(0.1);
+    total_fit = total_fit+all_fit;
+
+end
+hold off;
+
+%Plot average over everything
+total_fit = total_fit/length(state.curvars);
+figure;
+
+for gen = 1:length(state.curvars)
+    imagesc(xEdges, yEdges, total_fit,'AlphaData', 0.5);  hold on;
+    set(gca, 'YDir', 'normal'); 
+    colormap(jet);
+    caxis([15 30]); 
+    %current_iteration =  reshape(state.curvars{gen},nVars,optionsGA.PopulationSize);
+    current_iteration =  transpose([state.curvars{gen}(:,var1),state.curvars{gen}(:,var2)]);
+    scatter(current_iteration(1, :), current_iteration(2, :), 200, state.curfitness{gen}, 'filled'); 
+    pause(1);
+    hold off;
+    
+end
+
+pause;
+
+figure;
+imagesc(xEdges, yEdges, total_fit,'AlphaData', 0.5);  hold on;
+set(gca, 'YDir', 'normal'); 
+colormap(jet);
+caxis([15 30]); 
+
+for gen = 1:length(state.curvars)
+    %current_iteration =  reshape(state.curvars{gen},nVars,optionsGA.PopulationSize);
+    current_iteration =  transpose([state.curvars{gen}(:,var1),state.curvars{gen}(:,var2)]);
+    scatter(current_iteration(1, :), current_iteration(2, :), 200, state.curfitness{gen}, 'filled'); 
+    pause(1);
+end
+
+figure;
+imagesc(xEdges, yEdges, total_fit,'AlphaData', 0.5);  hold on;
+set(gca, 'YDir', 'normal'); 
+colormap(jet);
+caxis([15 30]);

@@ -4,8 +4,12 @@
 %Set plot boundaries
 y_bound = 0.3;
 x_bound = 0.4;
-Topo_plot_resolution = 150;
-Num_Neighbors = 3;
+Topo_plot_resolution = 30;
+Num_Neighbors = 4;
+lower_bound = 0;
+
+var1 = 5;
+var2 = 6;
 
 %Track cumulative fitness at each area
 total_fit = zeros(Topo_plot_resolution,Topo_plot_resolution);
@@ -16,16 +20,17 @@ for gen = 1:length(state.curvars)
     %Clear the figures
     clf;
     hold on;
-    axis([-0.5 x_bound -0.5 y_bound]);
+    axis([lower_bound x_bound lower_bound y_bound]);
     
     
     %General Plot
-    current_iteration =  reshape(state.curvars{gen},nVars,optionsGA.PopulationSize);
+    %current_iteration =  reshape(state.curvars{gen},nVars,optionsGA.PopulationSize);
+    current_iteration =  transpose([state.curvars{gen}(:,var1),state.curvars{gen}(:,var2)]);
 
     %Topo plot
     %1. Split the grid into a ton of little pieces.
-    xEdges = linspace(0, x_bound, Topo_plot_resolution); 
-    yEdges = linspace(0, y_bound, Topo_plot_resolution);
+    xEdges = linspace(lower_bound, x_bound, Topo_plot_resolution); 
+    yEdges = linspace(lower_bound, y_bound, Topo_plot_resolution);
 
     all_fit = [];
     for i = 1:length(xEdges)
@@ -86,10 +91,11 @@ for gen = 1:length(state.curvars)
     imagesc(xEdges, yEdges, total_fit,'AlphaData', 0.5);  hold on;
     set(gca, 'YDir', 'normal'); 
     colormap(jet);
-    caxis([15 30]); 
-    current_iteration =  reshape(state.curvars{gen},nVars,optionsGA.PopulationSize); 
+    caxis([13 70]); 
+    %current_iteration =  reshape(state.curvars{gen},nVars,optionsGA.PopulationSize);
+    current_iteration =  transpose([state.curvars{gen}(:,var1),state.curvars{gen}(:,var2)]);
     scatter(current_iteration(1, :), current_iteration(2, :), 200, state.curfitness{gen}, 'filled'); 
-    pause(1);
+    pause(0.2);
     hold off;
     
 end
@@ -100,16 +106,17 @@ figure;
 imagesc(xEdges, yEdges, total_fit,'AlphaData', 0.5);  hold on;
 set(gca, 'YDir', 'normal'); 
 colormap(jet);
-caxis([15 30]); 
+caxis([13 70]); 
 
 for gen = 1:length(state.curvars)
-    current_iteration =  reshape(state.curvars{gen},nVars,optionsGA.PopulationSize);
+    %current_iteration =  reshape(state.curvars{gen},nVars,optionsGA.PopulationSize);
+    current_iteration =  transpose([state.curvars{gen}(:,var1),state.curvars{gen}(:,var2)]);
     scatter(current_iteration(1, :), current_iteration(2, :), 200, state.curfitness{gen}, 'filled'); 
-    pause(1);
+    pause(0.2);
 end
 
 figure;
 imagesc(xEdges, yEdges, total_fit,'AlphaData', 0.5);  hold on;
 set(gca, 'YDir', 'normal'); 
 colormap(jet);
-caxis([15 30]);
+caxis([13 70]);
