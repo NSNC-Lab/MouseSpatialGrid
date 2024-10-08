@@ -13,7 +13,7 @@ function population = create_population(GenomeLength, ~, optionsGA)
     %a = fieldnames(optionsGA);
 
     %More optimal start
-    population = rand(n, GenomeLength)*0.05;
+    population = rand(n, GenomeLength)*0.01;
     % population(:,3) = population(:,3)*2;
     % population(:,2) = population(:,2)*6;
     

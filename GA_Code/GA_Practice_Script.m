@@ -4,22 +4,24 @@ Init_Handler;
 %Changed upper left to 87 7/31 (Might allow us to get better firing rates)
 
 %1. Load in target spatial grid (Practice grid for now)
-Target_grid = [86,85,85,87;87,69,71,56;86,71,47,52;63,60,56,60;58,63,65,58];
-Target_fr_grid = [28.733,17.1333,13.2,13.566;20.733,13.556,10.66,9;0,0,0,0;0,0,0,0;0,0,0,0];
+Target_grid = [100,99,99,100;100,84,79,67;87,60,56,56;66,59,58,53;47,54,56,56];
+Target_fr_grid = [9.1,15.5,21.8,26.1;9.27,6.4,6.9,7.63;0,0,0,0;0,0,0,0;0,0,0,0];
 
 %2. Define the number of var iables
-nVars = 4;
+nVars = 7;
 
 %3. Set GA options
-optionsGA = optimoptions('ga', 'PopulationSize',1, 'MaxGenerations', 1, 'Display', 'iter', 'CreationFcn', @create_population,...
+optionsGA = optimoptions('ga', 'PopulationSize',30, 'MaxGenerations', 150, 'Display', 'iter', 'CreationFcn', @create_population,...
                          'MutationFcn', @mutate_populationV2, 'OutputFcn', @ga_output_function,'CrossoverFraction',0.5, ...
-                         'SelectionFcn','selectiontournament','CrossoverFcn','crossovertwopoint');  
+                         'SelectionFcn','selectiontournament','CrossoverFcn','crossovertwopoint'); 
 
-% optionsGA = optimoptions('ga', '=frew\][[poiuy76t5r4e321  `PopulationSize', 150, 'MaxGenerations', 50, 'Display', 'iter', 'CreationFcn', @create_population,...
-%                          'MutationFcn', @mutate_population, 'OutputFcn', @ga_output_function,'InitialPopulationMatrix', state.Population);
+% optionsGA = optimoptions('ga', 'PopulationSize',50, 'MaxGenerations', 50, 'Display', 'iter', 'CreationFcn', @create_population,...
+%                          'MutationFcn', @mutate_populationV2, 'OutputFcn', @ga_output_function,'CrossoverFraction',0.5, ...
+%                          'SelectionFcn','selectiontournament','CrossoverFcn','crossovertwopoint','InitialPopulationMatrix', state.Population); 
+
 %4. Define the fitness function
 %fitnessFunction = @(x) fitness_fun(Target_grid,Target_fr_grid, reshape(x, [1, nVars]),optionsGA);
-fitnessFunction = @(x) fitness_fun_4D(Target_grid,Target_fr_grid, reshape(x, [1, nVars]),optionsGA, plot_all,toggle_real);
+fitnessFunction = @(x) fitness_fun_tar90_maskNeg90(Target_grid,Target_fr_grid, reshape(x, [1, nVars]),optionsGA, plot_all,toggle_real);
 
 %5. Run the GA
 [x, fval] = ga(fitnessFunction, nVars, [], [], [], [], [], [], [], optionsGA);

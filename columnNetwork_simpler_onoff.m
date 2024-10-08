@@ -1,4 +1,4 @@
-function [simdata,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons, flag_raised_mex, varied_struct)
+function [simdata,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons, flag_raised_mex)  %, varied_struct
 
 % Generates and simulates a network featuring columns of excitatory cells 
 % that respond to onsets and offsets in auditory stimuli
@@ -150,11 +150,11 @@ end
 
 s.connections(1).direction='On->On';
 s.connections(1).mechanism_list={'IC'};
-s.connections(1).parameters={'g_postIC',0.165,'label','on','trial',1,'locNum',options.locNum,'netcon',eye(nCells,nCells),'t_ref',1,'t_ref_rel',1,'rec',2};
+s.connections(1).parameters={'g_postIC',0.035,'label','on','trial',1,'locNum',options.locNum,'netcon',eye(nCells,nCells),'t_ref',1,'t_ref_rel',1,'rec',2};
 
 s.connections(end+1).direction='Off->Off';
 s.connections(end).mechanism_list={'IC'};
-s.connections(end).parameters={'g_postIC',0.165,'label','off','trial',1,'locNum',options.locNum,'netcon',eye(nCells,nCells),'t_ref',1,'t_ref_rel',1,'rec',2};
+s.connections(end).parameters={'g_postIC',0.035,'label','off','trial',1,'locNum',options.locNum,'netcon',eye(nCells,nCells),'t_ref',1,'t_ref_rel',1,'rec',2};
 
 % % % Intermediate layer % % %
 

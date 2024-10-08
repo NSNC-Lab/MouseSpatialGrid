@@ -1,4 +1,4 @@
-function [perf,fr,spks,perfmed,distMat] = postProcessData_new(snn_out,s,trialStart,trialEnd,configName,options, plot_all)
+function [perf,fr,spks,perfmed] = postProcessData_new(snn_out,s,trialStart,trialEnd,configName,options, plot_all)
 % calculate performance and FR for *a single spot on the spatial grid*
 % input:
 %   data structure with length = #sims, containing voltage information of
@@ -109,6 +109,7 @@ for vv = 1:jump % for each varied parameter
                     % end
 
                     [perf.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv),...
+                        perfmed.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv), ...
                         fr.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv)] = ...
                         calcPCandPlot(channel(channelNum).popSpks,trial_length,numTrials,dt,plot_rasters_final,y1,y2,t,figName);
                     else

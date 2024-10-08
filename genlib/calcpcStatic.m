@@ -42,53 +42,53 @@ end
 s = size(distMat); % [numTrains, numTrains, numTaus]
 
 %Add in a flag for MI asap
-tic
-
-global exe
-
-if ispc
-    exe = "C:\Users\ipboy\AppData\Local\Programs\Julia-1.10.5\bin\julia";
-elseif ismac
-    exe = '/Users/jionocon/.juliaup/bin/julialauncher';
-end
-
-
-%distances = rand(20,20);
-%Double check this
-labels = repmat([ones(1,10),ones(1,10)*2],24,1);
-
-matfile = 'temp_SP_distances.mat';
-save(matfile,'distMat','labels');
-
-csv_file = runJuliaCode(matfile);
-pc = readmatrix(csv_file);
-
-
-toc
+% tic
+% 
+% global exe
+% 
+% if ispc
+%     exe = "C:\Users\ipboy\AppData\Local\Programs\Julia-1.10.5\bin\julia";
+% elseif ismac
+%     exe = '/Users/jionocon/.juliaup/bin/julialauncher';
+% end
+% 
+% 
+% %distances = rand(20,20);
+% %Double check this
+% labels = repmat([ones(1,10),ones(1,10)*2],24,1);
+% 
+% matfile = 'temp_SP_distances.mat';
+% save(matfile,'distMat','labels');
+% 
+% csv_file = runJuliaCode(matfile);
+% pc = readmatrix(csv_file);
+% 
+% 
+% toc
 
 
 
 % tic
-% for iterationNum = 1:numIterations
-%     if ~selfFlag
-%         [tempInds(1),tempInds(2)] = ind2sub([numTrials numTrials],iterationNum);
-%         tempInds = tempInds - 1;
-%     else
-%         tempInds = tempMatrix(iterationNum,:);
-%     end
-%     pc(iterationNum,1) = calcpcNew(distMat, numTrials, numTargets, tempInds, selfFlag);
-% 
-%     %pc =
-% end
+for iterationNum = 1:numIterations
+    if ~selfFlag
+        [tempInds(1),tempInds(2)] = ind2sub([numTrials numTrials],iterationNum);
+        tempInds = tempInds - 1;
+    else
+        tempInds = tempMatrix(iterationNum,:);
+    end
+    pc(iterationNum,1) = calcpcNew(distMat, numTrials, numTargets, tempInds, selfFlag);
+
+    %pc =
+end
 % toc
 E = std(pc);   % standard deviation
-% maxY = mean(pc);
 maxY = mean(pc);
-%maxY = reshape(maxY, [s(3:end), size(maxY, ndims(maxY)), 1]);
-%E = reshape(E, [s(3:end), size(E, ndims(E)), 1]);
+maxY = mean(pc);
+maxY = reshape(maxY, [s(3:end), size(maxY, ndims(maxY)), 1]);
+E = reshape(E, [s(3:end), size(E, ndims(E)), 1]);
 
 maxMED = median(pc);
-%maxMED = reshape(maxMED, [s(3:end), size(maxMED, ndims(maxMED)), 1]);
+maxMED = reshape(maxMED, [s(3:end), size(maxMED, ndims(maxMED)), 1]);
 
 %% the new shiny version
 function [pc,pc2] = calcpcNew(distMat, numTrials, numTargets, tempInds, selfFlag)

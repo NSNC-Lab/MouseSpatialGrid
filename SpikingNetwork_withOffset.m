@@ -1,4 +1,3 @@
-
 % profile on;
 %% Make ICfiles.mat if it's not in your directory
 
@@ -141,8 +140,8 @@ else, options.time_end = padToTime*numel(options.locNum); end
 
 %REMOVE THIS FOR GA START
 % varied_struct = {};
-% approximate_grid = zeros(5,4);
-% fr_grid = zeros(5,4);
+approximate_grid = zeros(5,4);
+fr_grid = zeros(5,4);
 
 %saveout815(2)
 %varied_struct.RtoC1 = 0.0085;
@@ -152,7 +151,7 @@ else, options.time_end = padToTime*numel(options.locNum); end
 % varied_struct.XR3 = 0.013;
 
 
-[snn_out,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons, flag_raised_mex, varied_struct);
+[snn_out,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons, flag_raised_mex);  %, varied_struct
 %[snn_out,s] = columnNetwork_alternative(study_dir,varies,options,netcons);
 %% post-process for performance and firing results
 

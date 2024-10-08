@@ -18,7 +18,10 @@ end
 %X_input = transpose(1:100);
 %Y_input = sin(X_input/100);
 
-X_input = [input_holder(:,1),input_holder(:,4)];
+var1 = 1;
+var2 = 6;
+
+X_input = [input_holder(:,var1),input_holder(:,var2)];
 Y_input = input_holder_score;
 
 X_known = [];
@@ -154,7 +157,8 @@ ranges = {};
 
 for h = 1:length(mins)
     %Tuned down to 20 bc 200^4 is a large #
-    ranges{end+1} = linspace(mins(h),maxs(h),20);
+    %ranges{end+1} = linspace(mins(h),maxs(h),200);
+    ranges{end+1} = linspace(0,0.02,200);
 end
 %ranges = {1:3, 4:6, 7:9, ... };  % Add more ranges for higher dimensions
 
@@ -185,7 +189,7 @@ end
 
 %X_unknown = transpose(linspace(min(X_known),max(X_known),2000));
 %noise = 1e-2;
-noise = 0.2;
+noise = 0.5;
 
 simplex_output = simplex_decent(0.1,0.1,X_known,Y_known,noise);
 coords = simplex_output{1};
@@ -196,12 +200,31 @@ coords = simplex_output{1};
 
 figure;
 
-plot(X_unknown,mu); hold on
+%plot(X_unknown,mu); hold on
 
-plot(X_known,Y_known)
+%plot(X_known,Y_known)
 
 surf(grids{1},grids{2},reshape(mu,size(grids{1})),'EdgeColor','none','FaceAlpha',0.5); hold on
-plot3(X_known(:,1),X_known(:,2),Y_known,'r.','MarkerSize',20)
+%For poster plot first iteration in black last in green
+%plot3(X_known(1:30,1),X_known(1:30,2),Y_known(1:30),'r.','MarkerSize',20); hold on
+%plot3(X_known(end-5:end,1),X_known(end-5:end,2),Y_known(end-5:end),'g.','MarkerSize',20)
+
+plot3(state.curvars{1}(1:30,var1),state.curvars{1}(1:30,var2),state.curfitness{1}(1:30),'r.','MarkerSize',20); hold on
+
+for mm = 2:20
+    plot3(state.curvars{mm}(1:30,var1),state.curvars{mm}(1:30,var2),state.curfitness{mm}(1:30),'k.','MarkerSize',5); hold on
+end
+
+plot3(state.curvars{21}(1:30,var1),state.curvars{21}(1:30,var2),state.curfitness{21}(1:30),'g.','MarkerSize',20); hold on
+
+xlim([0,0.01])
+ylim([0,0.01])
+
+xlabel('R->C Strength Contra')
+ylabel('SOM->R Strength 90->0')
+zlabel('Error')
+
+saveas(gcf, 'FitnessLandscapeGAAPAN.svg');
 
 
 toc;

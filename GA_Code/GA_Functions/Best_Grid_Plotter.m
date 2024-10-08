@@ -1,13 +1,16 @@
+addpath("subfunctions")
+addpath("plotting")
 %For Average grid of a trial
 % bestApproximateGrid2 = bestApproximateGrid;
 %bestApproximateGrid = state.bestApproximateGridHistory{end};
+%bestfrGrid = state.frGridHistory{end};
 % bestfrGrid2 = bestfrGrid;
 
-bestfrGrid = mean(state.curfrgrid{2},3);
-bestApproximateGrid = mean(state.curgrid{2},3);
+bestfrGrid = mean(state.curfrgrid{end},3);
+bestApproximateGrid = mean(state.curgrid{end},3);
 
 % bestApproximateGrid = approximate_grid;
-%bestfrGrid = state.frGridHistory{end};
+
 
 % bestApproximateGrid = bestApproximateGrid2;
 % 

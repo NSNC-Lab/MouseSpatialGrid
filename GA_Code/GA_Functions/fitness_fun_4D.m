@@ -4,17 +4,20 @@ function fitness = fitness_fun_4D(Target_grid,Target_fr_grid, varied_params, opt
     %Start by just looking at the R to C connections
 
     %R to C connections
-    % varied_struct.RtoC1 = varied_params(1);
-    % varied_struct.RtoC2 = varied_params(2);
-    % varied_struct.RtoC3 = varied_params(3);
-    % varied_struct.RtoC4 = varied_params(4);
+    varied_struct.RtoC1 = varied_params(1);
+    varied_struct.RtoC2 = varied_params(2);
+    varied_struct.RtoC3 = varied_params(3);
+    varied_struct.RtoC4 = varied_params(4);
 
 
-    %REMOVE BEFORE 5D search
-    varied_struct.RtoC1 = 0.00175685264443262;
-    varied_struct.RtoC2 = 0.000198679983008015;
-    varied_struct.RtoC3 = 0.00229808130178778;
-    varied_struct.RtoC4 = 0.00149230691029864;
+
+
+
+    % %REMOVE BEFORE 5D search
+    % varied_struct.RtoC1 = 0.00175685264443262;
+    % varied_struct.RtoC2 = 0.000198679983008015;
+    % varied_struct.RtoC3 = 0.00229808130178778;
+    % varied_struct.RtoC4 = 0.00149230691029864;
 
     
 %0.00175685264443262	0.000198679983008015	0.00229808130178778	0.00149230691029864
@@ -54,10 +57,14 @@ function fitness = fitness_fun_4D(Target_grid,Target_fr_grid, varied_params, opt
     fr_grid_mixed_norm = fr_grid(2,:)/(max(fr_grid(2,:)));
 
     t_fr_grid_clean_norm = Target_fr_grid(1,:)/max(Target_fr_grid(1,:));
-    t_fr_grid_mixed_norm = Target_fr_grid(1,:)/max(Target_fr_grid(1,:));
+    t_fr_grid_mixed_norm = Target_fr_grid(2,:)/max(Target_fr_grid(2,:));
     
     fitness1 = sum(abs(fr_grid_clean_norm-t_fr_grid_clean_norm)) + sum(abs(fr_grid_mixed_norm-t_fr_grid_mixed_norm));
     
+    %Do not allow 0 firing rate to throw a nan
+    if(min(fr_grid(2,:)) < 2 || min(fr_grid(1,:)) < 2)
+        fitness1 = 1000;
+    end
     
     %2. Clean firing rate
     
@@ -67,14 +74,14 @@ function fitness = fitness_fun_4D(Target_grid,Target_fr_grid, varied_params, opt
         fitness2 = fitness2 + (fr_grid(1,1) - 30)*20;
     end
 
-    if fr_grid(2,4) < 7
+    if fr_grid(2,2) < 7
         %For Hz = 6 and below punish by 20 fitness per hz (in lowest area)
         fitness2 = fitness2 + abs(fr_grid(2,4)-7)*20;
     end
     
    %3. Hotspot absolute difference
 
-        fitness3 = abs(Target_grid(2,1) - approximate_grid(2,1));
+       fitness3 = abs(Target_grid(2,1) - approximate_grid(2,1));
 
 
     %4. Final Fitness calculation

@@ -79,14 +79,14 @@ distMats = [];
 % data(subz) = struct('perf', [], 'fr', [], 'spks', [], 'perfmed', [], 'config', []);
 
 % Temporary variables for storing results
-perf_temp = cell(1, numel(subz));
-fr_temp = cell(1, numel(subz));
-spks_temp = cell(1, numel(subz));
-perfmed_temp = cell(1, numel(subz));
-config_temp = cell(1, numel(subz));
+% perf_temp = cell(1, numel(subz));
+% fr_temp = cell(1, numel(subz));
+% spks_temp = cell(1, numel(subz));
+% perfmed_temp = cell(1, numel(subz));
+% config_temp = cell(1, numel(subz));
 
 %Going to try to parfor this for speed on the MI calculation
-parfor i = 1:length(subz)
+for i = 1:length(subz)
     trialStart = PPtrialStartTimes(i); trialEnd = PPtrialEndTimes(i);
     figName = [simDataDir filesep configName{subz(i)}];
     
@@ -117,13 +117,13 @@ parfor i = 1:length(subz)
     % end
     
 
-    % [data(subz(i)).perf , data(subz(i)).fr , data(subz(i)).spks, data(subz(i)).perfmed] = ...
-    %         postProcessData_new(snn_out,s,trialStart,trialEnd,figName,options, plot_all);
-    % data(subz(i)).config = configName{subz(i)};
+    [data(subz(i)).perf , data(subz(i)).fr , data(subz(i)).spks, data(subz(i)).perfmed] = ...
+            postProcessData_new(snn_out,s,trialStart,trialEnd,figName,options, plot_all);
+    data(subz(i)).config = configName{subz(i)};
 
-    [perf_temp{i}, fr_temp{i}, spks_temp{i}, perfmed_temp{i}] = ...
-        postProcessData_new(snn_out, s, trialStart, trialEnd, figName, options, plot_all);
-    config_temp{i} = configName{subz(i)};
+    % [perf_temp{i}, fr_temp{i}, spks_temp{i}, perfmed_temp{i}] = ...
+    %     postProcessData_new(snn_out, s, trialStart, trialEnd, figName, options, plot_all);
+    % config_temp{i} = configName{subz(i)};
 
     
 
@@ -134,19 +134,19 @@ parfor i = 1:length(subz)
 
     % make PSTH from spks
 
-    % t_bin = 20; % in [ms]
-    % psth_vec = (300:t_bin:(300 + 3000))/dt;
-    % for vv = 1:nVaried
-    %     for tid = 1:2
-    %         raster = data(subz(i)).spks.(output_pop)(vv).channel1((1:10) + 10*(tid-1),:);
-    %         [~,spk_inds] = find(raster);
-    %         data(subz(i)).output_PSTH(tid,:,vv) = histcounts(spk_inds,psth_vec);
-    %     end
-    % end
-    % 
-    % if nVaried == 1
-    %     data(subz(i)).output_PSTH = squeeze(data(subz(i)).output_PSTH);
-    % end
+    t_bin = 20; % in [ms]
+    psth_vec = (300:t_bin:(300 + 3000))/dt;
+    for vv = 1:nVaried
+        for tid = 1:2
+            raster = data(subz(i)).spks.(output_pop)(vv).channel1((1:10) + 10*(tid-1),:);
+            [~,spk_inds] = find(raster);
+            data(subz(i)).output_PSTH(tid,:,vv) = histcounts(spk_inds,psth_vec);
+        end
+    end
+
+    if nVaried == 1
+        data(subz(i)).output_PSTH = squeeze(data(subz(i)).output_PSTH);
+    end
 end
 %toc;
 
