@@ -1,0 +1,67 @@
+% Fitness function
+function fitness = fitnessfunc_general(Target_grid,Target_fr_grid, varied_params, optionsGA, plot_all)
+    
+
+    %First start by assigning all of the varied_params
+
+    %Assign params by default to an area
+        %Priority 1: Cross channel SOM inhibition - 3 for each hotspot
+        %Priority 2: Within Channel PV wieghts - 4  total
+        %Priority 3: R to C weights - 4 total
+        %Priority 4: On to Ron weights - 4 total
+
+    
+    %If weights have not been set yet, intilize tem to some default value
+    cur_weights = Initilize_weights;
+
+    %Set the weights according to 
+    
+    %In the base area get calculate the number of weights that you want to
+    %seek (assign PV SST and hotspots and what not)
+    %Check out source of noise
+
+    %Just going to have to use all of the connections for now. Basically we
+    %are running on all of the weights 
+
+    %1. Look at source of noise
+    %2. Look at optimizing the mutation
+    %3. Look at wiring up weights
+    %Add absolute firing rate term.
+
+
+
+
+
+
+
+
+
+    % %Start by just looking at the R to C connections
+    % 
+    % %R to C connections
+    % varied_struct.RtoC1 = varied_params(1);
+    % varied_struct.RtoC4 = varied_params(2);
+    % 
+    % 
+    % % Assume this function updates approximate_grid
+    % study_dir = fullfile(pwd,'run','4-channel-PV-inputs');
+    % if exist(fullfile(study_dir, 'solve',['IC_spks_on' '.mat'])) == 2
+    %     load(fullfile(study_dir, 'solve',['IC_spks_on' '.mat']),'spks','dt')
+    % end
+    % 
+    % 
+    % %Preallocate so that the appoximate grid can be populated
+    % approximate_grid = zeros(5,4);
+    % fr_grid = zeros(5,4);
+    % 
+    % SpikingNetwork_withOffset;
+    % 
+    % 
+    % %Goal here is to match firing rates
+    % fitness = abs(Target_fr_grid(1,1)-fr_grid(1,1));
+    % 
+    % %disp(['fitness: 1', num2str(fitness1),'  fitness: 2', num2str(fitness2),'   fitness: 3', num2str(fitness3),'   fitness: 4', num2str(fitness4)])
+    % 
+    % store_values(fitness, approximate_grid,fr_grid, varied_params,optionsGA);
+
+end

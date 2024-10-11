@@ -15,16 +15,16 @@ function PEnetcon = makePENetcon(bestLocs,sigma)
 % sigma - width of Gaussian curve
 %   as sigma approaches 0, PEnetcon becomes an identity matrix
 
-nCells = numel(bestLocs);
+% nCells = numel(bestLocs);
+% 
+% azi = -108:108;
+% 
+% azi_inds = find(ismember(azi,bestLocs));
 
-azi = -108:108;
-
-azi_inds = find(ismember(azi,bestLocs));
-
-PEnetcon = eye(nCells);
-for i = 1:nCells
-    curve = gaussmf(azi,[sigma bestLocs(i)]);
-    PEnetcon(i,:) = curve(azi_inds);
-end
+PEnetcon = eye(1);
+% for i = 1:nCells
+%     curve = gaussmf(azi,[sigma bestLocs(i)]);
+%     PEnetcon(i,:) = curve(azi_inds);
+% end
 
 end

@@ -1,5 +1,3 @@
-
-
 % locs are based on the locations for stimuli in mouse experiments
 % +90, 45, and 0 are to the left (contra)
 % -90 to the right (ipsi)

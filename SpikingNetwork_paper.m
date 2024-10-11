@@ -101,6 +101,8 @@ netcons = struct;
 % PEnetcon: PV->E, model as Gaussians for now
 sigma = 30;
 netcons.PEnetcon = makePENetcon(bestLocs,sigma);
+netcons.XRnetcon = eye(1);
+netcons.RCnetcon = eye(1);
 
 %% load input stimuli (targets and maskers) from ICSimStim
 load('default_STRF_with_offset_200k.mat');
@@ -147,10 +149,10 @@ options.dt = dt;
 
 if isempty(options.locNum), options.time_end = size(spks,1)*dt; % [ms];
 else, options.time_end = padToTime*numel(options.locNum); end
-[snn_out,s] = columnNetwork_paper_onoff_Excitatory(study_dir,varies,options,netcons,flag_raised_mex);
+%[snn_out,s] = columnNetwork_paper_onoff_Excitatory(study_dir,varies,options,netcons,flag_raised_mex);
 
 %Going to try rerunning old stuff to see if it is broken.
-%[snn_out,s] = columnNetwork_paper_onoff(study_dir,varies,options,netcons,flag_raised_mex);
+[snn_out,s] = columnNetwork_paper_onoff(study_dir,varies,options,netcons,flag_raised_mex);
 
 
 

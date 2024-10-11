@@ -4,6 +4,7 @@ if isempty(simlen)
     simlen = 35000;
 end
 
+%Temp changing this to see if it effects network
 temp = (rand(simlen,N_pop) < (FR + std*randn(simlen,N_pop))*dt/1000);
 
 refrac = 1;  % ms
@@ -15,6 +16,6 @@ for i = 1:N_pop
     temp(spk_inds(find(ISIs < refrac)+1),i) = 0;
 end
 
-token = temp;
+token = temp*0;
 
 end

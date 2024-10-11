@@ -271,64 +271,66 @@ end
 % end
 
 % poolobj = parpool('local', 8);
-if ~flag_raised_mex
-   simdata = dsSimulate(s, netcons, 'tspan',[dt time_end], 'solver',solverType, 'dt',dt,...
-  'downsample_factor',1, 'save_data_flag',0, 'save_results_flag',1,...
-  'study_dir',study_dir, 'vary',vary, 'debug_flag', 1, 'verbose_flag',0, ...
-  'parfor_flag',0, 'compile_flag',1);
-   copyfile('run\4-channel-PV-inputs\solve\solve_ode_4_channel_PV_inputs.m','mexes')
-   copyfile('run\4-channel-PV-inputs\solve\solve_ode_4_channel_PV_inputs_mex.mexw64','mexes')
-
-    study_dir = fullfile(pwd,'run','4-channel-PV-inputs');
-    % 
-    % if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
-    % mkdir(fullfile(study_dir, 'solve'));
-    
-    solve_directory = fullfile(study_dir, 'solve');
-    mfileinfo = mfilename('fullpath');
-
-    warning('off','all');
-    mkdir('backup');
-    
-    mfiledir = strsplit(mfileinfo,filesep);
-
-    copyfile('run\4-channel-PV-inputs\solve\params.mat', 'backup');
-    
-    %if exist(fullfile(study_dir, 'solve'), 'dir')
-        % don't remove the directory
-    %else
-        %if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
-        %mkdir(solve_directory); 
-        flag_raised_mex = 0;
-    
-        mexes_dir = fullfile(mfiledir{1:end-1}, 'mexes');
-        if isfolder(mexes_dir)
-            m_file_to_copy = 'solve_ode_4_channel_PV_inputs.m';
-            mex_file_to_copy = 'solve_ode_4_channel_PV_inputs_mex.mexw64';
-            mex_file_path = fullfile(mexes_dir, mex_file_to_copy);
-            mex_files = dir([mex_file_path, '.*']);
-            if ~isempty(mex_files)
-                flag_raised_mex = 1;
-                for num = 1:20
-                    simDir = fullfile(solve_directory, ['sim' num2str(num)]);
-                    mkdir(simDir);
-                    copyfile(fullfile(mexes_dir, mex_files.name), simDir);
-                    copyfile(fullfile(mexes_dir, m_file_to_copy), simDir);
-                    copyfile('backup\params.mat', simDir);
-                end
-            end
-        end
 
 
-
-end
+% if ~flag_raised_mex
+%    simdata = dsSimulate(s, netcons, 'tspan',[dt time_end], 'solver',solverType, 'dt',dt,...
+%   'downsample_factor',1, 'save_data_flag',0, 'save_results_flag',1,...
+%   'study_dir',study_dir, 'vary',vary, 'debug_flag', 1, 'verbose_flag',0, ...
+%   'parfor_flag',0, 'compile_flag',1);
+%    copyfile('run\4-channel-PV-inputs\solve\solve_ode_4_channel_PV_inputs.m','mexes')
+%    copyfile('run\4-channel-PV-inputs\solve\solve_ode_4_channel_PV_inputs_mex.mexw64','mexes')
+% 
+%     study_dir = fullfile(pwd,'run','4-channel-PV-inputs');
+%     % 
+%     % if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
+%     % mkdir(fullfile(study_dir, 'solve'));
+% 
+%     solve_directory = fullfile(study_dir, 'solve');
+%     mfileinfo = mfilename('fullpath');
+% 
+%     warning('off','all');
+%     mkdir('backup');
+% 
+%     mfiledir = strsplit(mfileinfo,filesep);
+% 
+%     copyfile('run\4-channel-PV-inputs\solve\params.mat', 'backup');
+% 
+%     %if exist(fullfile(study_dir, 'solve'), 'dir')
+%         % don't remove the directory
+%     %else
+%         %if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
+%         %mkdir(solve_directory); 
+%         flag_raised_mex = 0;
+% 
+%         mexes_dir = fullfile(mfiledir{1:end-1}, 'mexes');
+%         if isfolder(mexes_dir)
+%             m_file_to_copy = 'solve_ode_4_channel_PV_inputs.m';
+%             mex_file_to_copy = 'solve_ode_4_channel_PV_inputs_mex.mexw64';
+%             mex_file_path = fullfile(mexes_dir, mex_file_to_copy);
+%             mex_files = dir([mex_file_path, '.*']);
+%             if ~isempty(mex_files)
+%                 flag_raised_mex = 1;
+%                 for num = 1:20
+%                     simDir = fullfile(solve_directory, ['sim' num2str(num)]);
+%                     mkdir(simDir);
+%                     copyfile(fullfile(mexes_dir, mex_files.name), simDir);
+%                     copyfile(fullfile(mexes_dir, m_file_to_copy), simDir);
+%                     copyfile('backup\params.mat', simDir);
+%                 end
+%             end
+%         end
+% 
+% 
+% 
+% end
 
 
 
 simdata = dsSimulate(s, netcons, 'tspan',[dt time_end], 'solver',solverType, 'dt',dt,...
   'downsample_factor',1, 'save_data_flag',0, 'save_results_flag',1,...
   'study_dir',study_dir, 'vary',vary, 'debug_flag', 1, 'verbose_flag',0, ...
-  'parfor_flag',1, 'compile_flag',1);
+  'parfor_flag',0, 'compile_flag',0);
 %toc;
 
 

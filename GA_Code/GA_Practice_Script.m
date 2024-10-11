@@ -13,18 +13,10 @@ nVars = 7;
 %3. Set GA options
 optionsGA = optimoptions('ga', 'PopulationSize',30, 'MaxGenerations', 150, 'Display', 'iter', 'CreationFcn', @create_population,...
                          'MutationFcn', @mutate_populationV2, 'OutputFcn', @ga_output_function,'CrossoverFraction',0.5, ...
-                         'SelectionFcn','selectiontournament','CrossoverFcn','crossovertwopoint'); 
-
-% optionsGA = optimoptions('ga', 'PopulationSize',50, 'MaxGenerations', 50, 'Display', 'iter', 'CreationFcn', @create_population,...
-%                          'MutationFcn', @mutate_populationV2, 'OutputFcn', @ga_output_function,'CrossoverFraction',0.5, ...
-%                          'SelectionFcn','selectiontournament','CrossoverFcn','crossovertwopoint','InitialPopulationMatrix', state.Population); 
+                         'SelectionFcn','selectiontournament','CrossoverFcn','crossovertwopoint'); %,'InitialPopulationMatrix', state.Population); 
 
 %4. Define the fitness function
-%fitnessFunction = @(x) fitness_fun(Target_grid,Target_fr_grid, reshape(x, [1, nVars]),optionsGA);
-fitnessFunction = @(x) fitness_fun_tar90_maskNeg90(Target_grid,Target_fr_grid, reshape(x, [1, nVars]),optionsGA, plot_all,toggle_real);
+fitnessFunction = @(x) fitnessfunc_general(Target_grid,Target_fr_grid, reshape(x, [1, nVars]),optionsGA, plot_all);
 
 %5. Run the GA
 [x, fval] = ga(fitnessFunction, nVars, [], [], [], [], [], [], [], optionsGA);
-
-%Plot the evolution
-%animationPlotter

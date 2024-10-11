@@ -12,8 +12,7 @@ T=(p.tspan(1):dt:p.tspan(2))';
 ntime=length(T);
 nsamp=length(1:downsample_factor:ntime);
 
-% seed the random number generator
-rng(p.random_seed);
+% the 'shuffle' random seed has been set in advance.
 
 % ------------------------------------------------------------
 % Fixed variables:

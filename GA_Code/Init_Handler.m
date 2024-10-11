@@ -29,3 +29,6 @@ addpath('MICalculation');
 plot_all = 0;
 %Uses "masked" tuning curves instead of all clean tuning curves as input
 toggle_real = 0;
+
+%First time through flag
+f_flag = 0;

@@ -70,10 +70,23 @@ tw = 0:n_refab; % sample time vector for recovery rate
 t_ref_samp = t_ref/1000/dt_sec;
 t_rel_samp = t_ref_rel/1000/dt_sec;
 
+
+%Temp set rec to be higher 
+%rec = 5;
+%t_ref_samp = 5;
+
 w = (tw - t_ref_samp).^rec ./ ((tw - t_ref_samp).^rec + (t_rel_samp).^rec); % recovery function (schaette et al 2005)
 w(tw < t_ref_samp) = 0;
 
+
+
+
 x=rand(1,n);
+
+%Testing removing rand
+
+%x = ones(1,n)*0.1;
+
 spike_train = zeros(1,n);
 
 % spike_times = [];
@@ -89,6 +102,10 @@ for i=1:n   % sample
     %     spike_train(i) = 1;
     %     spike_times=[spike_times; i];
     % end
+
+    if rate(i) > 0
+        a = 1;
+    end
 
     if spike_count > 0 && i - spike_times(spike_count) < n_refab
         rate(i) = rate(i) * w(i - spike_times(spike_count));

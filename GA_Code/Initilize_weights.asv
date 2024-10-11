@@ -1,0 +1,10 @@
+function init_weights = Initilize_weights()
+    if f_flag == 0
+        init_weights = {[0,0,0,0];
+                        [0,0,0,0];
+                        [0,0,0,0];
+                        [0,0,0,0];
+                        [0.02,0.02,0.02,0.02];
+                        [0.01,0.01,0.01,0.01]};
+    end
+end
