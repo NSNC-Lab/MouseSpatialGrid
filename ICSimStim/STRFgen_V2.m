@@ -58,7 +58,8 @@ if nargin<7
     freqDom=0;
 end
 
-maxdelay = 2500; % for fs=10000hz, maxdelay=250 for fs=1000hz;
+%maxdelay = 2500; % for fs=10000hz, maxdelay=250 for fs=1000hz;
+maxdelay = 750;
 strf.type = 'lin';
 strf.nIn = nIn;
 strf.t =0:dt:maxdelay*dt;
@@ -96,9 +97,16 @@ strf.G = exp(-.5*((f-paramG.f0)/paramG.BW).^2).*cos(2*pi*paramG.BSM*(f-paramG.f0
 strf.w1=strf.G'*strf.H;
 strf.f=f;
 %%
+
+figure('Position',[100,100,500,500]);
+surf(strf.t,f,strf.w1,'EdgeColor','none');
+axis xy; axis tight; colormap(jet); view(0,90);
+title('Normal')
+
 % subplot(3, 2, 1);
 % plot(f,strf.G)
 % view(-90,90)
 % subplot(3, 2, 2);
 % plot(strf.t,strf.H)
 % set(gca,'XTickLabel','','YTickLabel','')
+

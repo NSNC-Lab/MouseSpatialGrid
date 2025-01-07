@@ -28,39 +28,85 @@ varies(1).range =  trialInds(:)';
 % Input strength
 varies(end+1).conxn = '(On->On,Off->Off)';
 varies(end).param = 'g_postIC';
-varies(end).range = 0.165;
+varies(end).range = 0.27;
 
 %Switch back Off->R1On to On->R1On
     
 % E->E connections
-varies(end+1).conxn = '(On->R1On,R1On->R2On,Off->R1On)';
+varies(end+1).conxn = '(On->RIOn)';
+varies(end).param = 'gSYN';
+varies(end).range = 0.02;
+
+varies(end+1).conxn = '(Off->RIOn)';
+varies(end).param = 'gSYN';
+varies(end).range = 0.005;
+
+varies(end+1).conxn = '(Off->RIOff)';
+varies(end).param = 'gSYN';
+varies(end).range = 0.02;
+
+varies(end+1).conxn = '(RIOn->ROn)';
 varies(end).param = 'gSYN';
 varies(end).range = 0.02;
 
 %PVs
-varies(end+1).conxn = '(S1OnOff->R1On,S2OnOff->R2On)';
+varies(end+1).conxn = '(SIOnOff->RIOn)';
+varies(end).param = 'gSYN';
+varies(end).range = 0.025;
+
+varies(end+1).conxn = '(SIOnOff->RIOff)';
+varies(end).param = 'gSYN';
+varies(end).range = 0.025;
+
+varies(end+1).conxn = '(SOnOff->ROn)';
 varies(end).param = 'gSYN';
 varies(end).range = 0.025;
 
 % On -> PV
-varies(end+1).conxn = '(On->S1OnOff,R1On->S2OnOff)';
+varies(end+1).conxn = '(On->SIOnOff)';
+varies(end).param = 'gSYN';
+varies(end).range = 0.02;
+
+varies(end+1).conxn = '(RIOn->SOnOff)';
 varies(end).param = 'gSYN';
 varies(end).range = 0.02;
 
 % Off-> PV
-varies(end+1).conxn = '(Off->S1OnOff)';
+varies(end+1).conxn = '(Off->SIOnOff)';
+varies(end).param = 'gSYN';
+varies(end).range = 0.005;
+
+varies(end+1).conxn = '(RIOff->SOnOff)';
 varies(end).param = 'gSYN';
 varies(end).range = 0.005;
 
 
+
 % control and opto conditions 
-varies(end+1).conxn = '(S1OnOff,S2OnOff)';
+varies(end+1).conxn = '(SOnOff,SIOnOff)';
 varies(end).param = 'Itonic';
 varies(end).range = 0; 
 
-varies(end+1).conxn = '(R2On->R2On)';
+varies(end+1).conxn = '(ROn->ROn)';
 varies(end).param = 'FR';
 varies(end).range = 8;
+
+
+
+%Figure 4 (Sweep over fp values for E->E)
+% varies(end+1).conxn = '(On->ROn,Off->ROn)';
+% varies(end).param = 'fP';
+% varies(end).range = [0:0.1:1];
+
+% %Sweep over fp values for E->PV)
+% varies(end+1).conxn = '(On->SOnOff,Off->SOnOff)';
+% varies(end).param = 'fP';
+% varies(end).range = [0:0.1:1];
+
+%Sweep over fp values for PV->E)
+varies(end+1).conxn = '(SOnOff->ROn)';
+varies(end).param = 'fP';
+varies(end).range = [0:0.1:1];
 
 % find varied parameter, excluding trials
 varied_param = find( (cellfun(@length,{varies.range}) > 1 & ~cellfun(@iscolumn,{varies.range})));

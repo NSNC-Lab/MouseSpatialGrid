@@ -16,6 +16,9 @@ for i = 1:N_pop
     temp(spk_inds(find(ISIs < refrac)+1),i) = 0;
 end
 
-token = temp*0;
+%Remove for 4 spatial simulations
+%token = temp*0;
+token = temp;
+
 
 end

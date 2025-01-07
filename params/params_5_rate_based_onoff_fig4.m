@@ -17,7 +17,8 @@ options.SpatialAttention = 0;
 %% define network parameters
 clear varies
 
-trialInds = repmat(1:20,nSims,1);
+%trialInds = repmat(1:20,nSims,1);
+trialInds = repmat(1:120,nSims,1);
 
 % % % DO NOT CHANGE THIS % % %
 varies(1).conxn = '(On->On,Off->Off)';
@@ -28,42 +29,56 @@ varies(1).range =  trialInds(:)';
 % Input strength
 varies(end+1).conxn = '(On->On,Off->Off)';
 varies(end).param = 'g_postIC';
-varies(end).range = 0.19;
+varies(end).range = 0.18;
+
+
 % E->E connections
 
 %Vary the synaptic depression (fp) between E->E conncections
-varies(end+1).conxn = '(On->R1On,R1On->R2On,Off->R1Off,R1Off->R2Off)';
+varies(end+1).conxn = '(R1On->R2On,Off->R1Off,R1Off->R2Off,Off->R1On)';%,On->R1On
 varies(end).param = 'fP';
+%varies(end).range = var_change1;
 varies(end).range = 0.1;
 
 %Gsyn
-varies(end+1).conxn = '(On->R1On,R1On->R2On,Off->R1Off,R1Off->R2Off)';
+varies(end+1).conxn = '(R1On->R2On,Off->R1Off,R1Off->R2Off,Off->R1On)';%,On->R1On
 varies(end).param = 'gSYN';
 varies(end).range = 0.02;
+
+varies(end+1).conxn = '(R1On->R2On,Off->R1Off,R1Off->R2Off,Off->R1On)';%,On->R1On
+varies(end).param = 'tauP';
+varies(end).range = 30;
 
 %PVs
 varies(end+1).conxn = '(S1OnOff->R1On,S1OnOff->R1Off,S2OnOff->R2On,S2OnOff->R2Off)';
 varies(end).param = 'gSYN';
-varies(end).range = 0.025;
+varies(end).range = 0.03;
 
 varies(end+1).conxn = '(S1OnOff->R1On,S1OnOff->R1Off,S2OnOff->R2On,S2OnOff->R2Off)';
 varies(end).param = 'fP';
-varies(end).range = [0:0.1:1];
+%varies(end).range = var_change3;
+varies(end).range = 0.5;
 
 
 % On -> PV
 varies(end+1).conxn = '(On->S1OnOff,R1On->S2OnOff)';
 varies(end).param = 'gSYN';
-varies(end).range = 0.025;
+varies(end).range = 0.02;
 
 % Off-> PV
 varies(end+1).conxn = '(Off->S1OnOff,R1Off->S2OnOff)';
 varies(end).param = 'gSYN';
-varies(end).range = 0.01;
+varies(end).range = 0.02;%*ones(1,30);
 
-varies(end+1).conxn = '(On->S1OnOff,R1On->S2OnOff,Off->S1OnOff,R1Off->S2OnOff)';
+varies(end+1).conxn = '(On->S1OnOff,R1On->S2OnOff)';
 varies(end).param = 'fP';
+%varies(end).range = var_change2;
 varies(end).range = 0.2;
+
+varies(end+1).conxn = '(Off->S1OnOff,R1Off->S2OnOff)';
+varies(end).param = 'fP';
+%varies(end).range = var_change2;
+varies(end).range = 0;
 
 % control and opto conditions 
 varies(end+1).conxn = '(S1OnOff,S2OnOff)';

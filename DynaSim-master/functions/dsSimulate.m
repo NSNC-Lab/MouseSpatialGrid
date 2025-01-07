@@ -1270,6 +1270,11 @@ end % in_parfor_loop_flag
 
   function update_data
     % store tmpdata
+
+
+    %IB 10/29 Trimming down the outputs in Tmpdata so that we are
+    %realistically able to start everything.
+
     if sim==1
       % replicate first data set as preallocation for all
       data=repmat(tmpdata,[1 length(modifications_set)]);

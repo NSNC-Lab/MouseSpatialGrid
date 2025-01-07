@@ -231,25 +231,28 @@ end
 %%
 
 
+%%%%% HERE IS WHERE WE WILL REIMPLEMENT THIGNS FOR FIG 4 %%%%%%%%%%%%%%%%%
+
+
 %For GA we are focusing on SPIKE performance for now. This is calculated
 %already in postprocesses_new. This block does not inform our current
 %output.
-% pc = struct;
-% for i = 1:length(subz)
-%     [perf,FR] = calcPerfsandFR( data(subz(i)).spks , nVaried ,options.dt , output_pop);
-%     pc(subz(i)).fr = FR;
-%     pc(subz(i)).perf = perf;
-%     pc(subz(i)).config = configName{subz(i)};
-% end
+pc = struct;
+for i = 1:length(subz)
+    [perf,FR] = calcPerfsandFR( data(subz(i)).spks , nVaried ,options.dt , output_pop);
+    pc(subz(i)).fr = FR;
+    pc(subz(i)).perf = perf;
+    pc(subz(i)).config = configName{subz(i)};
+end
 % save([simDataDir filesep 'perf_fr_' output_pop '.mat'],'pc');
 
 % make surface plot for 2D parameter searches
-if nVaried >= 10
-    for i = 1:length(subz)
-        plotPerfvsParams(output_pop,data(subz(i)),varies,simDataDir,data(subz(i)).config)
-        %close all;
-    end
-end
+% if nVaried >= 10
+%     for i = 1:length(subz)
+%         plotPerfvsParams(output_pop,data(subz(i)),varies,simDataDir,data(subz(i)).config)
+%         %close all;
+%     end
+% end
 
 dist_measures = struct;
 

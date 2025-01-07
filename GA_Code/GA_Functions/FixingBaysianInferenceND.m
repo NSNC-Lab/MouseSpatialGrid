@@ -6,8 +6,12 @@ input_holder = [];
 input_holder_score = [];
 
 for de = 1:length(state.curvars)
-    input_holder = [input_holder;state.curvars{de}];
-    input_holder_score = [input_holder_score;state.curfitness{de}];
+    for k = 1:length(state.curfitness{de})
+        if state.curfitness{de}(k) < 200
+            input_holder = [input_holder;state.curvars{de}(k,:)];
+            input_holder_score = [input_holder_score;state.curfitness{de}(k)];
+        end
+    end
 end
 
 
@@ -158,7 +162,7 @@ ranges = {};
 for h = 1:length(mins)
     %Tuned down to 20 bc 200^4 is a large #
     %ranges{end+1} = linspace(mins(h),maxs(h),200);
-    ranges{end+1} = linspace(0,0.02,200);
+    ranges{end+1} = linspace(0,0.05,200);
 end
 %ranges = {1:3, 4:6, 7:9, ... };  % Add more ranges for higher dimensions
 
@@ -189,7 +193,7 @@ end
 
 %X_unknown = transpose(linspace(min(X_known),max(X_known),2000));
 %noise = 1e-2;
-noise = 0.5;
+noise = 0.2;
 
 simplex_output = simplex_decent(0.1,0.1,X_known,Y_known,noise);
 coords = simplex_output{1};
@@ -209,13 +213,13 @@ surf(grids{1},grids{2},reshape(mu,size(grids{1})),'EdgeColor','none','FaceAlpha'
 %plot3(X_known(1:30,1),X_known(1:30,2),Y_known(1:30),'r.','MarkerSize',20); hold on
 %plot3(X_known(end-5:end,1),X_known(end-5:end,2),Y_known(end-5:end),'g.','MarkerSize',20)
 
-plot3(state.curvars{1}(1:30,var1),state.curvars{1}(1:30,var2),state.curfitness{1}(1:30),'r.','MarkerSize',20); hold on
+plot3(X_known(1:10,1),X_known(1:10,2),Y_known(1:10),'r.','MarkerSize',20); hold on
 
-for mm = 2:20
-    plot3(state.curvars{mm}(1:30,var1),state.curvars{mm}(1:30,var2),state.curfitness{mm}(1:30),'k.','MarkerSize',5); hold on
+for mm = 2:10
+    plot3(X_known(1+10*(mm-1):10*mm,1),X_known(1+10*(mm-1):10*mm,2),Y_known(1+10*(mm-1):10*mm),'k.','MarkerSize',5); hold on
 end
 
-plot3(state.curvars{21}(1:30,var1),state.curvars{21}(1:30,var2),state.curfitness{21}(1:30),'g.','MarkerSize',20); hold on
+plot3(X_known(end-10:end-1,1),X_known(end-10:end-1,2),Y_known(end-10:end-1),'g.','MarkerSize',20); hold on
 
 xlim([0,0.01])
 ylim([0,0.01])

@@ -9,8 +9,9 @@ function mutant = mutate_population(parents, optionsGA, nvars, FitnessFcn, state
     %Hyper Params
     %mutationRate = 0.5;
     %mutationStrength = 0.1;
-    mutationRate = 0.114;  %0.2 nominal for 4D.
-    mutationStrength = 0.1;
+    %Nominally 0.114 : 0.1
+    mutationRate = 0.07;  %0.2 nominal for 4D.
+    mutationStrength = 0.07;
 
     %Grab the parents in the population.
     mutant = thisPopulation(parents,:);

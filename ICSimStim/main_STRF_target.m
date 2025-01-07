@@ -43,11 +43,17 @@ maxWeight = 1; %maximum mixed tuning weight; capped at this level.
 % paramH.SC2 = 0.7;  % increase -> more inhibition 0.88
 % strfGain = 0.05; % 0.10
 
-paramH.alpha = 0.01; % time constant of temporal kernel [s] 0.0097
+% paramH.alpha = 0.01; % time constant of temporal kernel [s] 0.0097
+% paramH.N1 = 5;
+% paramH.N2 = 8;
+% paramH.SC1 = 1; %Nominally 1
+% paramH.SC2 = 0.88;  % increase -> more inhibition %0.88 in paper
+
+paramH.alpha = 0.0055; % time constant of temporal kernel [s] 0.0097
 paramH.N1 = 5;
-paramH.N2 = 8;
+paramH.N2 = 7;
 paramH.SC1 = 1; %Nominally 1
-paramH.SC2 = 0.88;  % increase -> more inhibition %0.88 in paper
+paramH.SC2 = 1.2;  % increase -> more inhibition %0.88 in paper
 
 % % wider MGB
 % paramH.alpha = 0.0105; % time constant of temporal kernel [s] 0.0097
@@ -63,11 +69,15 @@ paramG.BW = 2000;  % Hz
 paramG.BSM = 5.00E-05; % 1/Hz=s best spectral modulation
 paramG.f0 = 4300; % ~strf.f(30)
 
+%IB 12/2
+%Updated for broadband STRF according to Olsen & HausenStaub
+%paramG.BW = 16000;  % Hz
+
 % if isfile('preprocessed_stims.mat')
 %     load('preprocessed_stims.mat'); % don't need to run STRFspectrogram again
 % else
     % load stimuli & calc spectrograms
-
+    
     [song1,~] = audioread('200k_target1.wav');
     [song2,~] = audioread('200k_target2.wav');
 

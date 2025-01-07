@@ -115,22 +115,27 @@ s.connections(end).parameters={'g_postIC',0.19,'label','off','trial',1,'locNum',
 %Looking at E->PV fp = 0
 
 
-% excitatory inputs
-s.connections(end+1).direction='On->R1On';
+%excitatory inputs
+% s.connections(end+1).direction='On->R1On';
+% s.connections(end).mechanism_list={'PSC'};
+% s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30};
+
+%Added in response to reviewer's commments
+s.connections(end+1).direction='Off->R1On';
 s.connections(end).mechanism_list={'PSC'};
 s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30};
 
 s.connections(end+1).direction='On->S1OnOff';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
+s.connections(end).parameters={'gSYN',0.02,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
 
 s.connections(end+1).direction='S1OnOff->R1On';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.5,'tauP',120}; 
+s.connections(end).parameters={'gSYN',0.025,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.5,'tauP',120}; 
 
 s.connections(end+1).direction='S1OnOff->R1Off';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.5,'tauP',120}; 
+s.connections(end).parameters={'gSYN',0.025,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.5,'tauP',120}; 
 
 % offset channels
 s.connections(end+1).direction='Off->R1Off';
@@ -139,7 +144,7 @@ s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.
 
 s.connections(end+1).direction='Off->S1OnOff';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0,'tauP',80};
+s.connections(end).parameters={'gSYN',0.025,'tauR',EI_rise,'tauD',EI_fall,'fP',0,'tauP',80};
 
 
 % % %  L2/3  % % %
@@ -151,7 +156,7 @@ s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.
 
 s.connections(end+1).direction='R1On->S2OnOff';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
+s.connections(end).parameters={'gSYN',0.02,'tauR',EI_rise,'tauD',EI_fall,'fP',0.2,'tauP',80};
 
 s.connections(end+1).direction='S2OnOff->R2On';
 s.connections(end).mechanism_list={'PSC'};
@@ -159,7 +164,7 @@ s.connections(end).parameters={'gSYN',0.025,'tauR',IE_rise,'tauD',IE_fall,'ESYN'
 
 s.connections(end+1).direction='S2OnOff->R2Off';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.01,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.5,'tauP',120}; 
+s.connections(end).parameters={'gSYN',0.025,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.5,'tauP',120}; 
 
 % offset channels
 s.connections(end+1).direction='R1Off->R2Off';
@@ -168,7 +173,7 @@ s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.
 
 s.connections(end+1).direction='R1Off->S2OnOff';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0,'tauP',80};
+s.connections(end).parameters={'gSYN',0.02,'tauR',EI_rise,'tauD',EI_fall,'fP',0,'tauP',80};
 
 s.connections(end+1).direction='R2On->R2On';
 s.connections(end).mechanism_list={'iNoise_V3'};
@@ -220,63 +225,63 @@ if numel(vary{I_ind,3}) > 1 && size(vary{FR_ind,3},2) > 1
 end
 end
 
-% % poolobj = parpool('local', 8);
-% if ~flag_raised_mex
-%    simdata = dsSimulate(s, netcons, 'tspan',[dt time_end], 'solver',solverType, 'dt',dt,...
-%   'downsample_factor',1, 'save_data_flag',0, 'save_results_flag',1,...
-%   'study_dir',study_dir, 'vary',vary, 'debug_flag', 1, 'verbose_flag',0, ...
-%   'parfor_flag',0, 'compile_flag',1);
-%    copyfile('run\1-channel-paper\solve\solve_ode_1_channel_paper.m','mexes')
-%    copyfile('run\1-channel-paper\solve\solve_ode_1_channel_paper_mex.mexw64','mexes')
-% 
-%     study_dir = fullfile(pwd,'run','1-channel-paper');
-%     % 
-%     % if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
-%     % mkdir(fullfile(study_dir, 'solve'));
-% 
-%     solve_directory = fullfile(study_dir, 'solve');
-%     mfileinfo = mfilename('fullpath');
-% 
-%     warning('off','all');
-%     mkdir('backup');
-% 
-%     mfiledir = strsplit(mfileinfo,filesep);
-% 
-%     copyfile('run\1-channel-paper\solve\params.mat', 'backup');
-% 
-%     %if exist(fullfile(study_dir, 'solve'), 'dir')
-%         % don't remove the directory
-%     %else
-%         %if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
-%         %mkdir(solve_directory); 
-%         flag_raised_mex = 0;
-% 
-%         mexes_dir = fullfile(mfiledir{1:end-1}, 'mexes');
-%         if isfolder(mexes_dir)
-%             m_file_to_copy = 'solve_ode_1_channel_paper.m';
-%             mex_file_to_copy = 'solve_ode_1_channel_paper_mex.mexw64';
-%             mex_file_path = fullfile(mexes_dir, mex_file_to_copy);
-%             mex_files = dir([mex_file_path, '.*']);
-%             if ~isempty(mex_files)
-%                 flag_raised_mex = 1;
-%                 for num = 1:20
-%                     simDir = fullfile(solve_directory, ['sim' num2str(num)]);
-%                     mkdir(simDir);
-%                     copyfile(fullfile(mexes_dir, mex_files.name), simDir);
-%                     copyfile(fullfile(mexes_dir, m_file_to_copy), simDir);
-%                     copyfile('backup\params.mat', simDir);
-%                 end
-%             end
-%         end
-% 
-% 
-% 
-% end
+% poolobj = parpool('local', 8);
+if ~flag_raised_mex
+   simdata = dsSimulate(s, netcons, 'tspan',[dt time_end], 'solver',solverType, 'dt',dt,...
+  'downsample_factor',1, 'save_data_flag',0, 'save_results_flag',1,...
+  'study_dir',study_dir, 'vary',vary, 'debug_flag', 1, 'verbose_flag',0, ...
+  'parfor_flag',0, 'compile_flag',1);
+   copyfile('run\1-channel-paper\solve\solve_ode_1_channel_paper.m','mexes')
+   copyfile('run\1-channel-paper\solve\solve_ode_1_channel_paper_mex.mexw64','mexes')
+
+    study_dir = fullfile(pwd,'run','1-channel-paper');
+    % 
+    % if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
+    % mkdir(fullfile(study_dir, 'solve'));
+
+    solve_directory = fullfile(study_dir, 'solve');
+    mfileinfo = mfilename('fullpath');
+
+    warning('off','all');
+    mkdir('backup');
+
+    mfiledir = strsplit(mfileinfo,filesep);
+
+    copyfile('run\1-channel-paper\solve\params.mat', 'backup');
+
+    %if exist(fullfile(study_dir, 'solve'), 'dir')
+        % don't remove the directory
+    %else
+        %if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
+        %mkdir(solve_directory); 
+        flag_raised_mex = 0;
+
+        mexes_dir = fullfile(mfiledir{1:end-1}, 'mexes');
+        if isfolder(mexes_dir)
+            m_file_to_copy = 'solve_ode_1_channel_paper.m';
+            mex_file_to_copy = 'solve_ode_1_channel_paper_mex.mexw64';
+            mex_file_path = fullfile(mexes_dir, mex_file_to_copy);
+            mex_files = dir([mex_file_path, '.*']);
+            if ~isempty(mex_files)
+                flag_raised_mex = 1;
+                for num = 1:20
+                    simDir = fullfile(solve_directory, ['sim' num2str(num)]);
+                    mkdir(simDir);
+                    copyfile(fullfile(mexes_dir, mex_files.name), simDir);
+                    copyfile(fullfile(mexes_dir, m_file_to_copy), simDir);
+                    copyfile('backup\params.mat', simDir);
+                end
+            end
+        end
+
+
+
+end
 
 
 simdata = dsSimulate(s, netcons, 'tspan',[dt time_end], 'solver',solverType, 'dt',dt,...
   'downsample_factor',1, 'save_data_flag',0, 'save_results_flag',1,...
   'study_dir',study_dir, 'vary',vary, 'debug_flag', 1, 'verbose_flag',0, ...
-  'parfor_flag',0, 'compile_flag',0);
+  'parfor_flag',1, 'compile_flag',0);
 
 end

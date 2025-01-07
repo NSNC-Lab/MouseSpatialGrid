@@ -1,5 +1,5 @@
 function init_weights = Initilize_weights()
-    if f_flag == 0
+    %TODO Add something here so that this only ever runs once.
         init_weights = [[0.000,0.000,0.000,0.000];
                         [0.000,0.000,0.000,0.000];
                         [0.000,0.000,0.000,0.000];
@@ -7,5 +7,4 @@ function init_weights = Initilize_weights()
                         [0.020,0.020,0.020,0.020];
                         [0.010,0.010,0.010,0.010];
                         [0.022,0.022,0.022,0.022]];
-    end
 end

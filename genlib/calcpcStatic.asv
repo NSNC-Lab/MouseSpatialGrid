@@ -41,41 +41,48 @@ end
 
 s = size(distMat); % [numTrains, numTrains, numTaus]
 
-%Try changing to Parfor to save time 7/9 IB
 %Add in a flag for MI asap
-tic
-
-%distances = rand(20,20);
-%Double check this
-labels = [ones(1,10),ones(1,10)*2];
-
-matfile = 'temp_SP_distances.mat';
-save(matfile,'distMat','labels');
-
-csv_file = runJuliaCode(matfile);
-pc = readmatrix(csv_file);
-
-
-toc
-
-
-
-%parfor at some point
 % tic
-% for iterationNum = 1:numIterations
-%     if ~selfFlag
-%         [tempInds(1),tempInds(2)] = ind2sub([numTrials numTrials],iterationNum);
-%         tempInds = tempInds - 1;
-%     else
-%         tempInds = tempMatrix(iterationNum,:);
-%     end
-%     pc(iterationNum,1) = calcpcNew(distMat, numTrials, numTargets, tempInds, selfFlag);
 % 
-%     %pc =
+% global exe
+% 
+% if ispc
+%     exe = "C:\Users\ipboy\AppData\Local\Programs\Julia-1.10.5\bin\julia";
+% elseif ismac
+%     exe = '/Users/jionocon/.juliaup/bin/julialauncher';
 % end
+% 
+% 
+% %distances = rand(20,20);
+% %Double check this
+% labels = repmat([ones(1,10),ones(1,10)*2],24,1);
+% 
+% matfile = 'temp_SP_distances.mat';
+% save(matfile,'distMat','labels');
+% 
+% csv_file = runJuliaCode(matfile);
+% pc = readmatrix(csv_file);
+% 
+% 
+% toc
+
+
+
+% tic
+for iterationNum = 1:numIterations
+    if ~selfFlag
+        [tempInds(1),tempInds(2)] = ind2sub([numTrials numTrials],iterationNum);
+        tempInds = tempInds - 1;
+    else
+        tempInds = tempMatrix(iterationNum,:);
+    end
+    pc(iterationNum,1) = calcpcNew(distMat, numTrials, numTargets, tempInds, selfFlag);
+
+    %pc =
+end
 % toc
 E = std(pc);   % standard deviation
-% maxY = mean(pc);
+maxY = mean(pc);
 maxY = mean(pc);
 maxY = reshape(maxY, [s(3:end), size(maxY, ndims(maxY)), 1]);
 E = reshape(E, [s(3:end), size(E, ndims(E)), 1]);
@@ -121,9 +128,17 @@ for ii = 1:numDistMats
     % top half of compInds for target 1 as trial, bottom half for target 2
     % as trial
     if ~selfFlag
-        for ti = 1:numTargets
-            compInds(:,ti) = setxor(0:(numTrials-1),tempInds(ti));
-        end
+        %Fix IB 10/28
+            %Explaination: Comparison should be the same between song 1 and
+            %song 2 with their respective matricies. Pervious code made
+            %this incosistant across songs.
+        ti = 1;
+        compInds(:,1) = setxor(0:(numTrials-1),tempInds(ti)); 
+        compInds(:,2) = compInds(:,1);
+        
+        %for ti = 1:numTargets
+        %    compInds(:,ti) = setxor(0:(numTrials-1),tempInds(ti));
+        %end
     else
         compInds = repmat(setxor([0:(numTrials-1)]',tempInds),numTargets,1);
     end
@@ -139,9 +154,11 @@ for ii = 1:numDistMats
     
     for ti = 1:numTargets
         b = a + (tempInds(:,ti) + tempShift(:,ti))*n; % convert tempInds and tempShift to linear indices in tempMat
-        distances(:,ti) = tempMat(b); % get indexes of the distance between the given template and the (ti)th target
+        distances(:,ti) = tempMat(b); % get indexes of the distance between the given template and the (ti)th target 
     end
     
+
+    %disp(distances)
     % 1st column of distances will always be the correct target (1st 1000
     % rows have target 1 in column 1, other 1000 rows have target 2 in
     % column 1)
@@ -151,6 +168,105 @@ for ii = 1:numDistMats
     correct = yFun(distances);
     pc(ii) = 100*mean(correct);
     % stdev(ii) = 100*std(correct, 1)/sqrt(numTargets);
+
+
+    %%%DOULBE CHECK STUFF
+    n_trials = 10;
+
+    
+    %one_mat = ones([n_trials,n_trials]);
+    %zero_mat = zeros([n_trials,n_trials]);
+    
+    
+    %Calcualte a distMat
+    %distMat = [zero_mat,zero_mat;one_mat,zero_mat];
+    
+    %Run a few times just to make sure it converges on 50%
+    
+    corrects = [];
+    
+    %for epochs = 1:10000
+    
+    %distMat = rand([n_trials*2,n_trials*2]);
+    %Create n by n symetric matrix
+    
+    %A = rand(n_trials*2); 
+    distMat = (A + A') / 2;
+    distMat(1:n_trials*2+1:end) = 0; % Set the diagonal elements to 0
+    %This is a silly trick since you can index a matrix at point k by doing
+    %row*cloumn length +remainder. n+1 will always be the diagnol.
+    
+    
+    
+    
+    figure();
+    imagesc(distMat)
+    
+    %Do matrix comparison
+    
+    total = 0;
+    correct = 0;
+    
+    for song = 1:2
+        
+        for m = 1:n_trials
+            for k = 1:n_trials
+                for j = 1:n_trials
+                    if j ~= k
+                        
+                        if song == 1
+                            
+                            if distMat(k,j) == distMat(m+n_trials,j)
+                                correct = correct + 0.5;
+                                comparison = 0;
+                            else
+                                comparison = distMat(k,j) < distMat(m+n_trials,j);
+                            end
+                        else
+                            
+                            if distMat(m,j+n_trials) == distMat(k+n_trials,j+n_trials)
+                                correct = correct + 0.5;
+                                comparison = 0;
+                            else
+                                comparison = distMat(m,j+n_trials) > distMat(k+n_trials,j+n_trials);
+                            end
+                        end
+        
+                        if comparison == 1
+                            correct = correct + 1;
+                        end
+            
+                        total = total + 1;
+           
+                        
+                    end
+                end
+            end
+        end
+    end
+    
+    total;
+    
+    correct = correct/total;
+    
+    corrects = [corrects,correct];
+    
+    
+    %end
+    
+    mean(corrects)
+
+
+
+
+
+
+
+
+
+
+
+
 end
 
 function correct = calcpcHelperSlow(distances)

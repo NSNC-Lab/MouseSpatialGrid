@@ -39,10 +39,13 @@ for ICtype = [1 2]
             mloc(z) = mod(z,5);
         end
 
-        singleConfigSpks = zeros(20,1,tmax);
+        %singleConfigSpks = zeros(120,1,length(full_stimuli_spec));
+        %singleConfigSpks = zeros(20,1,32301);
+        singleConfigSpks = zeros(20,1,16573);
         % singleConfigSpks = gpuArray(singleConfigSpks);
 
-        for t = 1:20 % trials: first 10 trials are target 1, last 10 are target 2
+        for t = 1:120 % trials: first 10 trials are target 1, last 10 are target 2
+        %for t = 1:20
             for ch = 1:options.nCells
                 
                 %Added 8/30 as a request from Dr. Sen to show a more
@@ -62,8 +65,13 @@ for ICtype = [1 2]
                 else
 
                     if isnan(mloc(z))
-                        t_wt = spatialCurves(ch,tloc(z));
-                        m_wt = 0;
+                        if options.nCells == 1 %IB 11/4 (issue since there is only 1 ch it will not index the correct spot with one channel. With one channel we shoul only ever want it to be non-supressed anyways since that is controlled by the input gain)
+                            t_wt = 1;
+                            m_wt = 0;
+                        else
+                            t_wt = spatialCurves(ch,tloc(z));
+                            m_wt = 0;
+                        end
                     else
                         t_wt = spatialCurves(ch,tloc(z));
                         m_wt = spatialCurves(ch,mloc(z));
@@ -96,11 +104,10 @@ for ICtype = [1 2]
                 if isempty(t_wt), t_wt = 0; end
                 if isempty(m_wt), m_wt = 0; end
 
-                if t <= 10 %song 1
-                    singleConfigSpks(t,ch,:) = t_wt.*eval(['fr_target_' labels{ICtype} '{1}']) + m_wt.*fr_masker{t};
-                else
-                    singleConfigSpks(t,ch,:) = t_wt.*eval(['fr_target_' labels{ICtype} '{2}']) + m_wt.*fr_masker{t-10};
-                end
+                
+                singleConfigSpks(t,ch,:) = t_wt.*eval(['fr_target_' labels{ICtype} '{1}']);
+                   
+                
 
                 % if t_wt + m_wt >= 1
                 %     singleConfigSpks(t,ch,:) = singleConfigSpks(t,ch,:) / (t_wt + m_wt);

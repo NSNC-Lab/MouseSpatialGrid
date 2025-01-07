@@ -57,6 +57,10 @@ for n = 1:size(rate,2)
     s(:,n) = spikeGenerator(rate(:,n),dt,t_ref,t_ref_rel,rec);
 end
 
+%disp('rec')
+%disp(rec)
+
+
 end
 
 function spike_train = spikeGenerator(rate,dt,t_ref,t_ref_rel,rec)

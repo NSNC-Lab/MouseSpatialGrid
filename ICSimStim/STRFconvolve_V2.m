@@ -1,6 +1,6 @@
 % function [spkcnt_on,onset_rate,spktimes_on]=...
 %     STRFconvolve_V2(strf,stim_spec,mean_rate,trialn,songn,t_ref,t_ref_rel,rec)
- 
+% 
 function [onset_rate,offset_rate]=...
      STRFconvolve_V2(strf,stim_spec,mean_rate)
 %
@@ -36,8 +36,14 @@ frate=frate*mean_rate;
 frate(isnan(frate)) = 0;
 % frate(find(frate<0))=zeros(size(find(frate<0))); % half-wave rec
 
+%It is probably reasonable to have frate be around half below zero and half
+%above zero due to strf geometry (can take integral of strf to find exactly what it should be)
+%frate = frate - mean(frate); %IB
+
+
 % offset rate
-offset_rate = -frate + max(frate); %-frate + max(frate)*0.6;
+%offset_rate = -frate + max(frate); %-frate + max(frate)*0.6;
+offset_rate = -frate;
 firstneg = find(offset_rate <= 0,1,'first');
 
 if firstneg > 5500, firstneg = 2501; end % for AM stimuli
@@ -61,7 +67,6 @@ onset_rate(onset_rate < 0) = 0;
 % else
 %     frate=power.^(frate)*mean_rate;
 % %         frate=power.^(frate)*mean_rate/m;
-% end
-
-
-
+% end% function [spkcnt_on,onset_rate,spktimes_on]=...
+%     STRFconvolve_V2(strf,stim_spec,mean_rate,trialn,songn,t_ref,t_ref_rel,rec)
+% 

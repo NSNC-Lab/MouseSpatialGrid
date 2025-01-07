@@ -1,5 +1,5 @@
 % Keep persistent memory of variables in the GA
-function store_values(fitness, approximate_grid,fr_grid, varied_params, optionsGA,data)
+function store_values(fitness, approximate_grid,fr_grid, varied_params, optionsGA)%,data)
 
     persistent bestFitness bestApproximateGrid bestvars bestfrGrid curfitness curvars curgrid curfrgrid data_tracker
 
@@ -34,7 +34,8 @@ function store_values(fitness, approximate_grid,fr_grid, varied_params, optionsG
     curvars = [curvars; varied_params];
     curfitness = [curfitness; fitness];
 
-    data_tracker{end+1} = data;
+    %Not sure what I was tracking here
+    %data_tracker{end+1} = data;
 
     if isempty(curgrid)
         curgrid(:,:,end) = approximate_grid;

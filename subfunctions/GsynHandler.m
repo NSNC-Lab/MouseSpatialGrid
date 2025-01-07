@@ -8,8 +8,8 @@ gsyncons = struct;
 % default was 0.02
 %gsyncons.OnRgsyncon = [varied_struct.ONtoR1,varied_struct.ONtoR2,varied_struct.ONtoR3,varied_struct.ONtoR4];
 %Pass through
-gsyncons.OnRgsyncon = [0.022,0.022,0.022,0.022];
-
+%gsyncons.OnRgsyncon = [0.022,0.022,0.022,0.022];
+gsyncons.OnRgsyncon = cur_weights(7,:);
 
 % XRgsyncon: SOM (X) -> E (Ron)
 % gsyncons.XRgsyncon =   [0.000,varied_struct.XR1,varied_struct.XR2,varied_struct.XR3;
@@ -21,10 +21,12 @@ gsyncons.OnRgsyncon = [0.022,0.022,0.022,0.022];
 %                         0.000,0.000,0.000,0.000;
 %                         0.000,0.000,0.000,0.000];
 
-gsyncons.XRgsyncon =   [0.000,0.010,0.010,0.010;
-                        0.000,0.000,0.000,0.000;
-                        0.000,0.000,0.000,0.000;
-                        0.000,0.000,0.000,0.000];
+% gsyncons.XRgsyncon =   [0.000,0.010,0.010,0.010;
+%                         0.000,0.000,0.000,0.000;
+%                         0.000,0.000,0.000,0.000;
+%                         0.000,0.000,0.000,0.000];
+gsyncons.XRgsyncon = cur_weights(1:4,:);
+
 
 % RCgsyncon: E (Ron) -> C
 % needs to be transposed for PSC3 mech
@@ -32,8 +34,8 @@ gsyncons.XRgsyncon =   [0.000,0.010,0.010,0.010;
 %gsyncons.RCgsyncon = [0.0088, 0.0043, 0.000466, 0.0060].';
 %gsyncons.RCgsyncon = [varied_struct.RtoC1, varied_struct.RtoC2, varied_struct.RtoC3, varied_struct.RtoC4].';
 
-gsyncons.RCgsyncon = [0.01, 0.01, 0.01, 0.01].';
-
+%gsyncons.RCgsyncon = [0.01, 0.01, 0.01, 0.01].';
+gsyncons.RCgsyncon = transpose(cur_weights(6,:));
 
 
 % gsyncons.PEgsyncon = [varied_struct.IntraPV1,varied_struct.CrossPV1,varied_struct.CrossPV2,varied_struct.CrossPV3;
@@ -41,10 +43,12 @@ gsyncons.RCgsyncon = [0.01, 0.01, 0.01, 0.01].';
 %                       varied_struct.CrossPV7,varied_struct.CrossPV8,varied_struct.IntraPV3,varied_struct.CrossPV9;
 %                       varied_struct.CrossPV10,varied_struct.CrossPV11,varied_struct.CrossPV12,varied_struct.IntraPV4];
 
-gsyncons.PEgsyncon = [0.02,0.000,0.000,0.000;
-                      0.000,0.02,0.000,0.000;
-                      0.000,0.000,0.02,0.000;
-                      0.000,0.000,0.000,0.02];
+gsyncons.PEgsyncon = [cur_weights(5,1),0.000,0.000,0.000;
+                       0.000,cur_weights(5,2),0.000,0.000;
+                       0.000,0.000,cur_weights(5,3),0.000;
+                       0.000,0.000,0.000,cur_weights(5,4)];
+
+%gsyncons.PEgsyncon = cur_weights(5,:);
 
 
 % gsyncons.CrossStatgsyncon = [0.000,0.000,0.000,0.000;

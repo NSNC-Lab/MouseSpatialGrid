@@ -128,9 +128,17 @@ for ii = 1:numDistMats
     % top half of compInds for target 1 as trial, bottom half for target 2
     % as trial
     if ~selfFlag
-        for ti = 1:numTargets
-            compInds(:,ti) = setxor(0:(numTrials-1),tempInds(ti));
-        end
+        %Fix IB 10/28
+            %Explaination: Comparison should be the same between song 1 and
+            %song 2 with their respective matricies. Pervious code made
+            %this incosistant across songs.
+        ti = 1;
+        compInds(:,1) = setxor(0:(numTrials-1),tempInds(ti)); 
+        compInds(:,2) = compInds(:,1);
+        
+        %for ti = 1:numTargets
+        %    compInds(:,ti) = setxor(0:(numTrials-1),tempInds(ti));
+        %end
     else
         compInds = repmat(setxor([0:(numTrials-1)]',tempInds),numTargets,1);
     end
@@ -146,9 +154,11 @@ for ii = 1:numDistMats
     
     for ti = 1:numTargets
         b = a + (tempInds(:,ti) + tempShift(:,ti))*n; % convert tempInds and tempShift to linear indices in tempMat
-        distances(:,ti) = tempMat(b); % get indexes of the distance between the given template and the (ti)th target
+        distances(:,ti) = tempMat(b); % get indexes of the distance between the given template and the (ti)th target 
     end
     
+
+    %disp(distances)
     % 1st column of distances will always be the correct target (1st 1000
     % rows have target 1 in column 1, other 1000 rows have target 2 in
     % column 1)
@@ -158,6 +168,23 @@ for ii = 1:numDistMats
     correct = yFun(distances);
     pc(ii) = 100*mean(correct);
     % stdev(ii) = 100*std(correct, 1)/sqrt(numTargets);
+
+
+    %%%DOULBE CHECK STUFF
+    n_trials = 10;
+
+    
+    %one_mat = ones([n_trials,n_trials]);
+    %zero_mat = zeros([n_trials,n_trials]);
+    
+    
+    %Calcualte a distMat
+    %distMat = [zero_mat,zero_mat;one_mat,zero_mat];
+    
+    %Run a few times just to make sure it converges on 50%
+   
+
+
 end
 
 function correct = calcpcHelperSlow(distances)

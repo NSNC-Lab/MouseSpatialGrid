@@ -6,10 +6,13 @@ input_holder = [];
 input_holder_score = [];
 
 for de = 1:length(state.curvars)
-    input_holder = [input_holder;state.curvars{de}];
-    input_holder_score = [input_holder_score;state.curfitness{de}];
+    for k = 1:length(state.curfitness{de})
+        if state.curfitness{de}(k) < 200
+            input_holder = [input_holder;state.curvars{de}(k,:)];
+            input_holder_score = [input_holder_score;state.curfitness{de}(k)];
+        end
+    end
 end
-
 
 
 
@@ -22,7 +25,7 @@ end
 %X_input = transpose(1:100);
 %Y_input = sin(X_input/100);
 
-X_input = [input_holder(:,1),input_holder(:,4)];
+X_input = [score(:,1),score(:,2)];
 Y_input = input_holder_score;
 
 X_known = [];
@@ -176,7 +179,7 @@ ranges = {};
 % Define the ranges for each dimension
 
 for h = 1:length(mins)
-    ranges{end+1} = linspace(mins(h),maxs(h),200);
+    ranges{end+1} = linspace(mins(h),maxs(h),20);
 end
 %ranges = {1:3, 4:6, 7:9, ... };  % Add more ranges for higher dimensions
 

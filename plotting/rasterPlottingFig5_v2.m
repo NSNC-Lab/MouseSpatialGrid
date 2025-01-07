@@ -8,7 +8,7 @@ fig_num = 6;
 
 
 %titles = {'on','off','R1on','R2on','R1off','R2off','S1OnOff','S2OnOff'};
-titles = {'on','R1on','S1OnOff'};
+titles = {'on','off','R1on','R2on','R1Off','R2Off','S1OnOff','S2OnOff'};
 
 for j = 1:length(titles)
     plotting_data = [];
@@ -22,16 +22,16 @@ for j = 1:length(titles)
         %% Rasters
         %Grab the spikes that we are interested in
         on = transpose(data(subz).spks.On(data_channel).channel1(k,:));
-        %off = transpose(data(subz).spks.Off(data_channel).channel1(k,:));
+        off = transpose(data(subz).spks.Off(data_channel).channel1(k,:));
         R1on = transpose(data(subz).spks.R1On(data_channel).channel1(k,:));
-        %R2on = transpose(data(subz).spks.R2On(data_channel).channel1(k,:));
-        %R1off = transpose(data(subz).spks.R1Off(data_channel).channel1(k,:));
-        %R2off = transpose(data(subz).spks.R2Off(data_channel).channel1(k,:));
+        R2on = transpose(data(subz).spks.R2On(data_channel).channel1(k,:));
+        R1off = transpose(data(subz).spks.R1Off(data_channel).channel1(k,:));
+        R2off = transpose(data(subz).spks.R2Off(data_channel).channel1(k,:));
         S1OnOff = transpose(data(subz).spks.S1OnOff(data_channel).channel1(k,:));
-        %S2OnOff = transpose(data(subz).spks.S2OnOff(data_channel).channel1(k,:));
+        S2OnOff = transpose(data(subz).spks.S2OnOff(data_channel).channel1(k,:));
 
         %reference_cell = {on,off,R1on,R2on,R1off,R2off,S1OnOff,S2OnOff};
-        reference_cell = {on,R1on,S1OnOff};
+        reference_cell = {on,off,R1on,R2on,R1off,R2off,S1OnOff,S2OnOff};
 
         
         
@@ -44,9 +44,14 @@ for j = 1:length(titles)
         y_lines(3,:) = nan;
         figure(25+j)
         plotting_data = [plotting_data;times];
-        h2 = plot(b,y_lines,'Color',[0 0 0 0.2],'LineWidth',0.3); hold on
+        subplot(2,1,1);
+        h2 = plot(b,y_lines,'Color',[0 0 0 0.3],'LineWidth',0.5); hold on
 
     end
+
+    %xlim([0 35000])
+
+    xlim([3500 13500])
 
     
     raw_freq_data = histcounts(plotting_data, BinWidth=200,BinLimits=[0 ending_sample-starting_sample]);
@@ -54,51 +59,85 @@ for j = 1:length(titles)
     %avg_data = (avg_data1*50/10)*10/150;
     avg_data = (avg_data1*50/10)*10/150*75/40;
     if contains(titles{j}, 'S')
+        subplot(2,1,2);
         plot(linspace(0,ending_sample-starting_sample,length(avg_data)),avg_data,'r',LineWidth=0.5);
+        print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(4),'\',titles{j},'.svg'])
     else
-        plot(linspace(0,ending_sample-starting_sample,length(avg_data)),avg_data,'k',LineWidth=0.5);
+        subplot(2,1,2);
+        plot(linspace(0,ending_sample-starting_sample,length(avg_data)),avg_data,'Color',[0.4660 0.6740 0.1880],LineWidth=0.5);
+        print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(4),'\',titles{j},'.svg'])
     end
     title(titles{j})
     
     %Fig 4/5
+    %xlim([3500 13500])
+
     xlim([3500 13500])
 
-    print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Desktop\Modeling Paper\Figures\Figure',num2str(fig_num),'\FpUpdate\',titles{j},'.svg']) % svg
+    %print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Desktop\Modeling Paper\Figures\Figure',num2str(fig_num),'\FpUpdate\',titles{j},'.svg']) % svg
 
 
     %%Plot zoom raster & Voltage plot (Fig 5)
     if fig_num == 5 || fig_num == 6
         
-        indexs = find(snn_out(data_channel).R2On_V_spikes == 1);
-        indexs2 = find(snn_out(data_channel).S2OnOff_V_spikes == 1);
-        holder = snn_out(data_channel).R2On_V;
+        indexs = find(snn_out(data_channel).R1On_V_spikes == 1);
+        indexs2 = find(snn_out(data_channel).S1OnOff_V_spikes == 1);
+        holder = snn_out(data_channel).R1On_V;
         holder(indexs) = 0;
-        holder2 = snn_out(data_channel).S2OnOff_V;
+        holder2 = snn_out(data_channel).S1OnOff_V;
         holder2(indexs2) = 0;
         
         
-        if contains(titles{j}, 'S2OnOff')
+        if contains(titles{j}, 'S1OnOff')
             figure(90)
             plot(linspace(0,ending_sample-starting_sample,length(avg_data1)),avg_data1,'r',LineWidth=0.5); hold on
+             print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(4),'\Comparison_',titles{j},'.svg']) % svg
             %xlim([8500 13500])
-            xlim([5500 10500])
-            print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Desktop\Modeling Paper\Figures\Figure',num2str(fig_num),'\FpUpdate\','ZoomedVersion','.svg']) % svg
-            figure(91)
+            %xlim([5500 10500])
+            %print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(4),'\',titles{j},'.svg']) % svg
+            %figure(91)
             %Range is changeable (Just looking for a relavent pattern here)
-            plot(holder2(9000:15000),'r')
-            ylim([-80 0])
-            print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Desktop\Modeling Paper\Figures\Figure',num2str(fig_num),'\FpUpdate\','PVspikes','.svg']) % svg
+            %plot(holder2(9000:15000),'r')
+            %ylim([-80 0])
             
-        elseif contains(titles{j}, 'R2on')
+        elseif contains(titles{j}, 'R1on')
             figure(90)
             plot(linspace(0,ending_sample-starting_sample,length(avg_data1)),avg_data1,'k',LineWidth=0.5); hold on
-            figure(92)
-            plot(holder(9000:15000),'k')
-            ylim([-80 0])
-            print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Desktop\Modeling Paper\Figures\Figure',num2str(fig_num),'\FpUpdate\','Espikes','.svg']) % svg
+            xlim([15000 20000])
+            %print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(4),'\Comparison_',titles{j},'.svg']) % svg
+            %figure(92)
+            %plot(holder(9000:15000),'k')
+            %ylim([-80 0])
+            %print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(4),'\',titles{j},'.svg']) % svg
+           
         end
 
-        
+
+        if contains(titles{j}, 'S2OnOff')
+            figure(97)
+            plot(linspace(0,ending_sample-starting_sample,length(avg_data1)),avg_data1,'r',LineWidth=0.5); hold on
+             print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(4),'\Comparison_',titles{j},'.svg']) % svg
+            %xlim([8500 13500])
+            %xlim([5500 10500])
+            %print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(4),'\',titles{j},'.svg']) % svg
+            %figure(91)
+            %Range is changeable (Just looking for a relavent pattern here)
+            %plot(holder2(9000:15000),'r')
+            %ylim([-80 0])
+            
+        elseif contains(titles{j}, 'R2on')
+            figure(97)
+            plot(linspace(0,ending_sample-starting_sample,length(avg_data1)),avg_data1,'k',LineWidth=0.5); hold on
+            xlim([15000 20000])
+            %print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(4),'\Comparison_',titles{j},'.svg']) % svg
+            %figure(92)
+            %plot(holder(9000:15000),'k')
+            %ylim([-80 0])
+            %print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(4),'\',titles{j},'.svg']) % svg
+           
+        end
+
+        %C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure4
     end
 
 end

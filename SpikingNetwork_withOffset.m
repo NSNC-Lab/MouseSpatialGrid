@@ -11,7 +11,10 @@ study_dir = fullfile(pwd,'run','4-channel-PV-inputs');
 % 
 % if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
 %mkdir(fullfile(study_dir, 'solve'));
-
+%Something with passing was changed when new fittness in GA was
+%implemented. Added these connections here to compensate.
+mfileinfo = mfilename('fullpath');
+mfiledir = strsplit(mfileinfo,filesep);
 solve_directory = fullfile(study_dir, 'solve');
 % 
 if exist(fullfile(study_dir, 'solve'), 'dir')
@@ -151,8 +154,8 @@ fr_grid = zeros(5,4);
 % varied_struct.XR3 = 0.013;
 
 
-[snn_out,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons, flag_raised_mex);  %, varied_struct
-%[snn_out,s] = columnNetwork_alternative(study_dir,varies,options,netcons);
+%[snn_out,s] = columnNetwork_simpler_onoff(study_dir,varies,options,netcons,gsyncons, flag_raised_mex);  %, varied_struct
+[snn_out,s] = columnNetwork_alternative(study_dir,varies,options,netcons);
 %% post-process for performance and firing results
 
 postProcessSims;

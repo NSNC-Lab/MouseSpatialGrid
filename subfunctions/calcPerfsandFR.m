@@ -14,6 +14,9 @@ nSims = length(spks.(pop)) / nVaried; % how many repeats (set of 20 trials) for 
 chanNames = fieldnames(spks.(pop));
 nChans = length(chanNames);
 
+corrects = [];
+
+
 for vv = 1:nVaried
     for ns = 1:nSims
 
@@ -24,16 +27,20 @@ for vv = 1:nVaried
             raster = popSpks.(chanNames{ch});
             numTrials = size(raster,1);
 
-            [pc.SPIKE(ns,vv,ch),pc.ISI(ns,vv,ch),pc.RISPIKE(ns,vv,ch),pc.spkct(ns,vv),fr(ns,vv,ch)] = calcPCandFR(raster,numTrials,dt);
+            [pc.SPIKE(ns,vv,ch),pc.ISI(ns,vv,ch),pc.RISPIKE(ns,vv,ch),pc.spkct(ns,vv),fr(ns,vv,ch),corrects] = calcPCandFR(raster,numTrials,dt,corrects);
         end
 
     end
 end
 
+
+
+
+
 end
 
 
-function [pc_SPIKE,pc_ISI,pc_RISPIKE,pc_spkct,fr] = calcPCandFR(raster,numTrials,dt)
+function [pc_SPIKE,pc_ISI,pc_RISPIKE,pc_spkct,fr,corrects] = calcPCandFR(raster,numTrials,dt,corrects)
 
 start_time = 300; % [ms]
 end_time = start_time + 3000; % [ms];
@@ -50,6 +57,10 @@ fr = round(mean(cellfun(@(x) sum(x >= start_time & x < end_time) / 3,input)));
 STS = SpikeTrainSet(input,start_time,end_time);
 
 distMat = STS.SPIKEdistanceMatrix(start_time,end_time);
+
+
+
+
 pc_SPIKE = calcpcStatic(distMat, numTrials/2, 2, 0);
 
 distMat = STS.ISIdistanceMatrix(start_time,end_time);

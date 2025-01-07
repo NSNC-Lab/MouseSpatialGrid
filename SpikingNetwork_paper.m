@@ -14,7 +14,6 @@ mfiledir = strsplit(mfileinfo,filesep);
 %dynasimPath = fullfile('..','DynaSim');
 dynasimPath = 'DynaSim-master';
 
-
 addpath('mechs');
 addpath('resampled-stimuli');
 addpath(genpath('ICSimStim'));
@@ -79,12 +78,12 @@ addpath('params');
 %addpath('params-AM')
 %params_5_rate_based_onoff_WorkingCopy; % Generates Figure 5 (rate-based simulation)
 %params_5_rate_based_onoff_WorkingCopy_HalfDense;
-%params_5_rate_based_onoff_fig4;
+params_5_rate_based_onoff_fig4;
 %params_4_opto_onoff_fig6;
 %params_5_rate_based_onoff_offNonSupressed;
 %params_opto_onoff_2
 %params_5_off_dominated
-onoff_con;
+%onoff_con;
 %params_AM_best_onoff;
 
 
@@ -125,7 +124,7 @@ newStrfGain = strfGain;
 
 %% create input spikes from STRFs
 
-padToTime = 3500; % [ms]
+padToTime = 3230.1; % [ms]
 
 % ICfiles.mat contains names of spatial grid configs: s[targetloc]m[maskerloc]
 % See 'config_idx_reference.JPG' for indexes

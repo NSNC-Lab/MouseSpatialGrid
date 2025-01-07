@@ -1,0 +1,31 @@
+all_data = [];
+all_perfs = [];
+all_fitnesses = [];
+
+fitness_indexes = [];
+
+for k = 1:length(state.curvars)
+    all_data = [all_data; state.curvars{k}];
+    all_perfs = [all_perfs; squeeze(state.curgrid{k}(2,1,:))];
+    all_fitnesses = [all_fitnesses; state.curfitness{k}];
+end
+
+for j = 1:length(all_fitnesses)
+    if all_fitnesses(j) > 1000
+        all_fitnesses(j) = 1000;
+        fitness_indexes = [fitness_indexes,j];
+    elseif all_fitnesses(j) < 1000 && all_fitnesses(j) > 100
+        all_fitnesses(j) = 100;
+    end
+end
+
+%Remove 1k data
+all_fitnesses(fitness_indexes) = [];
+all_data(fitness_indexes,:) = [];
+
+complete_data = [all_data,round(all_fitnesses/20)*20];
+
+[data_reduced, umap, clusterIdentifiers] = run_umap(complete_data, 'label_column', 22,'Marker_size',15,'n_neighbors',80,'spread',0.3);
+
+figure();
+plot(data_reduced(:,1),data_reduced(:,2),'r.')
