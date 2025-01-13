@@ -107,7 +107,7 @@ newStrfGain = strfGain;
 
 %% create input spikes from STRFs
 
-padToTime = 1657; % [ms]
+padToTime = 1657*3; % [ms]
 
 % ICfiles.mat contains names of spatial grid configs: s[targetloc]m[maskerloc]
 % See 'config_idx_reference.JPG' for indexes

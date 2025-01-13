@@ -18,7 +18,7 @@ options.SpatialAttention = 0;
 clear varies
 
 %trialInds = repmat(1:20,nSims,1);
-trialInds = repmat(1:120,nSims,1);
+trialInds = repmat(1:20,nSims,1);
 
 % % % DO NOT CHANGE THIS % % %
 varies(1).conxn = '(On->On,Off->Off)';
@@ -29,30 +29,30 @@ varies(1).range =  trialInds(:)';
 % Input strength
 varies(end+1).conxn = '(On->On,Off->Off)';
 varies(end).param = 'g_postIC';
-varies(end).range = 0.18;
+varies(end).range = 0.15;
 
 
 % E->E connections
 
 %Vary the synaptic depression (fp) between E->E conncections
-varies(end+1).conxn = '(R1On->R2On,Off->R1Off,R1Off->R2Off,Off->R1On)';%,On->R1On
+varies(end+1).conxn = '(R1On->R2On,Off->R1Off,R1Off->R2Off,On->R1On)';%,Off->R1On)';%,On->R1On
 varies(end).param = 'fP';
 %varies(end).range = var_change1;
 varies(end).range = 0.1;
 
 %Gsyn
-varies(end+1).conxn = '(R1On->R2On,Off->R1Off,R1Off->R2Off,Off->R1On)';%,On->R1On
+varies(end+1).conxn = '(R1On->R2On,Off->R1Off,R1Off->R2Off,On->R1On)';%,On->R1On
 varies(end).param = 'gSYN';
 varies(end).range = 0.02;
 
-varies(end+1).conxn = '(R1On->R2On,Off->R1Off,R1Off->R2Off,Off->R1On)';%,On->R1On
+varies(end+1).conxn = '(R1On->R2On,Off->R1Off,R1Off->R2Off,On->R1On)';%,On->R1On
 varies(end).param = 'tauP';
 varies(end).range = 30;
 
 %PVs
 varies(end+1).conxn = '(S1OnOff->R1On,S1OnOff->R1Off,S2OnOff->R2On,S2OnOff->R2Off)';
 varies(end).param = 'gSYN';
-varies(end).range = 0.03;
+varies(end).range = 0.025;
 
 varies(end+1).conxn = '(S1OnOff->R1On,S1OnOff->R1Off,S2OnOff->R2On,S2OnOff->R2Off)';
 varies(end).param = 'fP';

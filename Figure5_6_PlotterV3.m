@@ -55,6 +55,9 @@ print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Fi
 %Set how long you want the recording to be
 starting_sample = 3500;
 ending_sample = 10500;
+
+% starting_sample = 1;
+% ending_sample = 32300;
 %Fig5E_starting_sample = 3500;
 %Fig5E_ending_sample = 13500;
 num_iters = 30;
@@ -180,6 +183,7 @@ for j = 1:length(titles)
 subplot('Position',[0.7, 0.05, 0.27, 0.1])
 
 [song1,fs] = audioread('200k_target1.wav');
+[song2,~] = audioread('200k_target2.wav');
 plot(song1)
 xlim([starting_sample*20 ending_sample*20])
 

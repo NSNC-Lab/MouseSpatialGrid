@@ -41,7 +41,7 @@ for ICtype = [1 2]
 
         %singleConfigSpks = zeros(120,1,length(full_stimuli_spec));
         %singleConfigSpks = zeros(20,1,32301);
-        singleConfigSpks = zeros(20,1,16573);
+        singleConfigSpks = zeros(20,1,32378);
         % singleConfigSpks = gpuArray(singleConfigSpks);
 
         for t = 1:120 % trials: first 10 trials are target 1, last 10 are target 2

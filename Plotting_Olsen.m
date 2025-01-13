@@ -2,7 +2,7 @@
 figure;
 %Set how long you want the recording to be
 starting_sample = 1;
-ending_sample = 35000;
+ending_sample = 100000;
 
 data_channel = 1;
 fig_num = 6;
@@ -27,7 +27,7 @@ for j = 1:length(titles)
 
         %reference_cell = {on,off,R1on,R2on,R1off,R2off,S1OnOff,S2OnOff};
         %reference_cell = {on,off,R1on,R2on,R1off,R2off,S1OnOff,S2OnOff};
-        reference_cell = {off};
+        reference_cell = {on};
 
         times = find(reference_cell{j} == 1);
         b = transpose(repmat(times,1,3));
@@ -77,7 +77,7 @@ for j = 1:length(titles)
 
     subplot(4,1,4)
 
-    plot(fr_target_off{1,1})
+    plot(fr_target_on{1,1})
 
     xlim([1 length(on)])
 

@@ -116,14 +116,14 @@ s.connections(end).parameters={'g_postIC',0.19,'label','off','trial',1,'locNum',
 
 
 %excitatory inputs
-% s.connections(end+1).direction='On->R1On';
-% s.connections(end).mechanism_list={'PSC'};
-% s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30};
-
-%Added in response to reviewer's commments
-s.connections(end+1).direction='Off->R1On';
+s.connections(end+1).direction='On->R1On';
 s.connections(end).mechanism_list={'PSC'};
 s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30};
+
+%Added in response to reviewer's commments
+% s.connections(end+1).direction='Off->R1On';
+% s.connections(end).mechanism_list={'PSC'};
+% s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30};
 
 s.connections(end+1).direction='On->S1OnOff';
 s.connections(end).mechanism_list={'PSC'};

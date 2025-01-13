@@ -43,7 +43,7 @@ frate(isnan(frate)) = 0;
 
 % offset rate
 %offset_rate = -frate + max(frate); %-frate + max(frate)*0.6;
-offset_rate = -frate;
+offset_rate = -frate +max(frate);
 firstneg = find(offset_rate <= 0,1,'first');
 
 if firstneg > 5500, firstneg = 2501; end % for AM stimuli

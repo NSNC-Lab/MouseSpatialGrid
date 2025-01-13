@@ -105,6 +105,9 @@ netcons.RCnetcon = eye(1);
 
 %% load input stimuli (targets and maskers) from ICSimStim
 load('default_STRF_with_offset_200k.mat');
+%load('Rancon_STRF_Paper.mat')
+
+
 
 % firing rates were generated with sampling rate of 10000 Hz to match old
 % simulation time step, downsample if dt's don't match

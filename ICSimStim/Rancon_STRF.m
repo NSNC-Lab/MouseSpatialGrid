@@ -40,14 +40,31 @@ subplot(2,1,2)
 stem(t_I,expo_I)
 
 %2. convole accross the frequency bands of stimulus
-Simple_Stim; %Get the simple stimulus
+%Simple_Stim; %Get the simple stimulus
+Paper_Stim;
 
 convolved_spec_On = [];
 convolved_spec_Off = [];
 
+%To propoerly secure casuality we should not use same. The entire filter
+%should slide accross the signal and then on overlap with the signal we
+%should see a sresponse. In order to account for the change in length due
+%to the output of the convolution the other option is to trim the output. I
+%believe as long as the output is zero padded at the signal end this should
+%not be problematic. 
+
+
 for k = 1:size(full_stimuli_spec,2)
-    convolved_spec_On = [convolved_spec_On,conv(full_stimuli_spec(:,k),expo_E)];%,'same')];
-    convolved_spec_Off = [convolved_spec_Off,conv(full_stimuli_spec(:,k),expo_I)];%,'same')];
+    On_Conv = conv(full_stimuli_spec(:,k),expo_E);
+    On_Conv = On_Conv(1:end-length(expo_E));
+
+    convolved_spec_On = [convolved_spec_On,On_Conv];%,'same')];
+    
+    Off_Conv = conv(full_stimuli_spec(:,k),expo_I);
+    Off_Conv = Off_Conv(1:end-length(expo_I));
+
+    convolved_spec_Off = [convolved_spec_Off,Off_Conv];%,'same')];
+
 end
 
 

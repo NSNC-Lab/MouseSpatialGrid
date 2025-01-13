@@ -26,9 +26,33 @@ if size(input, 1) > 1,
 end;
 
 % Padd the input with zeros
-pinput = zeros(1,length(input)+winLength);
-pinput(winLength/2+1:winLength/2+length(input)) = input;
+
+%IB 1/7/2025
+%Here it seems that you would padd with the winLength instead of
+%winlength/2. If you only pad with half of the window length then you risk
+%alterin the signal's latency. For instance the window will have some
+%non-padded values for the first value calculated by the stft. This means
+%that the first value that you output in your stft is your n = winlength/2
+%value at the output.
+
+%Using matlabs fft function puts your lower freqncies first. I think that
+%you might be able to use fftshift in order to correct for this, but by
+%padding the front you can fix the un-causal relationships seen in the
+%model.
+
+%You musta also account for the increment which will change the window in
+%steps of size 19. Therefore in order to stay causal you must also push the
+%window by 19.
+
+%pinput = zeros(1,length(input)+winLength);
+%pinput(winLength/2+1:winLength/2+length(input)) = input;
+%inputLength = length(pinput);
+
+%<><><><><><><><>%
+pinput = zeros(1,length(input)+increment+2*winLength);
+pinput(winLength+1+increment:winLength+increment+length(input)) = input;
 inputLength = length(pinput);
+%<><><><><><><><>%
 
 % The number of time points in the spectrogram
 frameCount = floor((inputLength-winLength)/increment)+1;
