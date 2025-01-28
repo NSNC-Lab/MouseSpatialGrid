@@ -97,9 +97,13 @@ for ICtype = [1 2]
                 if isempty(m_wt), m_wt = 0; end
 
                 if t <= 10 %song 1
-                    singleConfigSpks(t,ch,:) = t_wt.*eval(['fr_target_' labels{ICtype} '{1}']) + m_wt.*fr_masker{t};
+                    %singleConfigSpks(t,ch,:) = t_wt.*eval(['fr_target_' labels{ICtype} '{1}']) + m_wt.*fr_masker{t};
+                    t_wt = 1;
+                    singleConfigSpks(t,ch,:) = eval(['fr_target_' labels{ICtype} '{1}']);
                 else
-                    singleConfigSpks(t,ch,:) = t_wt.*eval(['fr_target_' labels{ICtype} '{2}']) + m_wt.*fr_masker{t-10};
+                    t_wt = 1;
+                    %singleConfigSpks(t,ch,:) = t_wt.*eval(['fr_target_' labels{ICtype} '{2}']) + m_wt.*fr_masker{t-10};
+                    singleConfigSpks(t,ch,:) = eval(['fr_target_' labels{ICtype} '{2}']);
                 end
 
                 % if t_wt + m_wt >= 1

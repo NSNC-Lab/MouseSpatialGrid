@@ -108,7 +108,7 @@ for vv = 1:jump % for each varied parameter
                     %     perfmed.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv) = 0;
                     % end
 
-                    [perf.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv),...
+                    [perf.(popNames{currentPop}).(['channel' num2str(channelNum)])(1:3,vv),...
                         perfmed.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv), ...
                         fr.(popNames{currentPop}).(['channel' num2str(channelNum)])(vv)] = ...
                         calcPCandPlot(channel(channelNum).popSpks,trial_length,numTrials,dt,plot_rasters_final,y1,y2,t,figName);
@@ -414,52 +414,61 @@ fr = round(mean(cellfun(@(x) sum(x >= start_time & x < end_time) / 3,input)));
 STS = SpikeTrainSet(input,start_time,end_time);
 distMat = STS.SPIKEdistanceMatrix(start_time,end_time);
 
+distMatISI = STS.ISIdistanceMatrix(start_time,end_time);
+
+distMatRISPIKE = STS.RateIndependentSPIKEdistanceMatrix(start_time,end_time);
+
 %So here we would just gather all of the distMat, then we can shove the
 %whole matrix in and have Julia handle it. Watch out for the returns.
 
 
 %Might onyl need to do this for the upper triangular
 
-[pc,pc2,~,~] = calcpcStatic(distMat, numTrials/2, 2, 0);
-PCstr = ['PC = ' num2str(round(pc)) '%'];
+[pcSPIKE,~,~,~] = calcpcStatic(distMat, numTrials/2, 2, 0);
+[pcISI,~,~,~] = calcpcStatic(distMatISI, numTrials/2, 2, 0);
+[pcRISPIKE,pc2,~,~] = calcpcStatic(distMatRISPIKE, numTrials/2, 2, 0);
 
-%plot
-x = 0.86;
-y_raster = 0.4;
-y_stim = 0.08;
-y_psth = 0.12;
-dy = 0.01;
-x0 = 0.1;
+pc = [pcSPIKE;pcISI;pcRISPIKE];
 
-% plot rasters and PSTHs (in seconds)
-if plot_rasters
-    clf
-
-    ypos = 0.91 - y_stim;
-    subplot('position',[x0 ypos x y_stim]); % target 2
-    plot(t,y2,'k'); xlim([0 trial_length/1000]);
-    title({PCstr,['FR = ' num2str(fr)]}); set(gca,'xtick',[],'ytick',[])
-
-    ypos = ypos - dy - y_psth;
-    subplot('position',[x0 ypos x y_psth]);
-    plotPSTH(raster(numTrials/2+1:end,:),dt); set(gca,'xtick',[])
-
-    ypos = ypos - dy - y_raster;
-    subplot('position',[x0 ypos x y_raster]);
-    plotSpikeRasterFs(flipud(logical(raster)), 'PlotType','vertline');
-    xlim([0 trial_length/dt]);
-    line([0,trial_length/dt],[numTrials/2 + 0.5,numTrials/2 + 0.5],'color',[0.3 0.3 0.3]); set(gca,'xtick',[],'ytick',[])
-
-    ypos = ypos - dy - y_psth;
-    subplot('position',[x0 ypos x y_psth]);
-    plotPSTH(raster(1:numTrials/2,:),dt); set(gca,'xtick',[])
-
-    ypos = ypos - dy - y_stim;
-    subplot('position',[x0 ypos x y_stim]); % target 1
-    plot(t,y1,'k'); xlim([0 trial_length/1000]); set(gca,'ytick',[]); 
-
-    saveas(gcf,[figName '.png'])
-end
+% PCstr = ['PC = ' num2str(round(pc)) '%'];
+% 
+% %plot
+% x = 0.86;
+% y_raster = 0.4;
+% y_stim = 0.08;
+% y_psth = 0.12;
+% dy = 0.01;
+% x0 = 0.1;
+% 
+% % plot rasters and PSTHs (in seconds)
+% if plot_rasters
+%     clf
+% 
+%     ypos = 0.91 - y_stim;
+%     subplot('position',[x0 ypos x y_stim]); % target 2
+%     plot(t,y2,'k'); xlim([0 trial_length/1000]);
+%     title({PCstr,['FR = ' num2str(fr)]}); set(gca,'xtick',[],'ytick',[])
+% 
+%     ypos = ypos - dy - y_psth;
+%     subplot('position',[x0 ypos x y_psth]);
+%     plotPSTH(raster(numTrials/2+1:end,:),dt); set(gca,'xtick',[])
+% 
+%     ypos = ypos - dy - y_raster;
+%     subplot('position',[x0 ypos x y_raster]);
+%     plotSpikeRasterFs(flipud(logical(raster)), 'PlotType','vertline');
+%     xlim([0 trial_length/dt]);
+%     line([0,trial_length/dt],[numTrials/2 + 0.5,numTrials/2 + 0.5],'color',[0.3 0.3 0.3]); set(gca,'xtick',[],'ytick',[])
+% 
+%     ypos = ypos - dy - y_psth;
+%     subplot('position',[x0 ypos x y_psth]);
+%     plotPSTH(raster(1:numTrials/2,:),dt); set(gca,'xtick',[])
+% 
+%     ypos = ypos - dy - y_stim;
+%     subplot('position',[x0 ypos x y_stim]); % target 1
+%     plot(t,y1,'k'); xlim([0 trial_length/1000]); set(gca,'ytick',[]); 
+% 
+%     saveas(gcf,[figName '.png'])
+% end
 
 end
 

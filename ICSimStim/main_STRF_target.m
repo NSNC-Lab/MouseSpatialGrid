@@ -11,6 +11,9 @@ if ~contains(pwd,'ICSimStim'), cd('ICSimStim'); end
 %clc
 close all
 
+
+
+
 addpath(genpath('strflab_v1.45'))
 addpath('../genlib')
 % addpath('../fixed-stimuli')
@@ -45,7 +48,7 @@ maxWeight = 1; %maximum mixed tuning weight; capped at this level.
 
 paramH.alpha = 0.01; % time constant of temporal kernel [s] 0.0097
 paramH.N1 = 5;
-paramH.N2 = 8;
+paramH.N2 = 7;
 paramH.SC1 = 1; %Nominally 1
 paramH.SC2 = 0.88;  % increase -> more inhibition %0.88 in paper
 

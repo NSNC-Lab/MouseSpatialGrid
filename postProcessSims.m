@@ -244,12 +244,12 @@ end
 % save([simDataDir filesep 'perf_fr_' output_pop '.mat'],'pc');
 
 % make surface plot for 2D parameter searches
-if nVaried >= 10
-    for i = 1:length(subz)
-        plotPerfvsParams(output_pop,data(subz(i)),varies,simDataDir,data(subz(i)).config)
-        %close all;
-    end
-end
+% if nVaried >= 10
+%     for i = 1:length(subz)
+%         plotPerfvsParams(output_pop,data(subz(i)),varies,simDataDir,data(subz(i)).config)
+%         %close all;
+%     end
+% end
 
 dist_measures = struct;
 

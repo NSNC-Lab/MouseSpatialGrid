@@ -79,12 +79,12 @@ addpath('params');
 %addpath('params-AM')
 %params_5_rate_based_onoff_WorkingCopy; % Generates Figure 5 (rate-based simulation)
 %params_5_rate_based_onoff_WorkingCopy_HalfDense;
-%params_5_rate_based_onoff_fig4;
+params_5_rate_based_onoff_fig4;
 %params_4_opto_onoff_fig6;
 %params_5_rate_based_onoff_offNonSupressed;
 %params_opto_onoff_2
 %params_5_off_dominated
-onoff_con;
+%onoff_con;
 %params_AM_best_onoff;
 
 
@@ -160,3 +160,7 @@ else, options.time_end = padToTime*numel(options.locNum); end
 
 postProcessSims;
 toc;
+
+%Monitors
+FR = data(15).fr.R2On.channel1;
+perf = data(15).perf.R2On.channel1;
