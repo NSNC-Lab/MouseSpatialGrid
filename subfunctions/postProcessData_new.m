@@ -70,7 +70,7 @@ for vv = 1:jump % for each varied parameter
             %if(strcmp(popNames{currentPop},'C') || strcmp(popNames{currentPop},'ROn'))
 
             if(plot_all == 1)
-                if(strcmp(popNames{currentPop},'C') || strcmp(popNames{currentPop},'ROn')|| strcmp(popNames{currentPop},'On') || strcmp(popNames{currentPop},'X')|| strcmp(popNames{currentPop},'R1On')|| strcmp(popNames{currentPop},'R2On')|| strcmp(popNames{currentPop},'S1OnOff')|| strcmp(popNames{currentPop},'S2OnOff'))
+                if(strcmp(popNames{currentPop},'C') || strcmp(popNames{currentPop},'ROn')|| strcmp(popNames{currentPop},'On')|| strcmp(popNames{currentPop},'Off') || strcmp(popNames{currentPop},'X')|| strcmp(popNames{currentPop},'R1On')|| strcmp(popNames{currentPop},'R2On')|| strcmp(popNames{currentPop},'S1OnOff')|| strcmp(popNames{currentPop},'S2OnOff'))
                          % for each trial
                    for trial = 1:numTrials
                         channel(channelNum).popSpks(trial,:) = subData(trial).(fieldNames{currentPop})(tstart:tend,channelNum);

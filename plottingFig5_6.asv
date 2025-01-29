@@ -266,13 +266,8 @@ end
 
 
 figure;
-subplot(2,1,1)
-plot(mean(song1_holder),'b'); hold on
-plot(mean(song2_holder),'r'); hold on
-subplot(2,1,2)
-plot(song1,'b')
-subplot(2,1,3)
-plot(song2,'r')
+plot(mean(song1_holder)); hold on
+plot(mean(song2_holder)); hold on
 
 figure;
 plot(mean(E_ex),'k'); hold on
