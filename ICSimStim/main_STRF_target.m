@@ -12,6 +12,9 @@ if ~contains(pwd,'ICSimStim'), cd('ICSimStim'); end
 close all
 
 
+delete('default_STRF_with_offset_200k.mat')
+
+
 
 
 addpath(genpath('strflab_v1.45'))

@@ -1,0 +1,36 @@
+%Calculate RI-SPIKE/ISI
+offset = [];
+onset = [];
+
+for j = 0.005:0.005:0.05
+    for k = 0.005:0.005:0.05
+        offset = [offset, j];
+        onset = [onset, k];
+    end
+end
+
+ratio_grid = perf(2,:)./perf(3,:);
+ratio_grid_reshaped = reshape(ratio_grid,10,10);
+
+offset_reshaped = reshape(offset,10,10);
+onset_reshaped = reshape(onset,10,10);
+
+fr_reshaped = rehsape(FR)
+
+figure;
+imagesc(ratio_grid_reshaped)
+
+%Convolve this image in order to smooth it
+
+filter = [1,1,1;1,1,1;1,1,1];
+
+ratio_grid_convolved = conv2(ratio_grid_reshaped,filter, 'valid')./sum(sum(filter));
+%ratio_grid_convolved = ratio_grid_convolved(2:end-1,2:end-1); %Get rid of excess
+
+figure;
+imagesc(ratio_grid_convolved);
+colorbar
+
+
+yticklabels([0.01:0.005:0.045]')
+xticklabels([0.01:0.005:0.045])
