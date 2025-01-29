@@ -137,6 +137,7 @@ end
 
 subplot("Position",[0.15,0.15,0.35,0.1])
 plot(song1(starting_sample*20:ending_sample*20),'k'); hold on
+ylim([-1 1])
 xlim([0 ending_sample*20-starting_sample*20])
 yticklabels('')
 xticks(0:(ending_sample*20-starting_sample*20)/5:ending_sample*20-starting_sample*20)
@@ -145,6 +146,7 @@ xlabel('time (ms)')
 box off;
 subplot("Position",[0.55,0.15,0.35,0.1])
 plot(song2(starting_sample*20:ending_sample*20),'k')
+ylim([-1 1])
 xlim([0 ending_sample*20-starting_sample*20])
 yticklabels('')
 xticks(0:(ending_sample*20-starting_sample*20)/5:ending_sample*20-starting_sample*20)
@@ -180,7 +182,6 @@ ylabel(han, 'Spikes/s (Hz)');
 %Plot an average of 30 PSTHs between the two songs in order to show the
 %discrimitability of the two songs.
 
-figure(Position=[800,200,400,400]);
 titles = {'on','off','S1OnOff','R1on'};
 
 
@@ -189,6 +190,9 @@ song2_holder = [];
 
 E_ex = [];
 I_ex = [];
+
+starting_sample = 3500;
+ending_sample = 8500;
 
 for m = 1:length(FR)
 
@@ -219,11 +223,11 @@ for m = 1:length(FR)
         avg_data1 = movmean(raw_freq_data,3);
         avg_data = avg_data1/10/0.02*(10/250); %Divide by 10 for # of trials, divide by 0.02 (bindWidth) to get spikes/s = Hz,next part is scale factor which will be reprented with scaling bar in paper
         
-        if j == 1
+        if j == 2
             song1_holder = [song1_holder;avg_data];
             E_ex = [E_ex;avg_data];
         else
-            I_ex = [song2_holder;avg_data];
+            I_ex = [I_ex;avg_data];
         end
         
     
@@ -255,7 +259,7 @@ for m = 1:length(FR)
         avg_data1 = movmean(raw_freq_data,3);
         avg_data = avg_data1/10/0.02*(10/250); %Divide by 10 for # of trials, divide by 0.02 (bindWidth) to get spikes/s = Hz,next part is scale factor which will be reprented with scaling bar in paper
         
-        if j == 1
+        if j == 2
             song2_holder = [song2_holder;avg_data];
         end
         
@@ -266,9 +270,36 @@ end
 
 
 figure;
-plot(mean(song1_holder)); hold on
-plot(mean(song2_holder)); hold on
+subplot('Position',[0.1,0.5,0.8,0.4])
+plot(mean(song1_holder,1),'b','LineWidth',1.5); hold on
+plot(mean(song2_holder,1),'r','LineWidth',1.5); hold on
+yticks(linspace(0,4,5))
+yticklabels(linspace(0,100,5))
+ylabel('Spikes/s (Hz)')
+xticks('')
+
+subplot('Position',[0.1,0.25,0.8,0.15])
+plot(song1(starting_sample*20:ending_sample*20),'b'); hold on
+xlim([0 ending_sample*20-starting_sample*20])
+ylim([-1 1])
+yticks('')
+xticks('')
+subplot('Position',[0.1,0.05,0.8,0.15])
+plot(song2(starting_sample*20:ending_sample*20),'r'); hold on
+xlim([0 ending_sample*20-starting_sample*20])
+ylim([-1 1])
+yticks('')
+xticks(linspace(0,ending_sample*20-starting_sample*20,5))
+xticklabels(linspace(350,850,5))
+xlabel('time (ms)')
 
 figure;
-plot(mean(E_ex),'k'); hold on
-plot(mean(I_ex),'r'); hold on
+plot(mean(E_ex,1),'k','LineWidth',2); hold on
+plot(mean(I_ex,1),'r','LineWidth',2); hold on
+xticks(linspace(0,25,5))
+xticklabels(linspace(350,850,5))
+ylim([0 10])
+yticks(linspace(0,10,3))
+yticklabels(linspace(0,250,3))
+xlabel('time (ms)')
+ylabel('Spikes/s (Hz)')
