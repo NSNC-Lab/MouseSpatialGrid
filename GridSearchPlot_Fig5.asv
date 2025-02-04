@@ -1,3 +1,6 @@
+plot_num =5;
+
+
 %Calculate RI-SPIKE/ISI
 offset = [];
 onset = [];
@@ -9,36 +12,43 @@ for j = 0.005:0.005:0.05
     end
 end
 
-% ratio_grid = perf(3,:)./perf(2,:);
-% ratio_grid_reshaped = reshape(ratio_grid,10,10);
-% 
-% offset_reshaped = reshape(offset,10,10);
-% onset_reshaped = reshape(onset,10,10);
-% 
-% fr_reshaped = reshape(FR,10,10);
-% 
-% RI_reshaped = reshape(perf(3,:),10,10);
-% ISI_reshaped = reshape(perf(2,:),10,10);
-% 
-% figure;
-% imagesc(ratio_grid_reshaped)
-% 
-% %Convolve this image in order to smooth it
-% 
-% filter = [1,1,1;1,1,1;1,1,1];
-% 
-% ratio_grid_convolved = conv2(ratio_grid_reshaped,filter, 'valid')./sum(sum(filter));
-% %ratio_grid_convolved = ratio_grid_convolved(2:end-1,2:end-1); %Get rid of excess
-% 
-% fr_convolved = conv2(fr_reshaped, filter,'valid')./sum(sum(filter));
-% 
-% RI_convolved = conv2(RI_reshaped, filter,'valid')./sum(sum(filter));
-% 
-% ISI_convolved = conv2(ISI_reshaped, filter,'valid')./sum(sum(filter));
+ratio_grid = perf(3,:)./perf(2,:);
+ratio_grid_reshaped = reshape(ratio_grid,10,10);
+
+offset_reshaped = reshape(offset,10,10);
+onset_reshaped = reshape(onset,10,10);
+
+fr_reshaped = reshape(FR,10,10);
+
+RI_reshaped = reshape(perf(3,:),10,10);
+ISI_reshaped = reshape(perf(2,:),10,10);
 
 figure;
+imagesc(ratio_grid_reshaped)
+
+%Convolve this image in order to smooth it
+
+filter = [1,1,1;1,1,1;1,1,1];
+
+ratio_grid_convolved = conv2(ratio_grid_reshaped,filter, 'valid')./sum(sum(filter));
+%ratio_grid_convolved = ratio_grid_convolved(2:end-1,2:end-1); %Get rid of excess
+
+fr_convolved = conv2(fr_reshaped, filter,'valid')./sum(sum(filter));
+
+RI_convolved = conv2(RI_reshaped, filter,'valid')./sum(sum(filter));
+
+ISI_convolved = conv2(ISI_reshaped, filter,'valid')./sum(sum(filter));
+
+intersection = (ISI_convolved > 81 & ISI_convolved < 87) & (fr_convolved > 26 & fr_convolved < 33) & (ratio_grid_convolved > 0.78 & ratio_grid_convolved < 0.88);
+
+figure('Position',[300,300,600,520]);
 imagesc(ratio_grid_convolved);
 colorbar
+
+hold on
+Outliner(ratio_grid_convolved,0.78,0.88,'k')
+Outliner(intersection,0.5,1.5,'r')
+hold off
 
 
 yticklabels([0.01:0.005:0.045]')
@@ -47,6 +57,9 @@ xticklabels([0.01:0.005:0.045])
 title('RI-SPIKE/ISI')
 ylabel('Offset')
 xlabel('Onset')
+
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','On_Conv_Ratio_Grid_search','.svg']) % svg
+
 
 
 
@@ -58,12 +71,13 @@ mask = fr_convolved > 27;
 B = bwboundaries(mask);
 
 
-figure;
+figure('Position',[300,300,600,520]);
 imagesc(fr_convolved);
 colorbar
 
 hold on
-Outliner(fr_convolved,25,32)
+Outliner(fr_convolved,26,33,'k')
+Outliner(intersection,0.5,1.5,'r')
 hold off
 
 
@@ -76,9 +90,10 @@ ylabel('Offset')
 xlabel('Onset')
 
 
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','On_Conv_FR_Grid_search','.svg']) % svg
 
 
-figure;
+figure('Position',[300,300,600,520]);
 imagesc(RI_convolved);
 colorbar
 
@@ -96,15 +111,17 @@ ylabel('Offset')
 xlabel('Onset')
 
 
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','On_Conv_RISPIKE_Grid_search','.svg']) % svg
 
 
 
-figure;
+figure('Position',[300,300,600,520]);
 imagesc(ISI_convolved);
 colorbar
 
 hold on
-Outliner(RI_convolved,83,)
+Outliner(ISI_convolved,81,87,'k')
+Outliner(intersection,0.5,1.5,'r')
 hold off
 
 
@@ -115,5 +132,8 @@ xticklabels([0.01:0.005:0.045])
 title('ISI_{Performance}')
 ylabel('Offset')
 xlabel('Onset')
+
+
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','On_Conv_ISI_Grid_search','.svg']) % svg
 
 

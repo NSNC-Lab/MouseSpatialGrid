@@ -1,3 +1,6 @@
+plot_num =5;
+
+
 %Calculate RI-SPIKE/ISI
 offset = [];
 onset = [];
@@ -38,7 +41,7 @@ ISI_convolved = conv2(ISI_reshaped, filter,'valid')./sum(sum(filter));
 
 intersection = (ISI_convolved > 81 & ISI_convolved < 87) & (fr_convolved > 26 & fr_convolved < 33) & (ratio_grid_convolved > 0.78 & ratio_grid_convolved < 0.88);
 
-figure;
+figure('Position',[300,300,600,520]);
 imagesc(ratio_grid_convolved);
 colorbar
 
@@ -55,6 +58,9 @@ title('RI-SPIKE/ISI')
 ylabel('Offset')
 xlabel('Onset')
 
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','On_Conv_Ratio_Grid_search','.svg']) % svg
+
+
 
 
 
@@ -65,7 +71,7 @@ mask = fr_convolved > 27;
 B = bwboundaries(mask);
 
 
-figure;
+figure('Position',[300,300,600,520]);
 imagesc(fr_convolved);
 colorbar
 
@@ -84,9 +90,10 @@ ylabel('Offset')
 xlabel('Onset')
 
 
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','On_Conv_FR_Grid_search','.svg']) % svg
 
 
-figure;
+figure('Position',[300,300,600,520]);
 imagesc(RI_convolved);
 colorbar
 
@@ -104,10 +111,11 @@ ylabel('Offset')
 xlabel('Onset')
 
 
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','On_Conv_RISPIKE_Grid_search','.svg']) % svg
 
 
 
-figure;
+figure('Position',[300,300,600,520]);
 imagesc(ISI_convolved);
 colorbar
 
@@ -126,5 +134,6 @@ ylabel('Offset')
 xlabel('Onset')
 
 
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','On_Conv_ISI_Grid_search','.svg']) % svg
 
 

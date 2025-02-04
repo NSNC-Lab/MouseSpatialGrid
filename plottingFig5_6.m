@@ -3,17 +3,20 @@ plot_num = 5;
 
 %Plot the performance
 figure(Position=[200,400,200,450]);
-bar([1.2,2,2.8],[mean(perf(1,:)),mean(perf(2,:)),mean(perf(3,:))],0.8,'FaceColor','none'); hold on
-errorbar([1.2,2,2.8],[mean(perf(1,:)),mean(perf(2,:)),mean(perf(3,:))],[std(perf(1,:)),std(perf(1,:)),std(perf(1,:))],"LineStyle","none",'Color',[0,0,0]);
+bar([1.2,2,2.8],[mean(perf(1,:)),mean(perf(2,:)),mean(perf(3,:))],0.8,'FaceColor','none','LineWidth',2); hold on
+errorbar([1.2,2,2.8],[mean(perf(1,:)),mean(perf(2,:)),mean(perf(3,:))],[std(perf(1,:))/sqrt(length(perf(1,:))),std(perf(2,:))/sqrt(length(perf(2,:))),std(perf(3,:))/sqrt(length(perf(3,:)))],"LineStyle","none",'Color',[0,0,0],'LineWidth',2);
 xlim([0.7,3.3])
 ylim([50 100])
 yticks([50:10:100])
+ax = gca;
+ax.YAxis.FontSize = 14;
+ax.XAxis.FontSize = 14;
 xticks([1.2,2,2.8])
 xticklabels({'SPIKE','ISI','RI-SPIKE'})
 ylabel('Performance')
-xlabel('Spike distance measure')
+xlabel(sprintf('Spike distance\n measure'))
 box off;
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','On_Conv_Performance_Timing_regime_High_PV','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Off_Conv_Performance_Timing_regime_High_PV','.svg']) % svg
 
 
 %Plot the raster PSTH songs etc
@@ -138,6 +141,10 @@ for j = 1:length(titles)
 end
 
 subplot("Position",[0.15,0.15,0.35,0.1])
+
+[song1,~] = audioread('200k_target1.wav');
+[song2,~] = audioread('200k_target2.wav');
+
 plot(song1(starting_sample*20:ending_sample*20),'k'); hold on
 ylim([-1 1])
 xlim([0 ending_sample*20-starting_sample*20])
@@ -153,6 +160,7 @@ xlim([0 ending_sample*20-starting_sample*20])
 yticklabels('')
 xticks(0:(ending_sample*20-starting_sample*20)/5:ending_sample*20-starting_sample*20)
 xticklabels(350:(1350-350)/5:1350)
+
 xlabel('time (ms)')
 box off;
 
@@ -182,7 +190,7 @@ han.YLabel.Visible = 'on';
 ylabel(han, 'Spikes/s (Hz)');
 
 
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','On_Conv_Rasters_Timing_regime_High_PV','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Off_Conv_Rasters_Timing_regime_High_PV','.svg']) % svg
 
 
 %Plot an average of 30 PSTHs between the two songs in order to show the
@@ -281,7 +289,7 @@ end
 
 
 figure(Position=[600,200,800,800]);
-subplot('Position',[0.1,0.25,0.8,0.6])
+subplot('Position',[0.1,0.3,0.8,0.6])
 plot(mean(song1_holder,1),'b','LineWidth',1.5); hold on
 plot(mean(song2_holder,1),'r','LineWidth',1.5); hold on
 fill([1:length(song1_holder), fliplr(1:length(song1_holder))], [mean(song1_holder,1)+std(song1_holder,1), fliplr(mean(song1_holder,1)-std(song1_holder,1))], 'blue', ...
@@ -293,20 +301,29 @@ yticklabels(linspace(0,100,5))
 ylabel('Spikes/s (Hz)')
 xticks('')
 xlim([1 length(song1_holder)])
+ax = gca;
+ax.YAxis.FontSize = 14;
+ax.XAxis.FontSize = 14;
 
-subplot('Position',[0.1,0.15,0.8,0.075])
+subplot('Position',[0.1,0.2,0.8,0.075])
 plot(song1(starting_sample*20:ending_sample*20),'b'); hold on
 xlim([0 ending_sample*20-starting_sample*20])
 ylim([-1 1])
 yticks('')
 xticks('')
-subplot('Position',[0.1,0.05,0.8,0.075])
+ax = gca;
+ax.YAxis.FontSize = 14;
+ax.XAxis.FontSize = 14;
+subplot('Position',[0.1,0.1,0.8,0.075])
 plot(song2(starting_sample*20:ending_sample*20),'r'); hold on
 xlim([0 ending_sample*20-starting_sample*20])
 ylim([-1 1])
 yticks('')
 xticks(linspace(0,ending_sample*20-starting_sample*20,5))
 xticklabels(linspace(350,1350,5))
+ax = gca;
+ax.YAxis.FontSize = 14;
+ax.XAxis.FontSize = 14;
 xlabel('time (ms)')
 
 text(-0.02, 1.85, 'Target 1', 'Units', 'normalized', ...
@@ -315,7 +332,7 @@ text(-0.02, 1.85, 'Target 1', 'Units', 'normalized', ...
 text(-0.02, 0.5, 'Target 2', 'Units', 'normalized', ...
     'FontSize', 12, 'HorizontalAlignment', 'right');
 
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','On_Conv_Song1_Song2_Comp_Timing_regime_High_PV','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Off_Conv_Song1_Song2_Comp_Timing_regime_High_PV','.svg']) % svg
 
 
 figure;
@@ -328,6 +345,8 @@ yticks(linspace(0,10,3))
 yticklabels(linspace(0,250,3))
 xlabel('time (ms)')
 ylabel('Spikes/s (Hz)')
-
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','On_Conv_EI_Comparison_Timing_regime_High_PV','.svg']) % svg
+ax = gca;
+ax.YAxis.FontSize = 14;
+ax.XAxis.FontSize = 14;
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Off_Conv_EI_Comparison_Timing_regime_High_PV','.svg']) % svg
 

@@ -1,11 +1,10 @@
-figure(201)
-
+figure
 %pc.fr
 
-plot(0:0.1:1,[pc.fr],'k')
+plot(0:0.1:1,[data(15).fr.R2On.channel1],'k')
 
-figure(202)
+figure
 
-plot(0:0.1:1,[pc(15).perf.SPIKE]); hold on
-plot(0:0.1:1,[pc(15).perf.ISI]); hold on 
-plot(0:0.1:1,[pc(15).perf.RISPIKE])
+plot(0:0.1:1,[data(15).perf.R2On.channel1(1,:)]); hold on
+plot(0:0.1:1,[data(15).perf.R2On.channel1(2,:)]); hold on 
+plot(0:0.1:1,[data(15).perf.R2On.channel1(3,:)]);
