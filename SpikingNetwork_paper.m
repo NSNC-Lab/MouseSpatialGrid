@@ -79,13 +79,17 @@ addpath('params');
 %addpath('params-AM')
 %params_5_rate_based_onoff_WorkingCopy; % Generates Figure 5 (rate-based simulation)
 %params_5_rate_based_onoff_WorkingCopy_HalfDense;
-params_5_rate_based_onoff_fig4;
+
 %params_4_opto_onoff_fig6;
 %params_5_rate_based_onoff_offNonSupressed;
 %params_opto_onoff_2
 %params_5_off_dominated
 %onoff_con;
 %params_AM_best_onoff;
+
+%params_5_rate_based_onoff_fig4;
+%params_both
+params_off
 
 
 
@@ -152,7 +156,9 @@ else, options.time_end = padToTime*numel(options.locNum); end
 %[snn_out,s] = columnNetwork_paper_onoff_Excitatory(study_dir,varies,options,netcons,flag_raised_mex);
 
 %Going to try rerunning old stuff to see if it is broken.
-[snn_out,s] = columnNetwork_paper_onoff(study_dir,varies,options,netcons,flag_raised_mex);
+% [snn_out,s] = columnNetwork_paper_onoff(study_dir,varies,options,netcons,flag_raised_mex);
+[snn_out,s] = columnNetwork_paper_onoff_off_Conv(study_dir,varies,options,netcons,flag_raised_mex);
+%[snn_out,s] = columnNetwork_paper_onoff_Both_Conv(study_dir,varies,options,netcons,flag_raised_mex);
 
 
 

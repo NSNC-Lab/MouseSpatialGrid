@@ -133,9 +133,11 @@ s.connections(end).mechanism_list={'PSC'};
 s.connections(end).parameters={'gSYN',0.03,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'fP',0.5,'tauP',120}; 
 
 % offset channels
+
 s.connections(end+1).direction='Off->R1Off';
 s.connections(end).mechanism_list={'PSC'};
 s.connections(end).parameters={'gSYN',0.02,'tauR',EE_rise,'tauD',EE_fall,'fP',0.1,'tauP',30};
+
 
 s.connections(end+1).direction='Off->S1OnOff';
 s.connections(end).mechanism_list={'PSC'};

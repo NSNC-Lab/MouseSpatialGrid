@@ -18,6 +18,7 @@ onset_reshaped = reshape(onset,10,10);
 fr_reshaped = reshape(FR,10,10);
 
 RI_reshaped = reshape(perf(3,:),10,10);
+ISI_reshaped = reshape(perf(2,:),10,10);
 
 figure;
 imagesc(ratio_grid_reshaped)
@@ -29,46 +30,101 @@ filter = [1,1,1;1,1,1;1,1,1];
 ratio_grid_convolved = conv2(ratio_grid_reshaped,filter, 'valid')./sum(sum(filter));
 %ratio_grid_convolved = ratio_grid_convolved(2:end-1,2:end-1); %Get rid of excess
 
+fr_convolved = conv2(fr_reshaped, filter,'valid')./sum(sum(filter));
+
+RI_convolved = conv2(RI_reshaped, filter,'valid')./sum(sum(filter));
+
+ISI_convolved = conv2(ISI_reshaped, filter,'valid')./sum(sum(filter));
+
+intersection = (ISI_convolved > 81 & ISI_convolved < 87) & (fr_convolved > 26 & fr_convolved < 33) & (ratio_grid_convolved > 0.78 & ratio_grid_convolved < 0.88);
+
 figure;
 imagesc(ratio_grid_convolved);
 colorbar
 
+hold on
+Outliner(ratio_grid_convolved,0.78,0.88,'k')
+Outliner(intersection,0.5,1.5,'r')
+hold off
+
 
 yticklabels([0.01:0.005:0.045]')
-xticklabels([0.05:0.005:0.085])
-
+%xticklabels([0.05:0.005:0.085])
+xticklabels([0.01:0.005:0.045])
 title('RI-SPIKE/ISI')
 ylabel('Offset')
 xlabel('Onset')
 
 
-fr_convolved = conv2(fr_reshaped, filter,'valid')./sum(sum(filter));
+
+
+% Create a logical mask for M>80
+mask = fr_convolved > 27;
+
+% Find boundary points for each connected region
+B = bwboundaries(mask);
+
 
 figure;
 imagesc(fr_convolved);
 colorbar
 
+hold on
+Outliner(fr_convolved,26,33,'k')
+Outliner(intersection,0.5,1.5,'r')
+hold off
+
 
 yticklabels([0.01:0.005:0.045]')
-xticklabels([0.05:0.005:0.085])
+%xticklabels([0.05:0.005:0.085])
+xticklabels([0.01:0.005:0.045])
 
 title('FR')
 ylabel('Offset')
 xlabel('Onset')
 
 
-RI_convolved = conv2(RI_reshaped, filter,'valid')./sum(sum(filter));
+
 
 figure;
 imagesc(RI_convolved);
 colorbar
 
+%hold on
+%Outliner(RI_convolved,25,32)
+%hold off
+
 
 yticklabels([0.01:0.005:0.045]')
-xticklabels([0.05:0.005:0.085])
+%xticklabels([0.05:0.005:0.085])
+xticklabels([0.01:0.005:0.045])
 
 title('RI_{Performance}')
 ylabel('Offset')
 xlabel('Onset')
+
+
+
+
+
+figure;
+imagesc(ISI_convolved);
+colorbar
+
+hold on
+Outliner(ISI_convolved,81,87,'k')
+Outliner(intersection,0.5,1.5,'r')
+hold off
+
+
+yticklabels([0.01:0.005:0.045]')
+%xticklabels([0.05:0.005:0.085])
+xticklabels([0.01:0.005:0.045])
+
+title('ISI_{Performance}')
+ylabel('Offset')
+xlabel('Onset')
+
+
 
 
