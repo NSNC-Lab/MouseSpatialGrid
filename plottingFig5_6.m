@@ -16,7 +16,7 @@ xticklabels({'SPIKE','ISI','RI-SPIKE'})
 ylabel('Performance')
 xlabel(sprintf('Spike distance\n measure'))
 box off;
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Off_Conv_Performance_Timing_regime_High_PV','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Both_Conv_Performance_Rate_regime_High_PV','.svg']) % svg
 
 
 %Plot the raster PSTH songs etc
@@ -190,7 +190,7 @@ han.YLabel.Visible = 'on';
 ylabel(han, 'Spikes/s (Hz)');
 
 
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Off_Conv_Rasters_Timing_regime_High_PV','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Both_Conv_Rasters_Rate_regime_High_PV','.svg']) % svg
 
 
 %Plot an average of 30 PSTHs between the two songs in order to show the
@@ -332,7 +332,7 @@ text(-0.02, 1.85, 'Target 1', 'Units', 'normalized', ...
 text(-0.02, 0.5, 'Target 2', 'Units', 'normalized', ...
     'FontSize', 12, 'HorizontalAlignment', 'right');
 
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Off_Conv_Song1_Song2_Comp_Timing_regime_High_PV','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Both_Conv_Song1_Song2_Comp_Rate_regime_High_PV','.svg']) % svg
 
 
 figure;
@@ -348,5 +348,5 @@ ylabel('Spikes/s (Hz)')
 ax = gca;
 ax.YAxis.FontSize = 14;
 ax.XAxis.FontSize = 14;
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Off_Conv_EI_Comparison_Timing_regime_High_PV','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Both_Conv_EI_Comparison_Rate_regime_High_PV','.svg']) % svg
 

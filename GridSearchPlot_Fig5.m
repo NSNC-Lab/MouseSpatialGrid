@@ -1,4 +1,4 @@
-plot_num =5;
+plot_num =6;
 
 
 %Calculate RI-SPIKE/ISI
@@ -39,26 +39,26 @@ RI_convolved = conv2(RI_reshaped, filter,'valid')./sum(sum(filter));
 
 ISI_convolved = conv2(ISI_reshaped, filter,'valid')./sum(sum(filter));
 
-intersection = (ISI_convolved > 81 & ISI_convolved < 87) & (fr_convolved > 26 & fr_convolved < 33) & (ratio_grid_convolved > 0.78 & ratio_grid_convolved < 0.88);
+intersection = (RI_convolved > 74 & RI_convolved < 80) & (fr_convolved > 16 & fr_convolved < 24) & (ratio_grid_convolved > 1 & ratio_grid_convolved < 1.18);
 
 figure('Position',[300,300,600,520]);
 imagesc(ratio_grid_convolved);
 colorbar
 
 hold on
-Outliner(ratio_grid_convolved,0.78,0.88,'k')
+Outliner(ratio_grid_convolved,1,1.18,'k')
 Outliner(intersection,0.5,1.5,'r')
 hold off
 
 
-yticklabels([0.01:0.005:0.045]')
+yticklabels([0.045:0.005:0.09]')
 %xticklabels([0.05:0.005:0.085])
 xticklabels([0.01:0.005:0.045])
 title('RI-SPIKE/ISI')
 ylabel('Offset')
 xlabel('Onset')
 
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','On_Conv_Ratio_Grid_search','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','Off_Conv_Rate_Grid_search','.svg']) % svg
 
 
 
@@ -76,12 +76,12 @@ imagesc(fr_convolved);
 colorbar
 
 hold on
-Outliner(fr_convolved,26,33,'k')
+Outliner(fr_convolved,16,24,'k')
 Outliner(intersection,0.5,1.5,'r')
 hold off
 
 
-yticklabels([0.01:0.005:0.045]')
+yticklabels([0.045:0.005:0.09]')
 %xticklabels([0.05:0.005:0.085])
 xticklabels([0.01:0.005:0.045])
 
@@ -90,19 +90,20 @@ ylabel('Offset')
 xlabel('Onset')
 
 
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','On_Conv_FR_Grid_search','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','Off_Conv_Rate_FR_Grid_search','.svg']) % svg
 
 
 figure('Position',[300,300,600,520]);
 imagesc(RI_convolved);
 colorbar
 
-%hold on
-%Outliner(RI_convolved,25,32)
-%hold off
+hold on
+Outliner(RI_convolved,74,80,'k')
+Outliner(intersection,0.5,1.5,'r')
+hold off
 
 
-yticklabels([0.01:0.005:0.045]')
+yticklabels([0.045:0.005:0.09]')
 %xticklabels([0.05:0.005:0.085])
 xticklabels([0.01:0.005:0.045])
 
@@ -111,7 +112,7 @@ ylabel('Offset')
 xlabel('Onset')
 
 
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','On_Conv_RISPIKE_Grid_search','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','Off_Conv_Rate_RISPIKE_Grid_search','.svg']) % svg
 
 
 
@@ -125,7 +126,7 @@ Outliner(intersection,0.5,1.5,'r')
 hold off
 
 
-yticklabels([0.01:0.005:0.045]')
+yticklabels([0.045:0.005:0.09]')
 %xticklabels([0.05:0.005:0.085])
 xticklabels([0.01:0.005:0.045])
 
@@ -134,6 +135,7 @@ ylabel('Offset')
 xlabel('Onset')
 
 
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','On_Conv_ISI_Grid_search','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','Off_Conv_Rate_ISI_Grid_search','.svg']) % svg
 
-
+figure;
+imagesc(ISI_reshaped)

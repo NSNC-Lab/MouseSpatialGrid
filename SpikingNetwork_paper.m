@@ -88,8 +88,9 @@ addpath('params');
 %params_AM_best_onoff;
 
 %params_5_rate_based_onoff_fig4;
-%params_both
-params_off
+params_off;
+%params_both;
+
 
 
 
@@ -156,7 +157,7 @@ else, options.time_end = padToTime*numel(options.locNum); end
 %[snn_out,s] = columnNetwork_paper_onoff_Excitatory(study_dir,varies,options,netcons,flag_raised_mex);
 
 %Going to try rerunning old stuff to see if it is broken.
-% [snn_out,s] = columnNetwork_paper_onoff(study_dir,varies,options,netcons,flag_raised_mex);
+%[snn_out,s] = columnNetwork_paper_onoff(study_dir,varies,options,netcons,flag_raised_mex);
 [snn_out,s] = columnNetwork_paper_onoff_off_Conv(study_dir,varies,options,netcons,flag_raised_mex);
 %[snn_out,s] = columnNetwork_paper_onoff_Both_Conv(study_dir,varies,options,netcons,flag_raised_mex);
 
