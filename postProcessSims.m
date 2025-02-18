@@ -225,9 +225,9 @@ end
 % end
 
 % calculate control and laser performance for optogenetic trials
-if nSims >= 2
-    calcMeanOptoPerf(results,nVaried,simDataDir);
-end
+%if nSims >= 2
+%    calcMeanOptoPerf(results,nVaried,simDataDir);
+%end
 %%
 
 

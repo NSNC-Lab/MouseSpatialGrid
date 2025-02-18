@@ -1,5 +1,5 @@
 %Select which plot
-plot_num = 5;
+plot_num = 6;
 
 %Plot the performance
 figure(Position=[200,400,200,450]);
@@ -64,7 +64,7 @@ for j = 1:length(titles)
 
     if contains(titles{j}, 'S')
         avg_data = avg_data1/10/0.02*(10/250); %Divide by 10 for # of trials, divide by 0.02 (bindWidth) to get spikes/s = Hz,next part is scale factor which will be reprented with scaling bar in paper
-        plot(linspace(starting_sample,ending_sample,length(avg_data)),avg_data,'r',LineWidth=1.5); hold on
+         
         yticklabels([0:125:250]);
         xticklabels('')
         

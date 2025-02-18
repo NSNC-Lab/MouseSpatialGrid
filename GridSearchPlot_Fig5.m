@@ -1,4 +1,4 @@
-plot_num =6;
+plot_num =7;
 
 
 %Calculate RI-SPIKE/ISI
@@ -15,6 +15,9 @@ end
 ratio_grid = perf(3,:)./perf(2,:);
 ratio_grid_reshaped = reshape(ratio_grid,10,10);
 
+ratio_grid2 = perf(2,:)./perf(1,:);
+ratio_grid_reshaped2 = reshape(ratio_grid2,10,10);
+
 offset_reshaped = reshape(offset,10,10);
 onset_reshaped = reshape(onset,10,10);
 
@@ -26,11 +29,48 @@ ISI_reshaped = reshape(perf(2,:),10,10);
 figure;
 imagesc(ratio_grid_reshaped)
 
+% non_laser = perf(:,1:2:end);
+% laser = perf(:,2:2:end);
+% 
+% measure_laser = sum(laser < non_laser);
+% measure_laser_reshaped = reshape(measure_laser,10,10);
+% 
+% measure_laser_conv = conv2(measure_laser_reshaped,filter, 'valid')./sum(sum(filter));
+% 
+% fr1 = FR(1:2:end);
+% fr2 = FR(2:2:end);
+% 
+% fr_reshaped1 = reshape(fr1,10,10);
+% fr_reshaped2 = reshape(fr2,10,10);
+% 
+% fr1_conv = conv2(fr_reshaped1,filter, 'valid')./sum(sum(filter));
+% fr2_conv = conv2(fr_reshaped2,filter, 'valid')./sum(sum(filter));
+
 %Convolve this image in order to smooth it
 
 filter = [1,1,1;1,1,1;1,1,1];
 
+%ratio_grid_reshaped = ratio_grid_reshaped<1;
+%ratio_grid_reshaped2 = ratio_grid_reshaped2<1;
+
+%ratio_grid_reshaped = ratio_grid_reshaped & ratio_grid_reshaped2;
+
+ratio_grid_reshaped = (ratio_grid_reshaped + ratio_grid_reshaped2)/2;
+
 ratio_grid_convolved = conv2(ratio_grid_reshaped,filter, 'valid')./sum(sum(filter));
+
+% ratio_grid_convolved1 = conv2(ratio_grid_reshaped,filter, 'valid')./sum(sum(filter));
+% 
+% ratio_grid_convolved1 = ratio_grid_convolved1<1;
+% 
+% ratio_grid_convolved2 = conv2(ratio_grid_reshaped2,filter, 'valid')./sum(sum(filter));
+% 
+% ratio_grid_convolved2 = ratio_grid_convolved2<1;
+
+
+% ratio_grid_convolved = ratio_grid_convolved1 & ratio_grid_convolved2;
+
+
 %ratio_grid_convolved = ratio_grid_convolved(2:end-1,2:end-1); %Get rid of excess
 
 fr_convolved = conv2(fr_reshaped, filter,'valid')./sum(sum(filter));
@@ -39,26 +79,30 @@ RI_convolved = conv2(RI_reshaped, filter,'valid')./sum(sum(filter));
 
 ISI_convolved = conv2(ISI_reshaped, filter,'valid')./sum(sum(filter));
 
-intersection = (RI_convolved > 74 & RI_convolved < 80) & (fr_convolved > 16 & fr_convolved < 24) & (ratio_grid_convolved > 1 & ratio_grid_convolved < 1.18);
+intersection = (ISI_convolved > 77 & ISI_convolved < 83) & (fr_convolved > 22 & fr_convolved < 30) & (ratio_grid_convolved < 1 & ratio_grid_convolved > 0);
 
 figure('Position',[300,300,600,520]);
 imagesc(ratio_grid_convolved);
 colorbar
 
 hold on
-Outliner(ratio_grid_convolved,1,1.18,'k')
-Outliner(intersection,0.5,1.5,'r')
+Outliner(ratio_grid_convolved,0.5,1.18,'k')
+%Outliner(intersection,0.5,1.5,'r')
 hold off
 
 
-yticklabels([0.045:0.005:0.09]')
-%xticklabels([0.05:0.005:0.085])
-xticklabels([0.01:0.005:0.045])
+% yticklabels([0.045:0.005:0.09]')
+xticklabels([0.05:0.005:0.085])
+%xticklabels([0.01:0.005:0.045])
+
+%yticklabels([0.08:0.005:0.115]')
+yticklabels([0.01:0.005:0.045]')
+
 title('RI-SPIKE/ISI')
 ylabel('Offset')
 xlabel('Onset')
 
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','Off_Conv_Rate_Grid_search','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','Both_Conv_Rate_Grid_search','.svg']) % svg
 
 
 
@@ -76,21 +120,24 @@ imagesc(fr_convolved);
 colorbar
 
 hold on
-Outliner(fr_convolved,16,24,'k')
+Outliner(fr_convolved,22,30,'k')
 Outliner(intersection,0.5,1.5,'r')
 hold off
 
 
-yticklabels([0.045:0.005:0.09]')
-%xticklabels([0.05:0.005:0.085])
-xticklabels([0.01:0.005:0.045])
+% yticklabels([0.045:0.005:0.09]')
+% %xticklabels([0.05:0.005:0.085])
+%xticklabels([0.01:0.005:0.045])
+xticklabels([0.05:0.005:0.085])
+yticklabels([0.01:0.005:0.045]')
+%yticklabels([0.08:0.005:0.115]')
 
 title('FR')
 ylabel('Offset')
 xlabel('Onset')
 
 
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','Off_Conv_Rate_FR_Grid_search','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','Both_Conv_Rate_FR_Grid_search','.svg']) % svg
 
 
 figure('Position',[300,300,600,520]);
@@ -98,21 +145,23 @@ imagesc(RI_convolved);
 colorbar
 
 hold on
-Outliner(RI_convolved,74,80,'k')
+Outliner(RI_convolved,73,77,'k')
 Outliner(intersection,0.5,1.5,'r')
 hold off
 
 
-yticklabels([0.045:0.005:0.09]')
-%xticklabels([0.05:0.005:0.085])
-xticklabels([0.01:0.005:0.045])
+%yticklabels([0.05:0.005:0.085]')
+xticklabels([0.05:0.005:0.085])
+%xticklabels([0.01:0.005:0.045])
+%yticklabels([0.08:0.005:0.115]')
+yticklabels([0.01:0.005:0.045]')
 
 title('RI_{Performance}')
 ylabel('Offset')
 xlabel('Onset')
 
 
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','Off_Conv_Rate_RISPIKE_Grid_search','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','Both_Conv_Rate_RISPIKE_Grid_search','.svg']) % svg
 
 
 
@@ -121,21 +170,24 @@ imagesc(ISI_convolved);
 colorbar
 
 hold on
-Outliner(ISI_convolved,81,87,'k')
+Outliner(ISI_convolved,77,83,'k')
 Outliner(intersection,0.5,1.5,'r')
 hold off
 
 
-yticklabels([0.045:0.005:0.09]')
-%xticklabels([0.05:0.005:0.085])
-xticklabels([0.01:0.005:0.045])
+% yticklabels([0.045:0.005:0.09]')
+% %xticklabels([0.05:0.005:0.085])
+%xticklabels([0.01:0.005:0.045])
+xticklabels([0.05:0.005:0.085])
+yticklabels([0.01:0.005:0.045]')
+%yticklabels([0.08:0.005:0.115]')
 
 title('ISI_{Performance}')
 ylabel('Offset')
 xlabel('Onset')
 
 
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','Off_Conv_Rate_ISI_Grid_search','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2','\grid_search\','Both_Conv_Rate_ISI_Grid_search','.svg']) % svg
 
 figure;
 imagesc(ISI_reshaped)
