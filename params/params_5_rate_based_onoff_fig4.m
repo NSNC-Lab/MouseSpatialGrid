@@ -4,7 +4,8 @@ options = struct;
 options.nCells = 1;
 options.opto = 0;
 
-if options.opto, nSims = 5; else, nSims = 1; end
+%if options.opto, nSims = 5; else, nSims = 1; end
+nSims = 1;
 
 options.mex_flag = 0;
 options.parfor_flag = 0;
@@ -28,7 +29,7 @@ varies(1).range =  trialInds(:)';
 % Input strength
 varies(end+1).conxn = '(On->On,Off->Off)';
 varies(end).param = 'g_postIC';
-varies(end).range = 0.16*ones(1,30);
+varies(end).range = 0.16; 
 % E->E connections
 
 %Vary the synaptic depression (fp) between E->E conncections
@@ -56,7 +57,7 @@ varies(end).range = 0.5;
 % On -> PV
 varies(end+1).conxn = '(On->S1OnOff,R1On->S2OnOff)';
 varies(end).param = 'gSYN';
-varies(end).range = 0.02;
+varies(end).range = 0.01;
 %varies(end).range = [0.045:0.005:0.09];
 %varies(end).range = [0.005:0.005:0.05];
 %varies(end).range = [0.016:0.001:0.025];
@@ -64,7 +65,7 @@ varies(end).range = 0.02;
 % Off-> PV
 varies(end+1).conxn = '(Off->S1OnOff,R1Off->S2OnOff)';
 varies(end).param = 'gSYN';
-varies(end).range = 0.006;
+varies(end).range = 0.03;
 %varies(end).range = [0.005:0.005:0.05];
 %varies(end).range = [0.005:0.001:0.014];
 
@@ -82,11 +83,11 @@ varies(end).range = 0;
 % control and opto conditions 
 varies(end+1).conxn = '(S1OnOff,S2OnOff)';
 varies(end).param = 'Itonic';
-varies(end).range = [0 -0.03]; 
+varies(end).range = 0; 
 
 varies(end+1).conxn = '(R2On->R2On)';
 varies(end).param = 'FR';
-varies(end).range = [8 12];
+varies(end).range = 8;
 
 % find varied parameter, excluding trials
 varied_param = find( (cellfun(@length,{varies.range}) > 1 & ~cellfun(@iscolumn,{varies.range})));

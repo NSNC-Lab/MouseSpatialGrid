@@ -90,8 +90,14 @@ end
 % Temporal parameters from Adelson and Bergen 1985, J Opt Soc Am A   
 t = strf.t; % time delay
 
+%IB 3/4: Making this a balance convolution just to get the envelope of the
+%entire signal without offsets and onsets.
+% strf.H = ones(1,2501);
 strf.H = exp(-t/paramH.alpha).*(paramH.SC1*(t/paramH.alpha).^paramH.N1/factorial(paramH.N1) - ...
-    paramH.SC2*(t/paramH.alpha).^paramH.N2/factorial(paramH.N2));
+   paramH.SC2*(t/paramH.alpha).^paramH.N2/factorial(paramH.N2));
+
+
+
 strf.G = exp(-.5*((f-paramG.f0)/paramG.BW).^2).*cos(2*pi*paramG.BSM*(f-paramG.f0));
 strf.w1=strf.G'*strf.H;
 strf.f=f;

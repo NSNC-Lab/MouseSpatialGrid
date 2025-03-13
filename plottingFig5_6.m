@@ -16,7 +16,7 @@ xticklabels({'SPIKE','ISI','RI-SPIKE'})
 ylabel('Performance')
 xlabel(sprintf('Spike distance\n measure'))
 box off;
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Both_Conv_Performance_Rate_regime_High_PV','.svg']) % svg
+%print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Both_Conv_Performance_Rate_regime_High_PV','.svg']) % svg
 
 
 %Plot the raster PSTH songs etc
@@ -24,7 +24,8 @@ starting_sample = 3500;
 ending_sample = 13500;
 
 figure(Position=[600,200,900,750]);
-titles = {'on','off','S1OnOff','R1on'};
+%titles = {'on','off','S1OnOff','R1on'};
+titles = {'PV1','PV2','Output'};
 for j = 1:length(titles)
     plotting_data = [];
 
@@ -41,12 +42,14 @@ for j = 1:length(titles)
 
         %% Rasters
         %Grab the spikes that we are interested in
-        on = transpose(data(subz).spks.On(1).channel1(k,:));
-        off = transpose(data(subz).spks.Off(1).channel1(k,:));
+        %on = transpose(data(subz).spks.On(1).channel1(k,:));
+        %off = transpose(data(subz).spks.Off(1).channel1(k,:));
         S1OnOff = transpose(data(subz).spks.S1OnOff(1).channel1(k,:));
-        R1on = transpose(data(subz).spks.R1On(1).channel1(k,:));
+        S2OnOff = transpose(data(subz).spks.S1OnOff(1).channel1(k,:));
+        R2on = transpose(data(subz).spks.R1On(1).channel1(k,:));
         
-        reference_cell = {on,off,S1OnOff,R1on};
+        %reference_cell = {on,off,S1OnOff,R1on};
+        reference_cell = {S1OnOff,S2OnOff,R2on};
 
         times = find(reference_cell{j} == 1);
         b = transpose(repmat(times,1,3));
@@ -96,12 +99,12 @@ for j = 1:length(titles)
 
         %% Rasters
         %Grab the spikes that we are interested in
-        on = transpose(data(subz).spks.On(1).channel1(k,:));
-        off = transpose(data(subz).spks.Off(1).channel1(k,:));
         S1OnOff = transpose(data(subz).spks.S1OnOff(1).channel1(k,:));
-        R1on = transpose(data(subz).spks.R1On(1).channel1(k,:));
+        S2OnOff = transpose(data(subz).spks.S1OnOff(1).channel1(k,:));
+        R2on = transpose(data(subz).spks.R1On(1).channel1(k,:));
         
-        reference_cell = {on,off,S1OnOff,R1on};
+        %reference_cell = {on,off,S1OnOff,R1on};
+        reference_cell = {S1OnOff,S2OnOff,R2on};
 
         times = find(reference_cell{j} == 1);
         b = transpose(repmat(times,1,3));
@@ -190,7 +193,7 @@ han.YLabel.Visible = 'on';
 ylabel(han, 'Spikes/s (Hz)');
 
 
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Both_Conv_Rasters_Rate_regime_High_PV','.svg']) % svg
+%print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Both_Conv_Rasters_Rate_regime_High_PV','.svg']) % svg
 
 
 %Plot an average of 30 PSTHs between the two songs in order to show the
@@ -205,12 +208,12 @@ song2_holder = [];
 E_ex = [];
 I_ex = [];
 
-starting_sample = 3500;
-ending_sample = 13500;
+starting_sample = 1;
+ending_sample = 32300;
 
 for m = 1:length(FR)
 
-    for j = 1:3
+    for j = 1:2
         plotting_data = [];
     
         %Song 1
@@ -224,11 +227,12 @@ for m = 1:length(FR)
     
             %% Rasters
             %Grab the spikes that we are interested in
-            S1OnOff = transpose(data(subz).spks.S1OnOff(m).channel1(k,:));
+            %S1OnOff = transpose(data(subz).spks.S1OnOff(m).channel1(k,:));
             R1on = transpose(data(subz).spks.R1On(m).channel1(k,:));
             R2on = transpose(data(subz).spks.R2On(m).channel1(k,:));
             
-            reference_cell = {S1OnOff,R1on,R2on};
+            %reference_cell = {S1OnOff,R1on,R2on};
+            reference_cell = {R1on,R2on};
     
             times = find(reference_cell{j} == 1);
             plotting_data = [plotting_data;times];
@@ -238,10 +242,10 @@ for m = 1:length(FR)
         avg_data1 = movmean(raw_freq_data,3);
         avg_data = avg_data1/10/0.02*(10/250); %Divide by 10 for # of trials, divide by 0.02 (bindWidth) to get spikes/s = Hz,next part is scale factor which will be reprented with scaling bar in paper
         
-        if j == 2
+        if j == 1 %2
             E_ex = [E_ex;avg_data];
-        elseif j == 1
-            I_ex = [I_ex;avg_data];
+        % elseif j == 1
+        %     I_ex = [I_ex;avg_data];
         else
             song1_holder = [song1_holder;avg_data];
         end
@@ -263,10 +267,11 @@ for m = 1:length(FR)
             %Perhaps do the first layer. Some of the effects seem to be
             %deminished in the second set of PV cells. I think they are
             %necessary in order to match figure 4's depression rates.
-            S1OnOff = transpose(data(subz).spks.S1OnOff(m).channel1(k,:));
+            %S1OnOff = transpose(data(subz).spks.S1OnOff(m).channel1(k,:));
             R1on = transpose(data(subz).spks.R1On(m).channel1(k,:));  
             R2on = transpose(data(subz).spks.R2On(m).channel1(k,:));
-            reference_cell = {S1OnOff,R1on,R2on};
+            %reference_cell = {S1OnOff,R1on,R2on};
+            reference_cell = {R1on,R2on};
             times = find(reference_cell{j} == 1);
             plotting_data = [plotting_data;times];
     
@@ -276,7 +281,7 @@ for m = 1:length(FR)
         avg_data1 = movmean(raw_freq_data,3);
         avg_data = avg_data1/10/0.02*(10/250); %Divide by 10 for # of trials, divide by 0.02 (bindWidth) to get spikes/s = Hz,next part is scale factor which will be reprented with scaling bar in paper
         
-        if j == 3
+        if j == 2 %3
             song2_holder = [song2_holder;avg_data];
         end
 
@@ -332,7 +337,7 @@ text(-0.02, 1.85, 'Target 1', 'Units', 'normalized', ...
 text(-0.02, 0.5, 'Target 2', 'Units', 'normalized', ...
     'FontSize', 12, 'HorizontalAlignment', 'right');
 
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Both_Conv_Song1_Song2_Comp_Rate_regime_High_PV','.svg']) % svg
+%print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Both_Conv_Song1_Song2_Comp_Rate_regime_High_PV','.svg']) % svg
 
 
 figure;
@@ -348,5 +353,5 @@ ylabel('Spikes/s (Hz)')
 ax = gca;
 ax.YAxis.FontSize = 14;
 ax.XAxis.FontSize = 14;
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Both_Conv_EI_Comparison_Rate_regime_High_PV','.svg']) % svg
+%print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Both_Conv_EI_Comparison_Rate_regime_High_PV','.svg']) % svg
 

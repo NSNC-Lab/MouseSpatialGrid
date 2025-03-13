@@ -77,6 +77,11 @@ paramG.f0 = 4300; % ~strf.f(30)
     [song1,~] = audioread('200k_target1.wav');
     [song2,~] = audioread('200k_target2.wav');
 
+    % song1 = zeros(646011,1);
+    % song1(100001:200000) = ones(100000,1);
+    % song2 = zeros(646011,1);
+    % song2(100001:200000) = ones(100000,1);
+
     for trial = 1:10
         [masker,fs] = audioread(['200k_masker' num2str(trial) '.wav']);
         [spec,~,~] = STRFspectrogram(masker/rms(masker)*maskerlvl,fs);
@@ -100,6 +105,8 @@ strf.w1 = strf.w1*strfGain;
 
 plot(1000*strf.t,sum(strf.w1)); hold on;
 xlabel('Time (ms)'); ylabel('Weight'); title('MGB STRF (Figure 3c)')
+
+
 % savefig(gcf,'MGB STRF Figure 3c, v3');
 
 % sum of STRF with gain should be ~43.2;
@@ -123,6 +130,13 @@ tuningParam.sigma = sigma;
 %[~,~,fr_target_on{2},fr_target_off{2}] = STRFconvolve_V2(strf,specs.songs{2}*stimGain,mean_rate,1,[],paramSpk.t_ref,paramSpk.t_ref_rel,paramSpk.rec);
 [fr_target_on{1},fr_target_off{1}] = STRFconvolve_V2(strf,specs.songs{1}*stimGain,mean_rate);
 [fr_target_on{2},fr_target_off{2}] = STRFconvolve_V2(strf,specs.songs{2}*stimGain,mean_rate);
+
+% fr_target{1} = STRFconvolve_V2(strf,specs.songs{1}*stimGain,mean_rate);
+% fr_target{2} = STRFconvolve_V2(strf,specs.songs{2}*stimGain,mean_rate);
+
+%Create just abosolute value a firing pattern.
+
+
 for m = 1:10
     %[~,~,fr_masker{m}] = STRFconvolve_V2(strf,specs.maskers{m}*stimGain,mean_rate,1,[],paramSpk.t_ref,paramSpk.t_ref_rel,paramSpk.rec);
     [~,fr_masker{m}] = STRFconvolve_V2(strf,specs.maskers{m}*stimGain,mean_rate);

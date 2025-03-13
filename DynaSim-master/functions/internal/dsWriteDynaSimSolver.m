@@ -1394,9 +1394,10 @@ end
       case {'euler','rk1'}
         
         %IB working to reduce memory
-        for n = 1:length(odes)
-            odes{n} = strrep(odes{n}, 'n-1', '1');
-        end
+        %2/18/2025 : Need to look at voltage history
+        %for n = 1:length(odes)
+        %    odes{n} = strrep(odes{n}, 'n-1', '1');
+        %end
         
         print_k(fid,odes,'_k1',state_variables);                              % write k1 using model.ODEs'
        
@@ -1487,13 +1488,15 @@ function print_var_update(fid,index_nexts,index_lasts,update_term,state_variable
   %   state_variables{i} = strrep(state_variables{i}, 'n,', '1,');
   % 
   % end
-    
-  for i=1:length(index_nexts)
+   
 
-    index_lasts{i} = strrep(index_lasts{i}, 'n-1', '1');
-    index_nexts{i} = strrep(index_nexts{i}, 'n,', '2,');
-
-  end
+  %2/18/2025
+  %for i=1:length(index_nexts)
+  %  
+  %  index_lasts{i} = strrep(index_lasts{i}, 'n-1', '1');
+  %  index_nexts{i} = strrep(index_nexts{i}, 'n,', '2,');
+  %
+  %end
 
 
   for i=1:length(state_variables)
@@ -1566,10 +1569,11 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
           condition=dsStrrep(condition, state_variables{j}, [state_variables{j} index_nexts{j}], '', '', varargin{:});
           
 
-          action = strrep(action, 'n,', '2,');
+          %2/18/2025
+          %action = strrep(action, 'n,', '2,');
           action = strrep(action, 'p.', '');
-          action_index = strrep(action_index, 'n,', '2,');
-          action_index = strrep(action_index, 'n-1', '1');
+          %action_index = strrep(action_index, 'n,', '2,');
+          %action_index = strrep(action_index, 'n-1', '1');
           action_index = strrep(action_index, 'p.', '');
            
           
@@ -1592,8 +1596,9 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
     for j=1:length(condition)
 
       %IB
-      condition{j} = strrep(condition{j}, 'n-1', '1');
-      condition{j} = strrep(condition{j}, 'n,', '2,');
+      %2/28/2025
+      %condition{j} = strrep(condition{j}, 'n-1', '1');
+      %condition{j} = strrep(condition{j}, 'n,', '2,');
       condition{j} = strrep(condition{j}, 'p.', '');
       
 
@@ -1695,7 +1700,8 @@ function print_monitor_update(fid,nwsp,monitors,index_nexts_mon,state_variables,
     end
 
     % write monitors to solver function
-    monitor_expressions{i} = strrep(monitor_expressions{i}, 'n,', '2,');
+    %2/28/2025
+    %monitor_expressions{i} = strrep(monitor_expressions{i}, 'n,', '2,');
     monitor_expressions{i} = strrep(monitor_expressions{i}, 'p.', '');
     fprintf(fid,'%s%s%s=%s;\n',blanks(nwsp),monitor_names{i},index_nexts_mon{i},monitor_expressions{i});
   end
@@ -1708,18 +1714,20 @@ end
 function print_statevariables_again_update(fid,state_variables)
 
   %IB Update state vars again so that we can pu index 2 in 1
+  %2/18/2025
 
-    fprintf(fid,'\n');
-    fprintf(fid,'  %% ------------------------------------------------------------\n');
-    fprintf(fid,'  %% Replace n=1 for state variables IB:\n');
-    fprintf(fid,'  %% ------------------------------------------------------------\n');
+    %fprintf(fid,'\n');
+    %fprintf(fid,'  %% ------------------------------------------------------------\n');
+    %fprintf(fid,'  %% Replace n=1 for state variables IB:\n');
+    %fprintf(fid,'  %% ------------------------------------------------------------\n');
    
 
-  for i = 1:length(state_variables)
+  %for i = 1:length(state_variables)
     
-    fprintf(fid,'%s%s=%s%s;\n',state_variables{i},'(1,:)',state_variables{i},'(2,:)');
+  %  fprintf(fid,'%s%s=%s%s;\n',state_variables{i},'(1,:)',state_variables{i},'(2,:)');
 
-  end
+  %end
+  
 
 end
 

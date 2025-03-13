@@ -28,7 +28,7 @@ varies(1).range =  trialInds(:)';
 % Input strength
 varies(end+1).conxn = '(On->On,Off->Off)';
 varies(end).param = 'g_postIC';
-varies(end).range = 0.15*ones(1,30);
+varies(end).range = 0.185;
 % E->E connections
 
 %Vary the synaptic depression (fp) between E->E conncections
@@ -64,7 +64,7 @@ varies(end).range = 0.02;
 % Off-> PV
 varies(end+1).conxn = '(Off->S1OnOff,R1Off->S2OnOff)';
 varies(end).param = 'gSYN';
-varies(end).range = 0.06;
+varies(end).range = 0.015;
 %varies(end).range = [0.005:0.005:0.05];
 %varies(end).range = [0.045:0.005:0.09];
 

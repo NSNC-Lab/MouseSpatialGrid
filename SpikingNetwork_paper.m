@@ -3,7 +3,6 @@
 tic;
 plot_all = 1;
 
-
 %% Initialize
 
 % change current directory to folder where this script is stored
@@ -87,6 +86,7 @@ params_5_rate_based_onoff_fig4;
 %params_off;
 %params_both;
 %params_on_Laser;
+%params_no_pv;
 
 
 
@@ -154,6 +154,7 @@ else, options.time_end = padToTime*numel(options.locNum); end
 
 %Going to try rerunning old stuff to see if it is broken.
 [snn_out,s] = columnNetwork_paper_onoff(study_dir,varies,options,netcons,flag_raised_mex);
+%[snn_out,s] = columnNetwork_paper_on_only_nopv(study_dir,varies,options,netcons,flag_raised_mex);
 %[snn_out,s] = columnNetwork_paper_onoff_off_Conv(study_dir,varies,options,netcons,flag_raised_mex);
 %[snn_out,s] = columnNetwork_paper_onoff_Both_Conv(study_dir,varies,options,netcons,flag_raised_mex);
 
@@ -167,3 +168,10 @@ toc;
 %Monitors
 FR = data(15).fr.R2On.channel1;
 perf = data(15).perf.R2On.channel1;
+
+
+% figure;
+% subplot(2,1,1)
+% plot(snn_out(1).R1On_V(1:35000))
+% subplot(2,1,2)
+% plot(snn_out(1).S1OnOff_V(1:35000))
