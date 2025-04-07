@@ -81,12 +81,12 @@ text(-0.02, 0.5, 'Target 1', 'Units', 'normalized', ...
 
 
 subplot('Position',[0.7,0.1,0.25,0.85])
-bar([1.37,2.17,2.96],[mean(perf_only(1,2:2:end)),mean(perf_only(2,2:2:end)),mean(perf_only(3,2:2:end))],0.4,'FaceColor','k','LineWidth',2); hold on
-errorbar([1.37,2.17,2.96],[mean(perf_only(1,2:2:end)),mean(perf_only(2,2:2:end)),mean(perf_only(3,2:2:end))],[std(perf_only(1,2:2:end))/sqrt(length(perf_only(1,2:2:end))),std(perf_only(2,2:2:end))/sqrt(length(perf_only(2,2:2:end))),std(perf_only(3,2:2:end))/sqrt(length(perf_only(3,2:2:end)))],"LineStyle","none",'Color',[0,0,0],'LineWidth',2);
+bar([1.37,2.17,2.96],[mean(perf_only(1,1:end)),mean(perf_only(2,1:end)),mean(perf_only(3,1:2:end))],0.4,'FaceColor','k','LineWidth',2); hold on
+errorbar([1.37,2.17,2.96],[mean(perf_only(1,1:end)),mean(perf_only(2,1:end)),mean(perf_only(3,1:end))],[std(perf_only(1,1:end))/sqrt(length(perf_only(1,1:end))),std(perf_only(2,1:end))/sqrt(length(perf_only(2,1:end))),std(perf_only(3,1:end))/sqrt(length(perf_only(3,1:end)))],"LineStyle","none",'Color',[0,0,0],'LineWidth',2);
 
-bar([1.05,1.85,2.64],[mean(perf(1,1:2:end)),mean(perf(2,1:2:end)),mean(perf(3,1:2:end))],0.4,'FaceColor','none','LineWidth',2); hold on
-errorbar([1.05,1.85,2.64],[mean(perf(1,1:2:end)),mean(perf(2,1:2:end)),mean(perf(3,1:2:end))],[std(perf(1,1:2:end))/sqrt(length(perf(1,1:2:end))),std(perf(2,1:2:end))/sqrt(length(perf(2,1:2:end))),std(perf(3,1:2:end))/sqrt(length(perf(3,1:2:end)))],"LineStyle","none",'Color',[0,0,0],'LineWidth',2);
-
+bar([1.05,1.85,2.64],[mean(perf(1,1:end)),mean(perf(2,1:end)),mean(perf(3,1:end))],0.4,'FaceColor','none','LineWidth',2); hold on
+errorbar([1.05,1.85,2.64],[mean(perf(1,1:end)),mean(perf(2,1:end)),mean(perf(3,1:end))],[std(perf(1,1:end))/sqrt(length(perf(1,1:end))),std(perf(2,1:end))/sqrt(length(perf(2,1:end))),std(perf(3,1:end))/sqrt(length(perf(3,1:end)))],"LineStyle","none",'Color',[0,0,0],'LineWidth',2);
+    
 xlim([0.7,3.3])
 ylim([50 100])
 yticks([50:10:100])
@@ -98,20 +98,20 @@ xticklabels({'SPIKE','ISI','RI-SPIKE'})
 ylabel('Performance')
 xlabel(sprintf('Spike distance\n measure'))
 box off;
-print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','On_Conv_PV_COMP_LOW','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','On_Conv_PV_COMP_HIGH','.svg']) % svg
 
 
 figure(Position=[600,200,200,400]);
-load("on_dom_results.mat")
-song1_holder = song1_holder(:,20:35);
+load("on_dom_results_LOWFR.mat")
+song1_holder = song1_holder(:,16:35);
 
 
 plot(mean(song1_holder,1),'Color',[0.8500 0.3250 0.0980],'LineWidth',1.5); hold on
 fill([1:size(song1_holder,2), fliplr(1:size(song1_holder,2))], [mean(song1_holder,1)+std(song1_holder,1), fliplr(mean(song1_holder,1)-std(song1_holder,1))],[0.8500 0.3250 0.0980], ...
     'FaceAlpha', 0.1, 'EdgeColor', 'none');
 
-load("on_only_results.mat")
-song1_holder = song1_holder_only(:,20:35);
+load("on_only_results_LOWFR.mat")
+song1_holder = song1_holder_only(:,16:35);
 
 plot(mean(song1_holder,1),'Color',[0.4660 0.6740 0.1880],'LineWidth',1.5); hold on
 fill([1:size(song1_holder,2), fliplr(1:size(song1_holder,2))], [mean(song1_holder,1)+std(song1_holder,1), fliplr(mean(song1_holder,1)-std(song1_holder,1))], [0.4660 0.6740 0.1880], ...

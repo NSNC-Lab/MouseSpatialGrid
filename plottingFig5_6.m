@@ -1,5 +1,5 @@
 %Select which plot
-plot_num = 6;
+plot_num = 5;
 
 %Plot the performance
 figure(Position=[200,400,200,450]);
@@ -16,12 +16,12 @@ xticklabels({'SPIKE','ISI','RI-SPIKE'})
 ylabel('Performance')
 xlabel(sprintf('Spike distance\n measure'))
 box off;
-%print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Both_Conv_Performance_Rate_regime_High_PV','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','On_Conv_Performance_Rate_regime_High_PV','.svg']) % svg
 
 
 %Plot the raster PSTH songs etc
-starting_sample = 3500;
-ending_sample = 13500;
+starting_sample = 1;
+ending_sample = 32300;
 
 figure(Position=[600,200,900,750]);
 %titles = {'on','off','S1OnOff','R1on'};
@@ -58,16 +58,20 @@ for j = 1:length(titles)
         y_lines(2,:) = k-d;
         y_lines(3,:) = nan;
         plotting_data = [plotting_data;times];
-        h2 = plot(b,y_lines,'Color',[0 0 0 0.2],'LineWidth',0.3); hold on
+        if contains(titles{j}, 'P')
+            h2 = plot(b,y_lines,'Color',[1 0 0 0.2],'LineWidth',0.3); hold on
+        else
+            h2 = plot(b,y_lines,'Color',[0 0 0 0.2],'LineWidth',0.3); hold on
+        end
 
     end
     
     raw_freq_data = histcounts(plotting_data, BinWidth=200,BinLimits=[starting_sample ending_sample]);
     avg_data1 = movmean(raw_freq_data,3);
 
-    if contains(titles{j}, 'S')
+    if contains(titles{j}, 'P')
         avg_data = avg_data1/10/0.02*(10/250); %Divide by 10 for # of trials, divide by 0.02 (bindWidth) to get spikes/s = Hz,next part is scale factor which will be reprented with scaling bar in paper
-         
+        plot(linspace(starting_sample,ending_sample,length(avg_data)),avg_data,'r',LineWidth=1.5); hold on
         yticklabels([0:125:250]);
         xticklabels('')
         
@@ -113,14 +117,18 @@ for j = 1:length(titles)
         y_lines(2,:) = k-d;
         y_lines(3,:) = nan;
         plotting_data = [plotting_data;times];
-        h2 = plot(b,y_lines,'Color',[0 0 0 0.2],'LineWidth',0.3); hold on
+        if contains(titles{j}, 'P')
+            h2 = plot(b,y_lines,'Color',[1 0 0 0.2],'LineWidth',0.3); hold on
+        else
+            h2 = plot(b,y_lines,'Color',[0 0 0 0.2],'LineWidth',0.3); hold on
+        end
 
     end
     
     raw_freq_data = histcounts(plotting_data, BinWidth=200,BinLimits=[starting_sample ending_sample]);
     avg_data1 = movmean(raw_freq_data,3);
 
-    if contains(titles{j}, 'S')
+    if contains(titles{j}, 'P')
         avg_data = avg_data1/10/0.02*(10/250); %Divide by 10 for # of trials, divide by 0.02 (bindWidth) to get spikes/s = Hz,next part is scale factor which will be reprented with scaling bar in paper
         plot(linspace(starting_sample,ending_sample,length(avg_data)),avg_data,'r',LineWidth=1.5); hold on
         yticklabels([0:125:250]);
@@ -173,17 +181,17 @@ text(-0.65, -0.7, 'Target 1', 'Units', 'normalized', ...
 text(0.5, -0.7, 'Target 2', 'Units', 'normalized', ...
     'FontSize', 12, 'HorizontalAlignment', 'center');
 
-text(-1.4, 2, 'On', 'Units', 'normalized', ...
+text(-1.4, 2, 'PV1', 'Units', 'normalized', ...
     'FontSize', 12, 'HorizontalAlignment', 'right');
 
-text(-1.4, 3.75, 'Off', 'Units', 'normalized', ...
+text(-1.4, 3.75, 'PV2', 'Units', 'normalized', ...
     'FontSize', 12, 'HorizontalAlignment', 'right');
 
-text(-1.4, 5.5, 'PV1', 'Units', 'normalized', ...
+text(-1.4, 5.5, 'Output', 'Units', 'normalized', ...
     'FontSize', 12, 'HorizontalAlignment', 'right');
 
-text(-1.4, 7.25, 'Output', 'Units', 'normalized', ...
-    'FontSize', 12, 'HorizontalAlignment', 'right');
+% text(-1.4, 7.25, 'Output', 'Units', 'normalized', ...
+%     'FontSize', 12, 'HorizontalAlignment', 'right');
 
 
 
@@ -193,7 +201,7 @@ han.YLabel.Visible = 'on';
 ylabel(han, 'Spikes/s (Hz)');
 
 
-%print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Both_Conv_Rasters_Rate_regime_High_PV','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','PV_LOW_FR','.svg']) % svg
 
 
 %Plot an average of 30 PSTHs between the two songs in order to show the
@@ -337,7 +345,7 @@ text(-0.02, 1.85, 'Target 1', 'Units', 'normalized', ...
 text(-0.02, 0.5, 'Target 2', 'Units', 'normalized', ...
     'FontSize', 12, 'HorizontalAlignment', 'right');
 
-%print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Both_Conv_Song1_Song2_Comp_Rate_regime_High_PV','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','On_Conv_Song1_Song2_Comp_Rate_regime_High_PV','.svg']) % svg
 
 
 figure;
@@ -353,5 +361,5 @@ ylabel('Spikes/s (Hz)')
 ax = gca;
 ax.YAxis.FontSize = 14;
 ax.XAxis.FontSize = 14;
-%print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','Both_Conv_EI_Comparison_Rate_regime_High_PV','.svg']) % svg
+print(gcf,'-vector','-dsvg',['C:\Users\ipboy\Documents\Modeling Paper\Figures\Figure',num2str(plot_num),'\Resubmission2025_2\','On_Conv_EI_Comparison_Rate_regime_High_PV','.svg']) % svg
 
