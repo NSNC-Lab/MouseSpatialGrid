@@ -164,4 +164,4 @@ create_structure;
 %4x4   * 1x4   * 4x4
 
 profile off;
-profile viewer
+%profile viewer

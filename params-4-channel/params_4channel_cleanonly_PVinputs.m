@@ -31,8 +31,8 @@ varies(1).range =  trialInds(:)';
 %Lets just start with changing the input gsyn E->E connections. 1 for each
 %channel 4 total
 
-% NetconHandler;
-% GsynHandler;
+NetconHandler;
+GsynHandler;
 % XRnetcon = netcons.XRnetcon;
 % RCnetcon = netcons.RCnetcon;
 % PEnetcon = netcons.PEnetcon;

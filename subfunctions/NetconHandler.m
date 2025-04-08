@@ -5,8 +5,8 @@ netcons = struct;
 % all other netcons defined as identity in columnNetwork_simpler_onoff
 
 % XRnetcon: SOM (X) -> E (Ron)
-netcons.XRnetcon = [0,1,1,1;
-                    0,0,0,0;
+netcons.XRnetcon = [0,0,0,0;
+                    1,0,0,0;
                     0,0,0,0;
                     0,0,0,0];
 
