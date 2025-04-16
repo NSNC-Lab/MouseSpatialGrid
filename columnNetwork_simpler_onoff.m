@@ -102,7 +102,7 @@ s.populations(end).parameters = {'g_inc',0.0003,'tau_ad',100,'t_ref',1};
 s.populations(end+1).name='SOnOff';
 s.populations(end).equations = 'noconLIF';
 s.populations(end).size = nCells;
-s.populations(end).parameters = {'g_L',1/100,'E_L',-57,'V_reset',-52,'t_ref',0.5};
+s.populations(end).parameters = {'g_L',1/100,'E_L',-57,'V_reset',-52,'t_ref',0.5,'Itonic',0.4};
 
 % TD unit
 s.populations(end+1).name='TD';
@@ -197,7 +197,7 @@ s.connections(end).parameters={'gSYN',0.03,'tauR',EI_rise,'tauD',EI_fall,'fP',0.
 % noise at relays
 s.connections(end+1).direction='ROn->ROn';
 s.connections(end).mechanism_list={'iNoise_V3'};
-s.connections(end).parameters={'nSYN',0.015,'tauR_N',EE_rise,'tauD_N',EE_fall,'simlen',time_end/dt,'netcon',eye(nCells,nCells)};
+s.connections(end).parameters={'nSYN',0.015,'tauR_N',EE_rise,'tauD_N',EE_fall,'simlen',time_end/dt,'netcon',eye(nCells,nCells),'FR',50};
 
 % cross-channel inhibition
 s.connections(end+1).direction='ROn->X';
@@ -273,65 +273,65 @@ end
 % poolobj = parpool('local', 8);
 
 
-% if ~flag_raised_mex
-%    simdata = dsSimulate(s, netcons, 'tspan',[dt time_end], 'solver',solverType, 'dt',dt,...
-%   'downsample_factor',1, 'save_data_flag',0, 'save_results_flag',1,...
-%   'study_dir',study_dir, 'vary',vary, 'debug_flag', 1, 'verbose_flag',0, ...
-%   'parfor_flag',0, 'compile_flag',1);
-%    copyfile('run\4-channel-PV-inputs\solve\solve_ode_4_channel_PV_inputs.m','mexes')
-%    copyfile('run\4-channel-PV-inputs\solve\solve_ode_4_channel_PV_inputs_mex.mexw64','mexes')
-% 
-%     study_dir = fullfile(pwd,'run','4-channel-PV-inputs');
-%     % 
-%     % if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
-%     % mkdir(fullfile(study_dir, 'solve'));
-% 
-%     solve_directory = fullfile(study_dir, 'solve');
-%     mfileinfo = mfilename('fullpath');
-% 
-%     warning('off','all');
-%     mkdir('backup');
-% 
-%     mfiledir = strsplit(mfileinfo,filesep);
-% 
-%     copyfile('run\4-channel-PV-inputs\solve\params.mat', 'backup');
-% 
-%     %if exist(fullfile(study_dir, 'solve'), 'dir')
-%         % don't remove the directory
-%     %else
-%         %if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
-%         %mkdir(solve_directory); 
-%         flag_raised_mex = 0;
-% 
-%         mexes_dir = fullfile(mfiledir{1:end-1}, 'mexes');
-%         if isfolder(mexes_dir)
-%             m_file_to_copy = 'solve_ode_4_channel_PV_inputs.m';
-%             mex_file_to_copy = 'solve_ode_4_channel_PV_inputs_mex.mexw64';
-%             mex_file_path = fullfile(mexes_dir, mex_file_to_copy);
-%             mex_files = dir([mex_file_path, '.*']);
-%             if ~isempty(mex_files)
-%                 flag_raised_mex = 1;
-%                 for num = 1:20
-%                     simDir = fullfile(solve_directory, ['sim' num2str(num)]);
-%                     mkdir(simDir);
-%                     copyfile(fullfile(mexes_dir, mex_files.name), simDir);
-%                     copyfile(fullfile(mexes_dir, m_file_to_copy), simDir);
-%                     copyfile('backup\params.mat', simDir);
-%                 end
-%             end
-%         end
-% 
-% 
-% 
-% end
+if ~flag_raised_mex
+   simdata = dsSimulate(s, netcons, 'tspan',[dt time_end], 'solver',solverType, 'dt',dt,...
+  'downsample_factor',1, 'save_data_flag',0, 'save_results_flag',1,...
+  'study_dir',study_dir, 'vary',vary, 'debug_flag', 1, 'verbose_flag',0, ...
+  'parfor_flag',0, 'compile_flag',1);
+   copyfile('run\4-channel-PV-inputs\solve\solve_ode_4_channel_PV_inputs.m','mexes')
+   copyfile('run\4-channel-PV-inputs\solve\solve_ode_4_channel_PV_inputs_mex.mexw64','mexes')
+
+    study_dir = fullfile(pwd,'run','4-channel-PV-inputs');
+    % 
+    % if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
+    % mkdir(fullfile(study_dir, 'solve'));
+
+    solve_directory = fullfile(study_dir, 'solve');
+    mfileinfo = mfilename('fullpath');
+
+    warning('off','all');
+    mkdir('backup');
+
+    mfiledir = strsplit(mfileinfo,filesep);
+
+    copyfile('run\4-channel-PV-inputs\solve\params.mat', 'backup');
+
+    %if exist(fullfile(study_dir, 'solve'), 'dir')
+        % don't remove the directory
+    %else
+        %if exist(study_dir, 'dir'), msg = rmdir(study_dir, 's'); end
+        %mkdir(solve_directory); 
+        flag_raised_mex = 0;
+
+        mexes_dir = fullfile(mfiledir{1:end-1}, 'mexes');
+        if isfolder(mexes_dir)
+            m_file_to_copy = 'solve_ode_4_channel_PV_inputs.m';
+            mex_file_to_copy = 'solve_ode_4_channel_PV_inputs_mex.mexw64';
+            mex_file_path = fullfile(mexes_dir, mex_file_to_copy);
+            mex_files = dir([mex_file_path, '.*']);
+            if ~isempty(mex_files)
+                flag_raised_mex = 1;
+                for num = 1:20
+                    simDir = fullfile(solve_directory, ['sim' num2str(num)]);
+                    mkdir(simDir);
+                    copyfile(fullfile(mexes_dir, mex_files.name), simDir);
+                    copyfile(fullfile(mexes_dir, m_file_to_copy), simDir);
+                    copyfile('backup\params.mat', simDir);
+                end
+            end
+        end
+
+
+
+end
 
 
 
 simdata = dsSimulate(s, netcons, 'tspan',[dt time_end], 'solver',solverType, 'dt',dt,...
   'downsample_factor',1, 'save_data_flag',0, 'save_results_flag',1,...
   'study_dir',study_dir, 'vary',vary, 'debug_flag', 1, 'verbose_flag',0, ...
-  'parfor_flag',0, 'compile_flag',0);
-%toc;
+  'parfor_flag',1, 'compile_flag',0);
+toc;
 
 
 % create_structure;

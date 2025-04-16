@@ -31,9 +31,9 @@ else
         if ~isempty(mex_files)
             flag_raised_mex = 1;
 
-            end
         end
     end
+end
 
 
 

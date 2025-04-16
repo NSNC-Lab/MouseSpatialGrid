@@ -44,9 +44,9 @@ varies(1).range =  trialInds(:)';
 
 %Just going to use this to do our average of 3.
 % Input strength
-% varies(end+1).conxn = '(On->On,Off->Off)';
-% varies(end).param = 'g_postIC';
-% varies(end).range = 0.165*ones(1,3);
+%varies(end+1).conxn = '(On->On,Off->Off)';
+%varies(end).param = 'g_postIC';
+%varies(end).range = 0.165*ones(1,3);
 
 
 
@@ -67,7 +67,15 @@ varies(1).range =  trialInds(:)';
 % varies(end).range = {RCgsyncon,RCgsyncon};
 
 
-% noise at intermediate neurons
-varies(end+1).conxn = 'ROn->ROn';
+% varies(end+1).conxn = 'SOnOff';
+% varies(end).param = 'Itonic';
+% varies(end).range = 0.4; 
+
+varies(end+1).conxn = '(ROn->ROn)';
 varies(end).param = 'FR';
-varies(end).range = 8/options.nCells;
+varies(end).range = 50;
+
+% noise at intermediate neurons
+% varies(end+1).conxn = 'ROn->ROn';
+% varies(end).param = 'FR';
+% varies(end).range = 50/options.nCells;
