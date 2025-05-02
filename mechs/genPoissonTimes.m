@@ -5,7 +5,7 @@ if isempty(simlen)
 end
 
 %Temp changing this to see if it effects network
-temp = (rand(simlen,N_pop) < (FR + std*randn(simlen,N_pop))*dt/1000);
+temp = (rand(simlen,N_pop) < (FR + std*randn(simlen,N_pop))*dt/1000);   
 
 refrac = 1;  % ms
 

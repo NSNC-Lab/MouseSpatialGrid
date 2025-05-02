@@ -1,4 +1,4 @@
-% Simulate spike times based on a model neuron with a (1) STRF and a (2)
+    % Simulate spike times based on a model neuron with a (1) STRF and a (2)
 % spatial tuning curve. I.e. this neuron has both spatial and
 % spectral-temporal tuning.
 
