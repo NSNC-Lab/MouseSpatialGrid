@@ -76,6 +76,10 @@ Line 100-102: stimSampleRate is set to 10000 Hz instead of 1000 Hz
 
 ### strflab_v1.45/preprocessing/sound/timefreq.m
 
+## 5/2/2025 New Repository
+
+The most up to date work is currently being done at the [Modeling Effort](https://github.com/Ipboyd/ModelingEffort/tree/master) repo. Please see this repo for updates after the above date.
+
 Line 65-67: increment is set to fix(sampleRate/10000) instead of fix(0.001*sampleRate)
 
 These two changes result in spectrograms with a sampling frequency of 10000 Hz, which matches the Dynasim simulation dt of 0.1 ms.
