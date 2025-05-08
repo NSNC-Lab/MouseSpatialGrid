@@ -12,7 +12,8 @@ options.plotRasters = 0;
 
 % locNum should be empty for full grids
 %options.locNum = [5 10 15 20];
-options.locNum = [];
+%options.locNum = [];
+options.locNum = 1:24;
 options.SpatialAttention = 0;
 
 %% define network parameters

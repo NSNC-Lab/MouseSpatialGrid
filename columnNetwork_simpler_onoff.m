@@ -106,7 +106,7 @@ s.populations(end).parameters = {'g_L',1/100,'E_L',-57,'V_reset',-52,'t_ref',0.5
 s.populations(end+1).name='TD';
 s.populations(end).equations = 'noconLIF_currentOnly';
 s.populations(end).size = nCells;
-s.populations(end).parameters = {'Itonic',0.1,'numLocs',numel(options.locNum)};
+s.populations(end).parameters = {'numLocs',numel(options.locNum)};
 
 % cross-channel X units, modeled as SOM units
 s.populations(end+1).name='X';
@@ -190,15 +190,15 @@ s.connections(end).parameters={'gSYN', XRgsyncon,'tauR',XE_rise,'tauD',XE_fall,'
 % apply TD->E and TD->S inhibition
 s.connections(end+1).direction='TD->ROn';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'netcon',zeros(nCells,nCells)};
+s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'netcon',eye(nCells,nCells)}; %eye = TD neurons on within channel
 
 s.connections(end+1).direction='TD->ROff';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'netcon',zeros(nCells,nCells)};
+s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'netcon',eye(nCells,nCells)};
 
 s.connections(end+1).direction='TD->X';
 s.connections(end).mechanism_list={'PSC'};
-s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'netcon',zeros(nCells,nCells)};
+s.connections(end).parameters={'gSYN',0.015,'tauR',IE_rise,'tauD',IE_fall,'ESYN',-80,'netcon',eye(nCells,nCells)};
 
 % convergence at output from onset-responding neurons
 s.connections(end+1).direction='ROn->C';
