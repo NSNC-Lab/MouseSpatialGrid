@@ -27,7 +27,7 @@ V_reset = -52;      % reset voltage, originally -50mV. [mV]
 
 %%%%%%% current injection %%%%%%%%%%%%
 
-Itonic = 0;         % injected current, [nA]
+Itonic = 0.1;         % injected current, [nA]
 numLocs = 1;        % # locations to simultae
 Icur = Itonic*buildTonicCurrent(T,N_pop,dt,numLocs)
 
