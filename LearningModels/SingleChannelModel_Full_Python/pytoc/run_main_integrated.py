@@ -44,7 +44,7 @@ class runSimulation(object):
     #- Move the data loading to a seperate file and make it toggleable
 
     # -- Load in data
-    filename = f"C:/Users/ipboy/Documents/Github/ModelingEffort/Multi-Channel/Plotting/OliverDataPlotting/PicturesToFit/picture_fit{7}contra.mat"
+    filename = f"C:/Users/isaac/OneDrive/Documents/GitHub/MouseSpatialGrid/LearningModels/BridgingMatlabtoPython/Multi-Channel/Plotting/OliverDataPlotting/PicturesToFit/picture_fit{7}contra.mat"
     data = loadmat(filename)['picture'].astype(np.float32)  #trials,timecourse
     data = data[:,:,None]
 

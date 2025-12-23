@@ -1,5 +1,6 @@
 # pythran export solve_run(float64[:,:,:], float64[:,:,:], float64[:,:,:], float64[:,:,:], float64[:,:]) -> Tuple[float64[:,:,:,:], float64[:,:,:]]
 import numpy as np
+import time
 def solve_run(on_input,off_input,noise_token,data,p):
 
 
@@ -11,9 +12,8 @@ def solve_run(on_input,off_input,noise_token,data,p):
     On_noise = 0
     On_t_ref = 1
     On_E_k = -80
-    On_tau_ad = p[5].reshape(100, 1, 1)
     On_tau_ad = 5
-    On_g_inc = p[9].reshape(100, 1, 1)
+    On_g_inc = 0.0003
     On_Itonic = 0
     On_Imask = np.ones((1,1))
     On_R = 200.0
@@ -38,9 +38,8 @@ def solve_run(on_input,off_input,noise_token,data,p):
     Off_noise = 0
     Off_t_ref = 1
     Off_E_k = -80
-    Off_tau_ad = p[6].reshape(100, 1, 1)
     Off_tau_ad = 5
-    Off_g_inc = p[10].reshape(100, 1, 1)
+    Off_g_inc = 0.0003
     Off_Itonic = 0
     Off_Imask = np.ones((1,1))
     Off_R = 200.0
@@ -65,9 +64,8 @@ def solve_run(on_input,off_input,noise_token,data,p):
     SOnOff_noise = 0
     SOnOff_t_ref = 0.5
     SOnOff_E_k = -80
-    SOnOff_tau_ad = p[7].reshape(100, 1, 1)
     SOnOff_tau_ad = 5
-    SOnOff_g_inc = p[11].reshape(100, 1, 1)
+    SOnOff_g_inc = 0.0003
     SOnOff_Itonic = 0
     SOnOff_Imask = np.ones((1,1))
     SOnOff_R = 100.0
@@ -92,9 +90,8 @@ def solve_run(on_input,off_input,noise_token,data,p):
     ROn_noise = 0
     ROn_t_ref = 1
     ROn_E_k = -80
-    ROn_tau_ad = p[8].reshape(100, 1, 1)
     ROn_tau_ad = 100
-    ROn_g_inc = p[12].reshape(100, 1, 1)
+    ROn_g_inc = 0.0003
     ROn_Itonic = 0
     ROn_Imask = np.ones((1,1))
     ROn_R = 200.0
@@ -117,12 +114,10 @@ def solve_run(on_input,off_input,noise_token,data,p):
     On_ROn_tauD = 1.5
     On_ROn_tauR = 0.7
     On_ROn_PSC_delay = 0
-    On_ROn_gSYN = p[0].reshape(100, 1, 1)
     On_ROn_gSYN = 0.02
     On_ROn_PSC_fF = 0
     On_ROn_PSC_fP = 0.1
     On_ROn_tauF = 180
-    On_ROn_tauP = p[9].reshape(100, 1, 1)
     On_ROn_tauP = 30
     On_ROn_PSC_maxF = 4
     On_ROn_netcon = np.eye(1)
@@ -131,12 +126,10 @@ def solve_run(on_input,off_input,noise_token,data,p):
     On_SOnOff_tauD = 1
     On_SOnOff_tauR = 0.1
     On_SOnOff_PSC_delay = 0
-    On_SOnOff_gSYN = p[1].reshape(100, 1, 1)
     On_SOnOff_gSYN = 0.085
     On_SOnOff_PSC_fF = 0
     On_SOnOff_PSC_fP = 0.2
     On_SOnOff_tauF = 180
-    On_SOnOff_tauP = p[10].reshape(100, 1, 1)
     On_SOnOff_tauP = 80
     On_SOnOff_PSC_maxF = 4
     On_SOnOff_netcon = np.eye(1)
@@ -145,12 +138,10 @@ def solve_run(on_input,off_input,noise_token,data,p):
     Off_SOnOff_tauD = 1
     Off_SOnOff_tauR = 0.1
     Off_SOnOff_PSC_delay = 0
-    Off_SOnOff_gSYN = p[2].reshape(100, 1, 1)
     Off_SOnOff_gSYN = 0.045
     Off_SOnOff_PSC_fF = 0
     Off_SOnOff_PSC_fP = 0
     Off_SOnOff_tauF = 180
-    Off_SOnOff_tauP = p[11].reshape(100, 1, 1)
     Off_SOnOff_tauP = 80
     Off_SOnOff_PSC_maxF = 4
     Off_SOnOff_netcon = np.eye(1)
@@ -159,12 +150,10 @@ def solve_run(on_input,off_input,noise_token,data,p):
     SOnOff_ROn_tauD = 4.5
     SOnOff_ROn_tauR = 1
     SOnOff_ROn_PSC_delay = 0
-    SOnOff_ROn_gSYN = p[3].reshape(100, 1, 1)
     SOnOff_ROn_gSYN = 0.025
     SOnOff_ROn_PSC_fF = 0
     SOnOff_ROn_PSC_fP = 0.5
     SOnOff_ROn_tauF = 180
-    SOnOff_ROn_tauP = p[12].reshape(100, 1, 1)
     SOnOff_ROn_tauP = 120
     SOnOff_ROn_PSC_maxF = 4
     SOnOff_ROn_netcon = np.eye(1)
@@ -176,20 +165,14 @@ def solve_run(on_input,off_input,noise_token,data,p):
     On_g_ad = np.zeros((100,10,1,2))
     On_tspike = np.ones((100,10,1,5)) * -30
     On_buffer_index = np.ones((100,10,1))
-    spike_wrt_tau_ad_On = np.zeros((100,10,1))
-    spike_wrt_g_inc_On = np.zeros((100,10,1))
     Off_V = np.ones((100,10,1,2)) * Off_E_L
     Off_g_ad = np.zeros((100,10,1,2))
     Off_tspike = np.ones((100,10,1,5)) * -30
     Off_buffer_index = np.ones((100,10,1))
-    spike_wrt_tau_ad_Off = np.zeros((100,10,1))
-    spike_wrt_g_inc_Off = np.zeros((100,10,1))
     SOnOff_V = np.ones((100,10,1,2)) * SOnOff_E_L
     SOnOff_g_ad = np.zeros((100,10,1,2))
     SOnOff_tspike = np.ones((100,10,1,5)) * -30
     SOnOff_buffer_index = np.ones((100,10,1))
-    spike_wrt_tau_ad_SOnOff = np.zeros((100,10,1))
-    spike_wrt_g_inc_SOnOff = np.zeros((100,10,1))
     ROn_V = np.ones((100,10,1,2)) * ROn_E_L
     ROn_g_ad = np.zeros((100,10,1,2))
     ROn_tspike = np.ones((100,10,1,5)) * -30
@@ -197,42 +180,37 @@ def solve_run(on_input,off_input,noise_token,data,p):
     ROn_spikes_holder = np.zeros((100,10,1,29801), dtype=np.int8)
     ROn_noise_sn = np.zeros((100,10,1,2))
     ROn_noise_xn = np.zeros((100,10,1,2))
-    spike_wrt_tau_ad_ROn = np.zeros((100,10,1))
-    spike_wrt_g_inc_ROn = np.zeros((100,10,1))
     On_ROn_PSC_s = np.zeros((100,10,1,2))
     On_ROn_PSC_x = np.zeros((100,10,1,2))
     On_ROn_PSC_F = np.ones((100,10,1,2))
     On_ROn_PSC_P = np.ones((100,10,1,2))
     On_ROn_PSC_q = np.ones((100,10,1,2))
-    spike_wrt_gsyn_On_ROn = np.zeros((100,10,1))
-    spike_wrt_tauP_On_ROn = np.zeros((100,10,1))
     On_SOnOff_PSC_s = np.zeros((100,10,1,2))
     On_SOnOff_PSC_x = np.zeros((100,10,1,2))
     On_SOnOff_PSC_F = np.ones((100,10,1,2))
     On_SOnOff_PSC_P = np.ones((100,10,1,2))
     On_SOnOff_PSC_q = np.ones((100,10,1,2))
-    spike_wrt_gsyn_On_SOnOff = np.zeros((100,10,1))
-    spike_wrt_tauP_On_SOnOff = np.zeros((100,10,1))
     Off_SOnOff_PSC_s = np.zeros((100,10,1,2))
     Off_SOnOff_PSC_x = np.zeros((100,10,1,2))
     Off_SOnOff_PSC_F = np.ones((100,10,1,2))
     Off_SOnOff_PSC_P = np.ones((100,10,1,2))
     Off_SOnOff_PSC_q = np.ones((100,10,1,2))
-    spike_wrt_gsyn_Off_SOnOff = np.zeros((100,10,1))
-    spike_wrt_tauP_Off_SOnOff = np.zeros((100,10,1))
     SOnOff_ROn_PSC_s = np.zeros((100,10,1,2))
     SOnOff_ROn_PSC_x = np.zeros((100,10,1,2))
     SOnOff_ROn_PSC_F = np.ones((100,10,1,2))
     SOnOff_ROn_PSC_P = np.ones((100,10,1,2))
     SOnOff_ROn_PSC_q = np.ones((100,10,1,2))
-    spike_wrt_gsyn_SOnOff_ROn = np.zeros((100,10,1))
-    spike_wrt_tauP_SOnOff_ROn = np.zeros((100,10,1))
-    spike_wrt_FR = np.zeros((100,10,1))
+    ode_times = []
+    state_update_times = []
+    conditionals_times = []
 
     for timestep,t in enumerate(np.arange(0,29801*0.1-0.1,0.1)):
 
 
         #Declare ODES
+
+
+        ODE_start = time.perf_counter()
 
         On_V_k1 = (((On_E_L - On_V[:,:,:,-1]) - On_R*On_g_ad[:,:,:,-1]*(On_V[:,:,:,-1]-On_E_k) - On_R*On_g_postIC*on_input[:,timestep,:]*On_netcon*(On_V[:,:,:,-1]-On_E_exc) + On_R*On_Itonic*On_Imask) / On_tau)
         On_g_ad_k1 = -On_g_ad[:,:,:,-1] / On_tau_ad
@@ -265,7 +243,13 @@ def solve_run(on_input,off_input,noise_token,data,p):
         SOnOff_ROn_PSC_P_k1 = (1 - SOnOff_ROn_PSC_P[:,:,:,-1])/SOnOff_ROn_tauP
         SOnOff_ROn_PSC_q_k1 = 0
 
+        ode_times.append(time.perf_counter() - ODE_start)
+
+
         #Declare State Updates
+
+
+        state_update_start = time.perf_counter()
 
         On_V[:,:,:,-2] = On_V[:,:,:,-1]
         On_V[:,:,:,-1] = On_V[:,:,:,-1] + 0.1*On_V_k1
@@ -327,23 +311,14 @@ def solve_run(on_input,off_input,noise_token,data,p):
         SOnOff_ROn_PSC_P[:,:,:,-1] = SOnOff_ROn_PSC_P[:,:,:,-1] + 0.1*SOnOff_ROn_PSC_P_k1
         SOnOff_ROn_PSC_q[:,:,:,-2] = SOnOff_ROn_PSC_q[:,:,:,-1]
         SOnOff_ROn_PSC_q[:,:,:,-1] = SOnOff_ROn_PSC_q[:,:,:,-1] + 0.1*SOnOff_ROn_PSC_q_k1
-        voltage_wrt_psc_On_ROn = ( ROn_R * (On_ROn_gSYN*np.dot((ROn_V[:,:,:,-2]-On_ROn_ESYN).reshape(np.shape(ROn_V[:,:,:,-2])[0]*np.shape(ROn_V[:,:,:,-2])[1],np.shape(ROn_V[:,:,:,-2])[2]),On_ROn_netcon).reshape(np.shape(ROn_V[:,:,:,-2])[0],np.shape(ROn_V[:,:,:,-2])[1],np.shape(ROn_V[:,:,:,-2])[2]))/ROn_tau  ) / 10
-        voltage_wrt_psc_On_SOnOff = ( SOnOff_R * (On_SOnOff_gSYN*np.dot((SOnOff_V[:,:,:,-2]-On_SOnOff_ESYN).reshape(np.shape(SOnOff_V[:,:,:,-2])[0]*np.shape(SOnOff_V[:,:,:,-2])[1],np.shape(SOnOff_V[:,:,:,-2])[2]),On_SOnOff_netcon).reshape(np.shape(SOnOff_V[:,:,:,-2])[0],np.shape(SOnOff_V[:,:,:,-2])[1],np.shape(SOnOff_V[:,:,:,-2])[2]))/SOnOff_tau  ) / 10
-        voltage_wrt_psc_Off_SOnOff = ( SOnOff_R * (Off_SOnOff_gSYN*np.dot((SOnOff_V[:,:,:,-2]-Off_SOnOff_ESYN).reshape(np.shape(SOnOff_V[:,:,:,-2])[0]*np.shape(SOnOff_V[:,:,:,-2])[1],np.shape(SOnOff_V[:,:,:,-2])[2]),Off_SOnOff_netcon).reshape(np.shape(SOnOff_V[:,:,:,-2])[0],np.shape(SOnOff_V[:,:,:,-2])[1],np.shape(SOnOff_V[:,:,:,-2])[2]))/SOnOff_tau  ) / 10
-        voltage_wrt_psc_SOnOff_ROn = ( ROn_R * (SOnOff_ROn_gSYN*np.dot((ROn_V[:,:,:,-2]-SOnOff_ROn_ESYN).reshape(np.shape(ROn_V[:,:,:,-2])[0]*np.shape(ROn_V[:,:,:,-2])[1],np.shape(ROn_V[:,:,:,-2])[2]),SOnOff_ROn_netcon).reshape(np.shape(ROn_V[:,:,:,-2])[0],np.shape(ROn_V[:,:,:,-2])[1],np.shape(ROn_V[:,:,:,-2])[2]))/ROn_tau  ) / 10
 
-        psc_wrt_spiking_On_ROn = ( 0.1*(On_ROn_scale*(On_ROn_PSC_x[:,:,:,-2] + On_ROn_PSC_q[:,:,:,-2]*(1-(np.tanh(t-(On_tspike[:,:,:,-1]+On_ROn_PSC_delay))))**2))  )*100 
-        psc_wrt_spiking_On_SOnOff = ( 0.1*(On_SOnOff_scale*(On_SOnOff_PSC_x[:,:,:,-2] + On_SOnOff_PSC_q[:,:,:,-2]*(1-(np.tanh(t-(On_tspike[:,:,:,-1]+On_SOnOff_PSC_delay))))**2))  )*100 
-        psc_wrt_spiking_Off_SOnOff = ( 0.1*(Off_SOnOff_scale*(Off_SOnOff_PSC_x[:,:,:,-2] + Off_SOnOff_PSC_q[:,:,:,-2]*(1-(np.tanh(t-(Off_tspike[:,:,:,-1]+Off_SOnOff_PSC_delay))))**2))  )*100 
-        psc_wrt_spiking_SOnOff_ROn = ( 0.1*(SOnOff_ROn_scale*(SOnOff_ROn_PSC_x[:,:,:,-2] + SOnOff_ROn_PSC_q[:,:,:,-2]*(1-(np.tanh(t-(SOnOff_tspike[:,:,:,-1]+SOnOff_ROn_PSC_delay))))**2))  )*100 
-
-        tspike_wrt_odeVoltage_On = (  (t - On_tspike[:,:,:,-1])*np.tanh(-(On_V[:,:,:,-2]-On_V_thresh))*(1-np.tanh(On_V[:,:,:,-1]-On_V_thresh)**2)  )
-        tspike_wrt_odeVoltage_Off = (  (t - Off_tspike[:,:,:,-1])*np.tanh(-(Off_V[:,:,:,-2]-Off_V_thresh))*(1-np.tanh(Off_V[:,:,:,-1]-Off_V_thresh)**2)  )
-        tspike_wrt_odeVoltage_SOnOff = (  (t - SOnOff_tspike[:,:,:,-1])*np.tanh(-(SOnOff_V[:,:,:,-2]-SOnOff_V_thresh))*(1-np.tanh(SOnOff_V[:,:,:,-1]-SOnOff_V_thresh)**2)  )
-        tspike_wrt_odeVoltage_ROn = (  (t - ROn_tspike[:,:,:,-1])*np.tanh(-(ROn_V[:,:,:,-2]-ROn_V_thresh))*(1-np.tanh(ROn_V[:,:,:,-1]-ROn_V_thresh)**2)  )
+        state_update_times.append(time.perf_counter() - state_update_start)
 
 
         #Declare Conditionals
+
+
+        conditionals_start = time.perf_counter()
 
         On_mask = ((On_V[:,:,:,-1] >= On_V_thresh) & (On_V[:,:,:,-2] < On_V_thresh))
         On_V[:,:,:,-2] = np.where(On_mask,On_V[:,:,:,-1], On_V[:,:,:,-2])
@@ -486,57 +461,26 @@ def solve_run(on_input,off_input,noise_token,data,p):
         SOnOff_ROn_PSC_q[:,:,:,-1] = np.where(SOnOff_ROn_mask_psc,SOnOff_ROn_PSC_F[:,:,:,-1] * SOnOff_ROn_PSC_P[:,:,:,-1], SOnOff_ROn_PSC_q[:,:,:,-1])
         SOnOff_ROn_PSC_F[:,:,:,-1] = np.where(SOnOff_ROn_mask_psc,SOnOff_ROn_PSC_F[:,:,:,-1] + SOnOff_ROn_PSC_fF * (SOnOff_ROn_PSC_maxF - SOnOff_ROn_PSC_F[:,:,:,-1]), SOnOff_ROn_PSC_F[:,:,:,-1])
         SOnOff_ROn_PSC_P[:,:,:,-1] = np.where(SOnOff_ROn_mask_psc,SOnOff_ROn_PSC_P[:,:,:,-1] * (1 - SOnOff_ROn_PSC_fP), SOnOff_ROn_PSC_P[:,:,:,-1])
-        voltage_wrt_gsyn_On_ROn = (ROn_R * On_ROn_PSC_s[:,:,:,-1]*On_ROn_netcon*(ROn_V[:,:,:,-1]-On_ROn_ESYN))/ROn_tau
-        voltage_wrt_gsyn_On_SOnOff = (SOnOff_R * On_SOnOff_PSC_s[:,:,:,-1]*On_SOnOff_netcon*(SOnOff_V[:,:,:,-1]-On_SOnOff_ESYN))/SOnOff_tau
-        voltage_wrt_gsyn_Off_SOnOff = (SOnOff_R * Off_SOnOff_PSC_s[:,:,:,-1]*Off_SOnOff_netcon*(SOnOff_V[:,:,:,-1]-Off_SOnOff_ESYN))/SOnOff_tau
-        voltage_wrt_gsyn_SOnOff_ROn = (ROn_R * SOnOff_ROn_PSC_s[:,:,:,-1]*SOnOff_ROn_netcon*(ROn_V[:,:,:,-1]-SOnOff_ROn_ESYN))/ROn_tau
 
-        voltage_wrt_FR = (-ROn_R * ROn_nSYN * ROn_noise_scale  * (1/1000)   * (ROn_V[:,:,:,-1]-ROn_noise_E_exc))/ROn_tau
-
-        voltage_wrt_tau_ad_On = (-On_R*On_g_ad[:,:,:,-1]*0.1*(On_V[:,:,:,-1]-On_E_k))/(On_tau*On_tau_ad**2)
-        voltage_wrt_tau_ad_Off = (-Off_R*Off_g_ad[:,:,:,-1]*0.1*(Off_V[:,:,:,-1]-Off_E_k))/(Off_tau*Off_tau_ad**2)
-        voltage_wrt_tau_ad_SOnOff = (-SOnOff_R*SOnOff_g_ad[:,:,:,-1]*0.1*(SOnOff_V[:,:,:,-1]-SOnOff_E_k))/(SOnOff_tau*SOnOff_tau_ad**2)
-        voltage_wrt_tau_ad_ROn = (-ROn_R*ROn_g_ad[:,:,:,-1]*0.1*(ROn_V[:,:,:,-1]-ROn_E_k))/(ROn_tau*ROn_tau_ad**2)
-
-        voltage_wrt_g_inc_On = (-On_R*(((1+np.tanh(On_V[:,:,:,-1]-On_V_thresh))/2)*((1+np.tanh(-(On_V[:,:,:,-2]-On_V_thresh)))/2))*0.1*(On_V[:,:,:,-1]-On_E_k))/On_tau
-        voltage_wrt_g_inc_Off = (-Off_R*(((1+np.tanh(Off_V[:,:,:,-1]-Off_V_thresh))/2)*((1+np.tanh(-(Off_V[:,:,:,-2]-Off_V_thresh)))/2))*0.1*(Off_V[:,:,:,-1]-Off_E_k))/Off_tau
-        voltage_wrt_g_inc_SOnOff = (-SOnOff_R*(((1+np.tanh(SOnOff_V[:,:,:,-1]-SOnOff_V_thresh))/2)*((1+np.tanh(-(SOnOff_V[:,:,:,-2]-SOnOff_V_thresh)))/2))*0.1*(SOnOff_V[:,:,:,-1]-SOnOff_E_k))/SOnOff_tau
-        voltage_wrt_g_inc_ROn = (-ROn_R*(((1+np.tanh(ROn_V[:,:,:,-1]-ROn_V_thresh))/2)*((1+np.tanh(-(ROn_V[:,:,:,-2]-ROn_V_thresh)))/2))*0.1*(ROn_V[:,:,:,-1]-ROn_E_k))/ROn_tau
-
-        voltage_wrt_tauP_On_ROn = (-ROn_R*On_ROn_gSYN*On_ROn_scale*  (     (   On_ROn_PSC_F[:,:,:,-1]*(-(1-On_ROn_PSC_P[:,:,:,-1])/On_ROn_tauP**2)*(1-On_ROn_PSC_fP))   *    (np.tanh(-(t-(On_tspike[:,:,:,-1]+On_ROn_PSC_delay)))  +  1)/2 )   *       0.1*On_ROn_netcon*(ROn_V[:,:,:,-1]-On_ROn_ESYN))/(On_ROn_tauR*ROn_tau)
-        voltage_wrt_tauP_On_SOnOff = (-SOnOff_R*On_SOnOff_gSYN*On_SOnOff_scale*  (     (   On_SOnOff_PSC_F[:,:,:,-1]*(-(1-On_SOnOff_PSC_P[:,:,:,-1])/On_SOnOff_tauP**2)*(1-On_SOnOff_PSC_fP))   *    (np.tanh(-(t-(On_tspike[:,:,:,-1]+On_SOnOff_PSC_delay)))  +  1)/2 )   *       0.1*On_SOnOff_netcon*(SOnOff_V[:,:,:,-1]-On_SOnOff_ESYN))/(On_SOnOff_tauR*SOnOff_tau)
-        voltage_wrt_tauP_Off_SOnOff = (-SOnOff_R*Off_SOnOff_gSYN*Off_SOnOff_scale*  (     (   Off_SOnOff_PSC_F[:,:,:,-1]*(-(1-Off_SOnOff_PSC_P[:,:,:,-1])/Off_SOnOff_tauP**2)*(1-Off_SOnOff_PSC_fP))   *    (np.tanh(-(t-(Off_tspike[:,:,:,-1]+Off_SOnOff_PSC_delay)))  +  1)/2 )   *       0.1*Off_SOnOff_netcon*(SOnOff_V[:,:,:,-1]-Off_SOnOff_ESYN))/(Off_SOnOff_tauR*SOnOff_tau)
-        voltage_wrt_tauP_SOnOff_ROn = (-ROn_R*SOnOff_ROn_gSYN*SOnOff_ROn_scale*  (     (   SOnOff_ROn_PSC_F[:,:,:,-1]*(-(1-SOnOff_ROn_PSC_P[:,:,:,-1])/SOnOff_ROn_tauP**2)*(1-SOnOff_ROn_PSC_fP))   *    (np.tanh(-(t-(SOnOff_tspike[:,:,:,-1]+SOnOff_ROn_PSC_delay)))  +  1)/2 )   *       0.1*SOnOff_ROn_netcon*(ROn_V[:,:,:,-1]-SOnOff_ROn_ESYN))/(SOnOff_ROn_tauR*ROn_tau)
-
-        #Voltage Primative Declaration
-
-        spiking_wrt_voltage_On = tspike_wrt_odeVoltage_ROn*voltage_wrt_psc_On_ROn*psc_wrt_spiking_On_ROn*tspike_wrt_odeVoltage_On+tspike_wrt_odeVoltage_ROn*voltage_wrt_psc_SOnOff_ROn*psc_wrt_spiking_SOnOff_ROn*tspike_wrt_odeVoltage_SOnOff*voltage_wrt_psc_On_SOnOff*psc_wrt_spiking_On_SOnOff*tspike_wrt_odeVoltage_On
-        spiking_wrt_voltage_Off = tspike_wrt_odeVoltage_ROn*voltage_wrt_psc_SOnOff_ROn*psc_wrt_spiking_SOnOff_ROn*tspike_wrt_odeVoltage_SOnOff*voltage_wrt_psc_Off_SOnOff*psc_wrt_spiking_Off_SOnOff*tspike_wrt_odeVoltage_Off
-        spiking_wrt_voltage_SOnOff = tspike_wrt_odeVoltage_ROn*voltage_wrt_psc_SOnOff_ROn*psc_wrt_spiking_SOnOff_ROn*tspike_wrt_odeVoltage_SOnOff
-        spiking_wrt_voltage_ROn = tspike_wrt_odeVoltage_ROn
+        conditionals_times.append(time.perf_counter() - conditionals_start)
 
 
-        #Parameter Updates
-
-        spike_wrt_tau_ad_On += spiking_wrt_voltage_On*voltage_wrt_tau_ad_On
-        spike_wrt_g_inc_On += spiking_wrt_voltage_On*voltage_wrt_g_inc_On
-        spike_wrt_tau_ad_Off += spiking_wrt_voltage_Off*voltage_wrt_tau_ad_Off
-        spike_wrt_g_inc_Off += spiking_wrt_voltage_Off*voltage_wrt_g_inc_Off
-        spike_wrt_tau_ad_SOnOff += spiking_wrt_voltage_SOnOff*voltage_wrt_tau_ad_SOnOff
-        spike_wrt_g_inc_SOnOff += spiking_wrt_voltage_SOnOff*voltage_wrt_g_inc_SOnOff
-        spike_wrt_tau_ad_ROn += spiking_wrt_voltage_ROn*voltage_wrt_tau_ad_ROn
-        spike_wrt_g_inc_ROn += spiking_wrt_voltage_ROn*voltage_wrt_g_inc_ROn
-        spike_wrt_tauP_On_ROn += spiking_wrt_voltage_ROn*voltage_wrt_tauP_On_ROn
-        spike_wrt_gsyn_On_ROn += spiking_wrt_voltage_ROn*voltage_wrt_gsyn_On_ROn
-        spike_wrt_tauP_On_SOnOff += spiking_wrt_voltage_SOnOff*voltage_wrt_tauP_On_SOnOff
-        spike_wrt_gsyn_On_SOnOff += spiking_wrt_voltage_SOnOff*voltage_wrt_gsyn_On_SOnOff
-        spike_wrt_tauP_Off_SOnOff += spiking_wrt_voltage_SOnOff*voltage_wrt_tauP_Off_SOnOff
-        spike_wrt_gsyn_Off_SOnOff += spiking_wrt_voltage_SOnOff*voltage_wrt_gsyn_Off_SOnOff
-        spike_wrt_tauP_SOnOff_ROn += spiking_wrt_voltage_ROn*voltage_wrt_tauP_SOnOff_ROn
-        spike_wrt_gsyn_SOnOff_ROn += spiking_wrt_voltage_ROn*voltage_wrt_gsyn_SOnOff_ROn
-        spike_wrt_FR += spiking_wrt_voltage_ROn*voltage_wrt_FR
-    grads = np.sum(np.stack([spike_wrt_gsyn_On_ROn,spike_wrt_gsyn_On_SOnOff,spike_wrt_gsyn_Off_SOnOff,spike_wrt_gsyn_SOnOff_ROn,spike_wrt_FR,spike_wrt_tau_ad_On,spike_wrt_tau_ad_Off,spike_wrt_tau_ad_SOnOff,spike_wrt_tau_ad_ROn,spike_wrt_g_inc_On,spike_wrt_g_inc_Off,spike_wrt_g_inc_SOnOff,spike_wrt_g_inc_ROn,spike_wrt_tauP_On_ROn,spike_wrt_tauP_On_SOnOff,spike_wrt_tauP_Off_SOnOff,spike_wrt_tauP_SOnOff_ROn], axis = 0), axis = 2)
+    print('ode_times')
 
 
+    print(sum(ode_times))
 
-    return ROn_spikes_holder, grads
+
+    print('state_update_times')
+
+
+    print(sum(state_update_times))
+
+
+    print('conditionals_times')
+
+
+    print(sum(conditionals_times))
+
+
+    return ROn_spikes_holder

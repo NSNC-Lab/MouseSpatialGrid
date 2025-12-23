@@ -2,7 +2,7 @@ from prep_input_data import PrepInput
 from argparse import ArgumentParser
 import yaml
 
-def call_inputs(p,batch_size):
+def call_inputs(batch_size):
     '''
     Example usage of the PrepInput class to generate spike trains based on STRF data.
     1. Load configuration from YAML file.
@@ -36,7 +36,7 @@ def call_inputs(p,batch_size):
     config = yaml.safe_load(open(yaml_path, 'r'))
     sub_config = config['input_spike_train']
     
-    prep_input = PrepInput(parsed_args, sub_config,p,batch_size)
+    prep_input = PrepInput(parsed_args, sub_config,batch_size)
     
     #masker_locs, target_locs = prep_input.make_grid_target_masker_locs()
     masker_locs = [None]

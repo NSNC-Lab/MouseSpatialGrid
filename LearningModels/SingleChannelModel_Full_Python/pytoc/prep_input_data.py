@@ -15,7 +15,7 @@ class PrepInput(object):
         config : dict
             Configuration dictionary loaded from a YAML file containing parameters for spike generation.
     '''
-    def __init__(self, args, config,p,batch_size):
+    def __init__(self, args, config,batch_size):
         
         self.chans = args.chans
         self.sigma = args.sigma
@@ -24,9 +24,8 @@ class PrepInput(object):
         self.dt = args.dt
         self.strfGain = args.strfGain
         self.std = args.std
-        #self.fr = args.FR
+        self.fr = args.FR
         
-        self.fr = p[4,:]
         self.batch_size = batch_size
         self.simlen = args.simlen
         
@@ -182,11 +181,11 @@ class PrepInput(object):
         #print(np.shape(np.reshape(FR,(100,1))[None][None]))
         #print(np.shape(std * np.random.randn(self.batch_size,simlen, chans, trials)))
 
-        firing_rate_reshape = np.reshape(FR,(100,1))
+        #firing_rate_reshape = np.reshape(FR,(100,1))
 
-        rand_gauss = firing_rate_reshape[:,:,None,None] + std * np.random.randn(self.batch_size,simlen, chans, trials)
+        #rand_gauss = firing_rate_reshape[:,:,None,None] + std * np.random.randn(self.batch_size,simlen, chans, trials)
         
-        #rand_gauss = FR + std * np.random.randn(simlen, chans, trials)
+        rand_gauss = FR + std * np.random.randn(simlen, chans, trials)
         rand_bin = np.random.rand(self.batch_size,simlen, chans, trials) < (rand_gauss * self.dt / 1000)
 
         temp = rand_bin.astype(np.uint8)

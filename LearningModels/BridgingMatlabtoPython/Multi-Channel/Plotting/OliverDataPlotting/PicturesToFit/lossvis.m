@@ -1,19 +1,8 @@
 addpath('C:\Users\ipboy\Documents\GitHub\ModelingEffort\Multi-Channel\Optimization\MatlabToPythonIntegration\results_arch_test\')
 addpath('C:\Users\ipboy\Documents\GitHub\ModelingEffort\Multi-Channel\Optimization\MatlabToPythonIntegration\results_tau_ad\')
 addpath('C:\Users\ipboy\Documents\GitHub\ModelingEffort\Multi-Channel\Plotting\OliverDataPlotting\PicturesToFit')
-
-%larger ginc (10x)
-%m = matfile('run_2025-10-17_11-41-22.mat');
-%Run for twice as long
-m = matfile('run_2025-10-17_06-02-24.mat');
-%With Ginc add as well as tau ad set low
-%m = matfile('run_2025-10-16_21-38-02.mat');
-%With tau ad set low on e cells
-%m = matfile('run_2025-10-15_20-05-36.mat');
-
+m = matfile('run_2025-10-15_20-05-36.mat');
 %m = matfile('run_2025-10-09_05-49-04.mat');
-
-losses = m.losses;
 
 loss = mean(losses(:,2,:),3);
 min_loss = min(squeeze(losses(:,2,:))');

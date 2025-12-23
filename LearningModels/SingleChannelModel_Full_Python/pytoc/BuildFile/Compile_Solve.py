@@ -23,6 +23,7 @@ def solve_file_generator(solve_file_body = '', cpp_gen = 0):
 def bring_in_imports():
 
     import_string = 'import numpy as np\n'
+    import_string += 'import time\n'
 
     return import_string
 
