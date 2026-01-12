@@ -11,8 +11,8 @@ def Declare_Architecture(opts):
     #              After all nuerons have been declared you must wrap all of the neurons
     #              within a list to be used downstream
 
-    from mechs import Lif_Neuron
-    from mechs import Lif_Synapse
+    from Variable_Initializations import Lif_Neuron
+    from Variable_Initializations import Lif_Synapse
 
     Onset_input = Lif_Neuron.Build_Vars(name = 'On',is_input=1, response = 'onset',g_postIC = 0.17, g_inc = 0.0000,is_output=0)
     Offset_input = Lif_Neuron.Build_Vars(name = 'Off',is_input=1, response = 'offset', g_inc = 0.0000,g_postIC = 0.17)
