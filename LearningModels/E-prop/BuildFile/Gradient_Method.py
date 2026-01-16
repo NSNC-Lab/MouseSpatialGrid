@@ -83,7 +83,10 @@ def compile_spiking_wrt_odeVoltage(neurons):
         neuron_name = k['name']
 
         #More stable version
+        #spiking_deriv += f'        tspike_wrt_odeVoltage_{neuron_name} = (  (t - {neuron_name}_tspike[:,:,:,-1])*np.tanh(-({neuron_name}_V[:,:,:,-2]-{neuron_name}_V_thresh))*(1-np.tanh({neuron_name}_V[:,:,:,-1]-{neuron_name}_V_thresh)**2)  )\n' #1 is our normailization component
         spiking_deriv += f'        tspike_wrt_odeVoltage_{neuron_name} = (  (t - {neuron_name}_tspike[:,:,:,-1])*np.tanh(-({neuron_name}_V[:,:,:,-2]-{neuron_name}_V_thresh))*(1-np.tanh({neuron_name}_V[:,:,:,-1]-{neuron_name}_V_thresh)**2)  )\n' #1 is our normailization component
+
+
 
         #spiking_deriv += f'        tspike_wrt_odeVoltage_{neuron_name} = (t - {neuron_name}_tspike[:,:,:,-1])*(1/(1+np.exp({neuron_name}_V[:,:,:,-2]-{neuron_name}_V_thresh)))*(np.exp(-({neuron_name}_V[:,:,:,-1]-{neuron_name}_V_thresh))/(1+np.exp(-({neuron_name}_V[:,:,:,-1]-{neuron_name}_V_thresh)))**2)\n'
         #spiking_deriv += f'        print(np.shape(tspike_wrt_odeVoltage_{neuron_name}))\n'
@@ -143,7 +146,7 @@ def compile_odeVoltage_wrt_spiking(synapses,options):
         #Try stable version
         #psc_wrt_spiking += f'        psc_wrt_spiking_{synapse_name} = {options["dt"]}*({synapse_name}_scale*({synapse_name}_PSC_x[:,:,:,-2] + {synapse_name}_PSC_q[:,:,:,-2]*(1/(np.cosh(t-({pre_node}_tspike[:,:,:,-1]+{synapse_name}_PSC_delay))))**2))\n'
         #Stable version v2 replace 1/cosh with 1-tanh
-        psc_wrt_spiking += f'        psc_wrt_spiking_{synapse_name} = ( {options["dt"]}*({synapse_name}_scale*(({synapse_name}_PSC_x[:,:,:,-1] + {synapse_name}_PSC_q[:,:,:,-1])*(1-(np.tanh(t-({pre_node}_tspike[:,:,:,-1]+{synapse_name}_PSC_delay)))**2)))  )*100 \n' #100 is normalization component (positively?)
+        psc_wrt_spiking += f'        psc_wrt_spiking_{synapse_name} = ( {options["dt"]}*({synapse_name}_scale*(({synapse_name}_PSC_q[:,:,:,-1])*2*(np.tanh(t-({pre_node}_tspike[:,:,:,-1]+{synapse_name}_PSC_delay)))*(1-(np.tanh(t-({pre_node}_tspike[:,:,:,-1]+{synapse_name}_PSC_delay)))**2)))  )*100 \n' #100 is normalization component (positively?)
         #psc_wrt_spiking += f'        psc_wrt_spiking_{synapse_name} = ( {options["dt"]}*({synapse_name}_scale*(({synapse_name}_PSC_x[:,:,:,-1] + {synapse_name}_PSC_q[:,:,:,-1])*((np.tanh(t-({pre_node}_tspike[:,:,:,-1]+{synapse_name}_PSC_delay))))))  )*100 \n' #100 is normalization component (positively?)
 
         #psc_wrt_spiking += f'        print(np.shape(psc_wrt_spiking_{synapse_name}))\n'
@@ -560,7 +563,7 @@ def fetch_loss(synapses):
     
 
     
-    fetch_loss_declaration += f'\n        if timestep % loss_bin_width == 0 and timestep != 0:'
+    fetch_loss_declaration += f'\n        if timestep % loss_bin_width == (loss_bin_width-1) and timestep != 0:'
     fetch_loss_declaration += f'\n            loss_vals = calculate_loss_eprop.calculate(ROn_spikes_holder,timestep,loss_bin_width)'
     #fetch_loss_declaration += f'\n            print(np.shape(losses_holder))'
     #fetch_loss_declaration += f'\n            print(np.shape(loss_vals))'
@@ -570,7 +573,7 @@ def fetch_loss(synapses):
         post_node = m['name'].rsplit('_', 1)[1]
         #parameter_updates += f'        spike_wrt_tauP_{synapse_name} += spiking_wrt_voltage_{post_node}*voltage_wrt_tauP_{synapse_name}\n'
         #parameter_updates += f'        print(np.shape(spiking_wrt_voltage_{post_node}*voltage_wrt_gsyn_{synapse_name}))\n'
-        fetch_loss_declaration += f'            spike_wrt_gsyn_{synapse_name} = np.sum(spike_wrt_gsyn_{synapse_name}_accumulate,axis=-1)*loss_vals[:,None,None]\n'
+        fetch_loss_declaration += f'            spike_wrt_gsyn_{synapse_name} += np.sum(spike_wrt_gsyn_{synapse_name}_accumulate,axis=-1)*loss_vals[:,None,None]\n'
 
     #fetch_loss_declaration += f'\n        else:'
     #fetch_loss_declaration += f'\n            loss_vals = np.array([1])'

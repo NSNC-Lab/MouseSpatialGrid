@@ -52,7 +52,7 @@ def declare_vars(neurons,synapses,options):
 
 
 
-                if 'gSYN' in j and 'Off_SOnOff' in j:
+                if 'Off_SOnOff_gSYN' == j:
                    variable_declaration += f'\n    {j} = p[{gsyn_t}].reshape({options["N_batch"]}, 1, 1)'
                    gsyn_t += 1
 
@@ -413,7 +413,7 @@ def declare_condtionals(neurons,synapses):
         #Same as above with the compability stuff
         conditionals_declaration += f'\n        t{synapse_name} = t + np.zeros_like({pre_neuron_name}_tspike)'
         conditionals_declaration += f'\n        {synapse_name}_PSC_delay_cmp = {synapse_name}_PSC_delay + np.zeros_like({pre_neuron_name}_tspike)'
-        conditionals_declaration += f'\n        cmp{synapse_name} = t{synapse_name} <= ({pre_neuron_name}_tspike + {synapse_name}_PSC_delay_cmp)'
+        conditionals_declaration += f'\n        cmp{synapse_name} = t{synapse_name} == ({pre_neuron_name}_tspike + {synapse_name}_PSC_delay_cmp)'
         #conditionals_declaration += f'\n        print("cmp_syn ndim=", int(cmp{synapse_name}.ndim))'
         conditionals_declaration += f'\n        {synapse_name}_mask_psc = np.any(cmp{synapse_name}, axis=3)'
         

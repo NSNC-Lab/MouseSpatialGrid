@@ -7,7 +7,7 @@ def pinit(batch_size, num_params):
     rng = np.random
     p = np.zeros((num_params,batch_size))
     lrs = np.zeros((num_params,1))
-    lr_frac = 0.05
+    lr_frac = 2
 
     #All tested starting conditions
     #p[0:4,:] = rng.uniform(0.0, 0.08, size=(4, batch_size)).astype(np.float32) #GSYNs  
@@ -23,7 +23,7 @@ def pinit(batch_size, num_params):
     #p[0:4,:] = rng.uniform(0, 0.01, size=(4, batch_size)).astype(np.float32) #g_inc
     
     #current 4 parameter test
-    p[0:1,:] = rng.uniform(0.0, 0.08, size=(1, batch_size)).astype(np.float32) #GSYNs
+    p[0:1,:] = rng.uniform(0, 0.08, size=(1, batch_size)).astype(np.float32) #GSYNs
     lrs[0:1] = 0.08*lr_frac
     # p[4,:] = rng.uniform(5, 20, size=(1, batch_size)).astype(np.float32) #tau_ad
     # lrs[4] = 20*lr_frac

@@ -21,7 +21,7 @@ def calculate(forwards_output, grads):
 
         #print(np.shape(forwards_out))
 
-        filename = f"C:/Users/ipboy/Documents/Github/ModelingEffort/Multi-Channel/Plotting/OliverDataPlotting/PicturesToFit/picture_fit{7}contra.mat"
+        filename = f"C:/Users/ipboy/Documents/Github/ModelingEffort/Multi-Channel/Plotting/OliverDataPlotting/PicturesToFit/picture_fit{1}contra.mat"
         data = loadmat(filename)['picture'].astype(np.float32)[:,:,None]
 
         savemat("compare.mat", {"data": data, "forwards_out":forwards_out}, do_compression=True)

@@ -13,7 +13,7 @@ def calculate(forwards_output,t,loss_bin_width):
         # -- Constants
         dt = 0.1 #ms
         dts = dt/1000 #in seconds
-        bin_width = 200 # binwidth/10 = ms ex. binwidth 200 = 20 ms
+        #bin_width = 200 # binwidth/10 = ms ex. binwidth 200 = 20 ms
 
         # -- Load in data
 
@@ -27,7 +27,7 @@ def calculate(forwards_output,t,loss_bin_width):
         #print(np.shape(forwards_out))
 
 
-        filename = f"C:/Users/ipboy/Documents/Github/ModelingEffort/Multi-Channel/Plotting/OliverDataPlotting/PicturesToFit/picture_fit{7}contra.mat"
+        filename = f"C:/Users/ipboy/Documents/Github/ModelingEffort/Multi-Channel/Plotting/OliverDataPlotting/PicturesToFit/picture_fit{1}contra.mat"
         data = loadmat(filename)['picture'].astype(np.float32)[:,:,None]
 
         
