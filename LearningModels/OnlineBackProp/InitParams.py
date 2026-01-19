@@ -7,7 +7,7 @@ def pinit(batch_size, num_params):
     rng = np.random
     p = np.zeros((num_params,batch_size))
     lrs = np.zeros((num_params,1))
-    lr_frac = 0.2
+    lr_frac = 0.05
 
     #All tested starting conditions
     #p[0:4,:] = rng.uniform(0.0, 0.08, size=(4, batch_size)).astype(np.float32) #GSYNs  

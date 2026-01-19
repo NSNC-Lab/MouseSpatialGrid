@@ -3,7 +3,6 @@ import declarations
 from BuildFile import Forwards_Method, Compile_Solve, calculate_loss
 import numpy as np
 import time
-from datetime import datetime
 import Update_params
 import InitParams
 from scipy.io import loadmat, savemat
@@ -106,7 +105,7 @@ class runSimulation(object):
     #savemat("compare.mat", {"data": data, "forwards_out":on_spks}, do_compression=True)
 
     #Grad Params
-    beta1, beta2 = 0.99, 0.9995 
+    beta1, beta2 = 0.5, 0.9995 
     eps = 1e-6
     #lr = 0.5
 
@@ -128,7 +127,7 @@ class runSimulation(object):
 
     
 
-    for epoch in range(20):
+    for epoch in range(100):
 
         #spks = call_inputs(p,batch_size)
         #on_spks = np.transpose(spks[f'locs_masker_None_target_0_on'][f'stimulus_0_poisson_spks'],(2,0,1))
@@ -142,8 +141,6 @@ class runSimulation(object):
         #Make it so that you don't have to supply data if you are not running gradients
         output, grads, on_track, off_track, loss_holder = generated_solve_file.solve_run(on_spks,off_spks,noise,data,p) #Python Verison to build
         
-        #print(grads)
-
         #print(np.shape(on_track))
 
         #print(grads)
@@ -181,14 +178,6 @@ class runSimulation(object):
 
         print(f'L2 loss : {np.mean(loss[0]):.2f}  -:-  MSE loss : {np.mean(loss[1]):.2f} ---- Epoch: {epoch}')
 
-
-        best_loss_idx = np.argmin(np.array(loss)[1,:])
-
-        if np.array(loss)[1,best_loss_idx] < best_loss:
-            best_output = output[best_loss_idx,:,:,:]
-            best_loss = np.array(loss)[1,best_loss_idx]
-            best_params = p[:,best_loss_idx]
-
         # print(out_grads)
 
         #Use adam optimizer on grads
@@ -210,14 +199,18 @@ class runSimulation(object):
         #print(np.shape(loss))
         #print(np.shape(p))
 
-        
+        best_loss_idx = np.argmin(np.array(loss)[1,:])
+
+        if np.array(loss)[1,best_loss_idx] < best_loss:
+            best_output = output[best_loss_idx,:,:,:]
+            best_loss = np.array(loss)[1,best_loss_idx]
+            best_params = p[:,best_loss_idx]
 
 
     elapsed = time.perf_counter() - start
-    print(f"{elapsed:.2f} s")
+    print(f"{elapsed*1000:.2f} ms")
 
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    savemat(f"output_compressed_Eprop_{timestamp}.mat", {"output": output, "losses":losses, "params" : param_tracker,  "best_loss" : np.asarray(best_loss, dtype=np.float32),"best_output" : np.asarray(best_output, dtype=np.float32),"best_params" : np.asarray(best_params, dtype=np.float32)}, do_compression=True)
+    savemat("output_compressed_500.mat", {"output": output, "losses":losses, "params" : param_tracker,  "best_loss" : np.asarray(best_loss, dtype=np.float32),"best_output" : np.asarray(best_output, dtype=np.float32),"best_params" : np.asarray(best_params, dtype=np.float32)}, do_compression=True)
 
     # # ============== PARAMETER EVOLUTION PLOT ==============
     # # param_tracker is a list of arrays, each with shape (1, 100) or (num_params, batch_size)

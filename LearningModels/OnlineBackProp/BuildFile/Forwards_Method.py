@@ -21,14 +21,15 @@ def Euler_Compiler(neurons,synapses,projections,options):
     #print(Conditionals_declaration)
 
     #6.5 Declare Gradients
-    phi_declaration,eligbility_declaration,Bk_declaration,Lt_declaration, grad_declaration, return_declaration_grad = Gradient_Method.compileGrad(neurons,synapses,projections,options)
+    spikewrtV_declaration, Vwrtspike_declaration, VwrtGsyn_declaration , VwrtFp_declaration, VwrtFR_declaration, VwrtEl_declaration, VwrtR_declaration, VwrtEk_declaration, VwrtgpostIC_declaration, VwrtTau_declaration, VwrtTauP_declaration, VwrtTau_ad_declaration, Vwrtg_inc_declaration, loss_declration, update_declaration, return_declaration_grad = Gradient_Method.compileGrad(neurons,synapses,projections,options)
 
     #7. Declare return statement
     Returns_declaration = declare_returns(neurons)
 
     #solve_file_body = variable_declaration + holder_declaration + Euler_loop_declaration + ODE_declaration + VwrtGsyn_declaration + State_Update_declaration + Vwrtspike_declaration + spikewrtV_declaration + Conditionals_declaration + update_declaration + return_declaration_grad + Returns_declaration
 
-    solve_file_body = variable_declaration + holder_declaration + Euler_loop_declaration + ODE_declaration + State_Update_declaration + phi_declaration + eligbility_declaration + Bk_declaration + Conditionals_declaration  + Lt_declaration + grad_declaration  + return_declaration_grad + Returns_declaration
+    solve_file_body = variable_declaration + holder_declaration + Euler_loop_declaration + ODE_declaration + State_Update_declaration + Vwrtspike_declaration + spikewrtV_declaration + Conditionals_declaration + VwrtGsyn_declaration + VwrtTau_ad_declaration + Vwrtg_inc_declaration  + update_declaration + loss_declration  + return_declaration_grad + Returns_declaration
+
 
     return solve_file_body
 
@@ -152,7 +153,7 @@ def declare_holders(neurons, synapses, options):
 
         holder_declaration += f'\n    spike_wrt_gsyn_{synapse_name}_accumulate = np.zeros(({options["N_batch"]},{options["N_trials"]},{options["N_channels"]},loss_bin_width))'
 
-        holder_declaration += f'\n    grad_{synapse_name} = np.zeros(({options["N_batch"]},{options["N_trials"]},{options["N_channels"]}))'
+        holder_declaration += f'\n    spike_wrt_gsyn_{synapse_name} = np.zeros(({options["N_batch"]},{options["N_trials"]},{options["N_channels"]}))'
         #holder_declaration += f'\n    spike_wrt_fP_{synapse_name} = np.zeros(({options["N_batch"]},{options["N_trials"]},{options["N_channels"]}))'
         #holder_declaration += f'\n    spike_wrt_tauP_{synapse_name} = np.zeros(({options["N_batch"]},{options["N_trials"]},{options["N_channels"]}))'
 

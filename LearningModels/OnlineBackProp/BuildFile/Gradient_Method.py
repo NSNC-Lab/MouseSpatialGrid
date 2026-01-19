@@ -49,14 +49,6 @@ def compileGrad(neurons,synapses,projections,options):
     #Get E-prop Loss
     loss_declration = fetch_loss(synapses)
 
-    #E-prop definitions
-    phi_declaration = compute_phi()
-    eligbility_declaration = compute_eligibility(synapses)
-    Bk_declaration = compute_Bk()
-    Lt_declaration = compute_Lt()
-    grad_declaration = compute_gradients(synapses)
-
-    
     #Update Derivatvies
     update_declaration = compile_updates(local_graph,local_graph_synapses,synapses,neurons,VwrtGsyn_declaration = VwrtGsyn_declaration)
 
@@ -65,7 +57,7 @@ def compileGrad(neurons,synapses,projections,options):
 
     #loss_declaration = compile_loss()
 
-    return phi_declaration,eligbility_declaration,Bk_declaration,Lt_declaration, grad_declaration, return_declaration
+    return spikewrtV_declaration, Vwrtspike_declaration, VwrtGsyn_declaration , VwrtFp_declaration, VwrtFR_declaration, VwrtEl_declaration, VwrtR_declaration, VwrtEk_declaration, VwrtgpostIC_declaration, VwrtTau_declaration, VwrtTauP_declaration, VwrtTau_ad_declaration, Vwrtg_inc_declaration, loss_declration, update_declaration, return_declaration
 
 #########################################
 #     Derivative related functions      #
@@ -592,62 +584,6 @@ def fetch_loss(synapses):
     return fetch_loss_declaration
 
 
-def compute_phi():
-    phi_declaration = '\n        #Compute Phi\n\n'
-
-    phi_declaration += '        psi_ROn = (1 - np.tanh(ROn_V[:,:,:,-1] - ROn_V_thresh)**2)\n'
-    phi_declaration += '        psi_SOnOff = (1 - np.tanh(SOnOff_V[:,:,:,-1] - SOnOff_V_thresh)**2)\n'
-    
-    return phi_declaration
-
-def compute_eligibility(synapses):
-    #This function creates takes the derivative of the same equation in the PSC derivative but wrt gsyn (synaptic weight)
-    # -- This is a learnable parameter
-    #-------------------------------------------
-    # V = R*gsyn*pscs*netcon*(V-ESYN)
-    #-------------------------------------------
-
-    eligbility_delcaration = '\n'
-
-    for k in synapses:
-        synapse_name = k['name']
-        post_node = k['name'].rsplit('_', 1)[1]
-
-        #python version
-        eligbility_delcaration += f'        eligibility_{synapse_name} = 0.1*(psi_{post_node}*(-{post_node}_R) * {synapse_name}_PSC_s[:,:,:,-1]*{synapse_name}_netcon*({post_node}_V[:,:,:,-1]-{synapse_name}_ESYN))/{post_node}_tau\n'
-
-    return eligbility_delcaration
-    
-def compute_Bk():
-    Bk_declaration = '\n        #Compute Bk\n\n'
-
-    Bk_declaration += '        Bk = -SOnOff_ROn_gSYN*(ROn_V_thresh - SOnOff_ROn_ESYN)\n'
-    
-    return Bk_declaration
-
-def compute_Lt():
-    Lt_declaration = '\n        #Compute Lt\n\n'
-
-    Lt_declaration += '        L_t = ROn_mask.astype(np.float64) - data[:,timestep,:].reshape(1,10,1)\n'
-    Lt_declaration += '        L_t_S_SOnOff_ROn = Bk*(ROn_mask.astype(np.float64) - data[:,timestep,:].reshape(1,10,1))\n'
-    
-    return Lt_declaration
-
-def compute_gradients(synapses):
-    gradients_declaration = '\n        #Compute Gradients\n\n'
-
-    for k in synapses:
-        synapse_name = k['name']
-        post_node = k['name'].rsplit('_', 1)[1]
-
-        if post_node == 'SOnOff':
-            gradients_declaration += f'        grad_{synapse_name} += eligibility_{synapse_name}*L_t_S_SOnOff_ROn\n'
-        else:
-            gradients_declaration += f'        grad_{synapse_name} += eligibility_{synapse_name}*L_t\n'
-        
-
-    return gradients_declaration
-
 def compile_updates(local_graph,local_graph_synapses,synapses,neurons,VwrtGsyn_declaration=''):
 
     voltage_primative_declaration = '\n        #Voltage Primative Declaration\n\n'
@@ -737,7 +673,7 @@ def compile_return(synapses,neurons,VwrtGsyn_declaration=''):
 
             #if k['name'] == 'SOnOff_ROn':
 
-            return_statement += f'grad_{synapse_name},'
+            return_statement += f'spike_wrt_gsyn_{synapse_name},'
         #     #return_statement += f'spike_wrt_fP_{synapse_name},'
          
         

@@ -29,6 +29,7 @@ def Declare_Architecture(opts):
     On_S1_synapse = Lif_Synapse.Build_Vars(name = 'On_SOnOff', gSYN = 0.085, fP = 0.2,tauP=80, tauR=0.1, tauD=1, delay=1)
     Off_S1_synapse = Lif_Synapse.Build_Vars(name = 'Off_SOnOff', gSYN = 0.045, fP = 0.0,tauP=80, tauR=0.1, tauD=1, delay=1)
     S1_R1_synapse = Lif_Synapse.Build_Vars(name = 'SOnOff_ROn',gSYN=0.025,fP=0.5,tauP=120, tauR=1, tauD=4.5,ESYN=-80, delay=0.5)
+
     Off_R1_synapse = Lif_Synapse.Build_Vars(name = 'Off_ROn',fP=0.1,gSYN=0.04,tauP=30, tauR=0.7, tauD=1.5,delay=3)
 
     synapses = [On_R1_synapse,Off_R1_synapse,On_S1_synapse,Off_S1_synapse,S1_R1_synapse]
