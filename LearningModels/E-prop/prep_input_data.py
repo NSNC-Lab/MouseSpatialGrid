@@ -249,7 +249,7 @@ class PrepInput(object):
                     Dictionary containing generated spike trains (adjusted IC and poisson spikes ) for each location and stimulus type.
                 
                     '''
-        data = scipy.io.loadmat(strf_path)
+        data = scipy.io.loadmat('C:/Users/ipboy/Documents/GitHub/MouseSpatialGrid/LearningModels/E-prop/strfMat.mat')
             
         #print(np.array(data['targets']['fr_on1'][0][0]))
         #fr_target_on = np.array([np.array(dta) for dta in data['fr_target_on'].squeeze()])

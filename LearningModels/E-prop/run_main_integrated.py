@@ -64,7 +64,7 @@ class runSimulation(object):
     mat = loadmat("all_units_info_with_polished_criteria_modified_perf.mat",variable_names=["all_data"],squeeze_me=True,struct_as_record=False)
     all_data = mat["all_data"]  # numpy array of MATLAB structs
 
-    n = 7  # MATLAB is 1-based
+    n = 2  # MATLAB is 1-based
     unit = all_data[n - 1]
 
     spike_times = unit.ctrl_tar1_timestamps
@@ -73,20 +73,30 @@ class runSimulation(object):
     if isinstance(spike_times, np.ndarray) and spike_times.ndim == 2:
         spike_times = spike_times[:, 0]
 
+    pre_to_aprx_3s_holder = np.zeros((10,39801))
+    no_pre_holder = np.zeros((10,29801))
+
     pre_zeros_list = []
+    post_zeros_list = []
     for k in range(10):  # MATLAB: 1:10
         times = np.asarray(spike_times[k]).squeeze()
-        pre_zeros_list.append(times[times < 0])
+        pre_to_aprx_3s_holder[k,np.round(times[times < 2.98]*(1000/opts['dt'])+(1000/opts['dt'])).astype(int)] = 1  # Convert to indices
+        #no_pre_holder[k,np.round(times[times < 0]*(1000/opts['dt'])).astype(int)] = 1  # Convert to indices
 
+        pre_zeros_list.append(times[times < 0])
+        post_zeros_list.append(times[times >= 0])
+ 
     pre_zeros = np.concatenate(pre_zeros_list) if pre_zeros_list else np.array([])
     FR = pre_zeros.size / 10  # MATLAB: length(pre_zeros)/10
 
+    print(FR)
+
     # -- Load in data
-    filename = f"C:/Users/ipboy/Documents/Github/ModelingEffort/Multi-Channel/Plotting/OliverDataPlotting/PicturesToFit/picture_fit{7}contra.mat"
-    data = loadmat(filename)['picture'].astype(np.float32)  #trials,timecourse
-    data = data[:,:,None]
-
-
+    #filename = f"C:/Users/ipboy/Documents/Github/ModelingEffort/Multi-Channel/Plotting/OliverDataPlotting/PicturesToFit/picture_fit{n}contra.mat"
+    #data = loadmat(filename)['picture'].astype(np.float32)  #trials,timecourse
+    
+    #data = data[:,:,None]
+    data = pre_to_aprx_3s_holder[:,:,None]
 
     num_params = 5
     batch_size = opts['N_batch']
@@ -103,10 +113,10 @@ class runSimulation(object):
     #print('p1')
     #print(p[13:17,1:5])
 
-    #savemat("compare.mat", {"data": data, "forwards_out":on_spks}, do_compression=True)
+    savemat("compare3.mat", {"data": data, "forwards_out":on_spks, "noise": noise}, do_compression=True)
 
     #Grad Params
-    beta1, beta2 = 0.99, 0.9995 
+    beta1, beta2 = 0.5, 0.9995 
     eps = 1e-6
     #lr = 0.5
 
@@ -128,7 +138,7 @@ class runSimulation(object):
 
     
 
-    for epoch in range(20):
+    for epoch in range(1):
 
         #spks = call_inputs(p,batch_size)
         #on_spks = np.transpose(spks[f'locs_masker_None_target_0_on'][f'stimulus_0_poisson_spks'],(2,0,1))
@@ -160,7 +170,7 @@ class runSimulation(object):
         #print(grads)
         #print(np.shape(grads))
 
-        out_grads,loss = calculate_loss.calculate(output,grads)
+        out_grads,loss = calculate_loss.calculate(output,grads,data)
 
 
         grads = np.squeeze(grads)

@@ -1,4 +1,4 @@
-from BuildFile import Gradient_Method
+from BuildFile import Gradient_Method, Gradient_Method_Binned
 
 def Euler_Compiler(neurons,synapses,projections,options):
     #1. Declare all of the variables
@@ -21,14 +21,16 @@ def Euler_Compiler(neurons,synapses,projections,options):
     #print(Conditionals_declaration)
 
     #6.5 Declare Gradients
-    phi_declaration,eligbility_declaration,Bk_declaration,Lt_declaration, grad_declaration, return_declaration_grad = Gradient_Method.compileGrad(neurons,synapses,projections,options)
+    #phi_declaration,eligbility_declaration,Bk_declaration,Lt_declaration, grad_declaration, return_declaration_grad = Gradient_Method.compileGrad(neurons,synapses,projections,options)
+    phi_declaration,eligbility_declaration,Bk_declaration, grad_declaration,loss_declaration, return_declaration_grad = Gradient_Method_Binned.compileGrad(neurons,synapses,projections,options)
 
     #7. Declare return statement
     Returns_declaration = declare_returns(neurons)
 
     #solve_file_body = variable_declaration + holder_declaration + Euler_loop_declaration + ODE_declaration + VwrtGsyn_declaration + State_Update_declaration + Vwrtspike_declaration + spikewrtV_declaration + Conditionals_declaration + update_declaration + return_declaration_grad + Returns_declaration
 
-    solve_file_body = variable_declaration + holder_declaration + Euler_loop_declaration + ODE_declaration + State_Update_declaration + phi_declaration + eligbility_declaration + Bk_declaration + Conditionals_declaration  + Lt_declaration + grad_declaration  + return_declaration_grad + Returns_declaration
+    #solve_file_body = variable_declaration + holder_declaration + Euler_loop_declaration + ODE_declaration + State_Update_declaration + phi_declaration + eligbility_declaration + Bk_declaration + Conditionals_declaration  + Lt_declaration + grad_declaration  + return_declaration_grad + Returns_declaration
+    solve_file_body = variable_declaration + holder_declaration + Euler_loop_declaration + ODE_declaration + State_Update_declaration + phi_declaration + eligbility_declaration + Bk_declaration + Conditionals_declaration  + grad_declaration + loss_declaration + return_declaration_grad + Returns_declaration
 
     return solve_file_body
 
@@ -89,7 +91,11 @@ def declare_vars(neurons,synapses,options):
                     variable_declaration += f'\n    {j} = {variable[j]}'
 
     variable_declaration += f'\n    loss_vals = np.array([0])'
-    variable_declaration += f'\n    loss_bin_width = 200'
+    variable_declaration += f'\n    loss_bin_width = 2000'
+
+    for synk in synapses:
+        synapse_name = synk["name"]
+        variable_declaration += f'\n    grad_{synapse_name}_accumulate=0'
 
     return variable_declaration
 

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import cumulative_trapezoid
 from scipy.io import loadmat, savemat
 
-def calculate(forwards_output, grads):
+def calculate(forwards_output, grads,data):
 
         # -- Constants
         dt = 0.1 #ms
@@ -18,18 +18,7 @@ def calculate(forwards_output, grads):
         forwards_out = np.squeeze(np.asarray(forwards_output, dtype=np.float32))
 
 
-
-        #print(np.shape(forwards_out))
-
-        filename = f"C:/Users/ipboy/Documents/Github/ModelingEffort/Multi-Channel/Plotting/OliverDataPlotting/PicturesToFit/picture_fit{7}contra.mat"
-        data = loadmat(filename)['picture'].astype(np.float32)[:,:,None]
-
-        savemat("compare.mat", {"data": data, "forwards_out":forwards_out}, do_compression=True)
-
-        #print(np.shape(data))
-
-        data = np.transpose(data,(2,0,1)) #Transpose things to be Batch,trials,timecouse
-        #forwards_out = np.transpose(forwards_out,(2,0,1))
+        data = np.transpose(data,(2,0,1))
 
         # -- L2 Loss & Deriv Vectorized
 

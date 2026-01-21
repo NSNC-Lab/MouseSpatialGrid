@@ -9,11 +9,11 @@ import numpy as np
 #Function to create he STRFs
 def call_strfs():
     args = ArgumentParser()
-    args.add_argument('--target_dir', type=str, default='../resampled-stimuli/target', help='directory containing target stimuli')
-    args.add_argument('--masker_dir', type=str, default='../resampled-stimuli/masker', help='directory containing masker stimuli')
+    args.add_argument('--target_dir', type=str, default='../SingleChannelModel_Full_Python/resampled-stimuli/target', help='directory containing target stimuli')
+    args.add_argument('--masker_dir', type=str, default='../SingleChannelModel_Full_Python/resampled-stimuli/masker', help='directory containing masker stimuli')
     parsed_args = args.parse_args()
         
-    yaml_path = '../config/config.yaml'
+    yaml_path = '../SingleChannelModel_Full_Python/config/config.yaml'
     config = yaml.safe_load(open(yaml_path, 'r'))
     strf_config = config['strf_config']
 

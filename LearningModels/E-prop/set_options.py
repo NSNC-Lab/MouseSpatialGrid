@@ -1,7 +1,8 @@
 def options():
    
     dt = 0.1                     #Simulation timestep size
-    sim_len = 29801              #Length of simulation
+    #sim_len = 29801              #Length of simulation
+    sim_len = 39801              #Length of simulation
     N_trials = 10                #Number of trials
     N_channels = 1               #Number of spatial channels
     N_batch = 100                #Batch size

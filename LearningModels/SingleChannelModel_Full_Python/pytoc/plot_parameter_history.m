@@ -12,5 +12,59 @@ spy(best_output)
 
 %%
 figure;
-spy(squeeze(output(2,:,:,:)))
+spy(squeeze(output(18,:,:,:)))
 
+%%
+figure
+subplot(3,1,1)
+plot(min(squeeze(losses(4:100,2,:))'))
+title('min-PSTH-loss over epochs')
+subplot(3,1,2)
+plot(mean(squeeze(losses(:,2,:))'))
+title('avg-PSTH-loss over epochs')
+subplot(3,1,3)
+plot(squeeze(mean(mean(diff(params),2),3)))
+title('convergence')
+
+%%
+cd(userpath);
+cd('../GitHub/ModelingEffort/Multi-Channel/Plotting/OliverDataPlotting')
+
+load('all_units_info_with_polished_criteria_modified_perf.mat','all_data');
+load('sound_files.mat','sampleRate','target1','target2');  %Sample Rate 195312 Hz
+
+
+cd('PicturesToFit\')
+%Look at the first animal type
+n = 7;
+    
+SpikeTimes = all_data(n).ctrl_tar1_timestamps(:,1);
+
+picture = zeros(10,29801);
+    
+for m = 1:10
+    stim_mask = logical((SpikeTimes{m} > 0) .* (SpikeTimes{m} < 2.9801));
+    trial_indicies = round(SpikeTimes{m}(stim_mask)*10000);
+    %Switch to one for spy plot
+    %1 added for zero indexing. Lets say for instance a spike lands at
+    %time = 0. In matlab this would be at the first indicy in the
+    %picture which is indicy 1.
+    picture(m,trial_indicies+1) = 1;
+end
+
+
+figure;
+spy(picture)
+
+
+%%
+figure
+spy(data)
+
+%%
+figure
+spy(forwards_out)
+
+%%
+figure
+spy(squeeze(noise(1,:,:)))

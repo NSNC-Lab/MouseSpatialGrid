@@ -104,7 +104,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     ROn_g_postIC = 0.17
     ROn_E_exc = 0
     ROn_netcon = np.eye(1)
-    ROn_nSYN = 0.011
+    ROn_nSYN = 0.015
     ROn_noise_E_exc = 0
     ROn_tauR_N = 0.7
     ROn_tauD_N = 1.5
@@ -171,7 +171,12 @@ def solve_run(on_input,off_input,noise_token,data,p):
     SOnOff_ROn_netcon = np.eye(1)
     SOnOff_ROn_scale = 1.5368523544529802
     loss_vals = np.array([0])
-    loss_bin_width = 200
+    loss_bin_width = 2000
+    grad_On_ROn_accumulate=0
+    grad_Off_ROn_accumulate=0
+    grad_On_SOnOff_accumulate=0
+    grad_Off_SOnOff_accumulate=0
+    grad_SOnOff_ROn_accumulate=0
 
     #Declare Holders
 
@@ -197,10 +202,10 @@ def solve_run(on_input,off_input,noise_token,data,p):
     ROn_g_ad = np.zeros((100,10,1,2))
     ROn_tspike = np.ones((100,10,1,5)) * -30
     ROn_buffer_index = np.ones((100,10,1))
-    ROn_spikes_holder = np.zeros((100,10,1,29801), dtype=np.int8)
-    On_SOnOff_PSC_s_holder = np.zeros((100,10,1,29801), dtype=np.int8)
-    Off_SOnOff_PSC_s_holder = np.zeros((100,10,1,29801), dtype=np.int8)
-    losses_holder = np.zeros((100,1,1,29801), dtype=np.int8)
+    ROn_spikes_holder = np.zeros((100,10,1,39801), dtype=np.int8)
+    On_SOnOff_PSC_s_holder = np.zeros((100,10,1,39801), dtype=np.int8)
+    Off_SOnOff_PSC_s_holder = np.zeros((100,10,1,39801), dtype=np.int8)
+    losses_holder = np.zeros((100,1,1,39801), dtype=np.int8)
     ROn_noise_sn = np.zeros((100,10,1,2))
     ROn_noise_xn = np.zeros((100,10,1,2))
     spike_wrt_tau_ad_ROn = np.zeros((100,10,1))
@@ -241,7 +246,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     spike_wrt_gsyn_SOnOff_ROn_accumulate = np.zeros((100,10,1,loss_bin_width))
     grad_SOnOff_ROn = np.zeros((100,10,1))
 
-    for timestep,t in enumerate(np.arange(0,29801*0.1-0.1,0.1)):
+    for timestep,t in enumerate(np.arange(0,39801*0.1-0.1,0.1)):
 
 
         #Declare ODES
@@ -525,18 +530,33 @@ def solve_run(on_input,off_input,noise_token,data,p):
         SOnOff_ROn_PSC_q[:,:,:,-1] = np.where(SOnOff_ROn_mask_psc,SOnOff_ROn_PSC_F[:,:,:,-1] * SOnOff_ROn_PSC_P[:,:,:,-1], SOnOff_ROn_PSC_q[:,:,:,-1])
         SOnOff_ROn_PSC_F[:,:,:,-1] = np.where(SOnOff_ROn_mask_psc,SOnOff_ROn_PSC_F[:,:,:,-1] + SOnOff_ROn_PSC_fF * (SOnOff_ROn_PSC_maxF - SOnOff_ROn_PSC_F[:,:,:,-1]), SOnOff_ROn_PSC_F[:,:,:,-1])
         SOnOff_ROn_PSC_P[:,:,:,-1] = np.where(SOnOff_ROn_mask_psc,SOnOff_ROn_PSC_P[:,:,:,-1] * (1 - SOnOff_ROn_PSC_fP), SOnOff_ROn_PSC_P[:,:,:,-1])
-        #Compute Lt
-
-        L_t = ROn_mask.astype(np.float64) - data[:,timestep,:].reshape(1,10,1)
-        L_t_S_SOnOff_ROn = Bk*(ROn_mask.astype(np.float64) - data[:,timestep,:].reshape(1,10,1))
-
         #Compute Gradients
 
-        grad_On_ROn += eligibility_On_ROn*L_t
-        grad_Off_ROn += eligibility_Off_ROn*L_t
-        grad_On_SOnOff += eligibility_On_SOnOff*L_t_S_SOnOff_ROn
-        grad_Off_SOnOff += eligibility_Off_SOnOff*L_t_S_SOnOff_ROn
-        grad_SOnOff_ROn += eligibility_SOnOff_ROn*L_t
+        grad_On_ROn_accumulate += eligibility_On_ROn
+        grad_Off_ROn_accumulate += eligibility_Off_ROn
+        grad_On_SOnOff_accumulate += eligibility_On_SOnOff
+        grad_Off_SOnOff_accumulate += eligibility_Off_SOnOff
+        grad_SOnOff_ROn_accumulate += eligibility_SOnOff_ROn
+
+        #grab loss
+
+
+        if timestep % loss_bin_width == 0 and timestep != 0:
+            sim_bin = np.sum(np.squeeze(np.sum(ROn_spikes_holder[:,:,:,timestep-loss_bin_width:timestep], axis=-1)),axis=-1)
+
+            data_bin = np.sum(np.sum(np.squeeze(data[:,timestep-loss_bin_width:timestep,:], axis=-1)),axis=-1)
+
+            loss_deriv = 2.0*(sim_bin - data_bin)
+            grad_On_ROn += grad_On_ROn_accumulate*loss_deriv[:,None,None]
+            grad_On_ROn_accumulate = 0
+            grad_Off_ROn += grad_Off_ROn_accumulate*loss_deriv[:,None,None]
+            grad_Off_ROn_accumulate = 0
+            grad_On_SOnOff += grad_On_SOnOff_accumulate*Bk*loss_deriv[:,None,None]
+            grad_On_SOnOff_accumulate = 0
+            grad_Off_SOnOff += grad_Off_SOnOff_accumulate*Bk*loss_deriv[:,None,None]
+            grad_Off_SOnOff_accumulate = 0
+            grad_SOnOff_ROn += grad_SOnOff_ROn_accumulate*loss_deriv[:,None,None]
+            grad_SOnOff_ROn_accumulate = 0
     grads = np.sum(np.stack([grad_On_ROn,grad_Off_ROn,grad_On_SOnOff,grad_Off_SOnOff,grad_SOnOff_ROn], axis = 0), axis = 2)
 
 

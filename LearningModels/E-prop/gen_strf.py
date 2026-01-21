@@ -77,6 +77,10 @@ class GenSTRF(object):
                 '''
                 fs, data = wavfile.read(stim_path)
                 data = data[np.newaxis, :]
+
+                #Append zeros to the beginning (1 second worth)
+                data = np.reshape(np.append(np.zeros((1,200000)), data),(1,846011))
+
                 spec, t, f = self.STRFspectrogram(data/rms(data)*lvl,fs)                 
                 strf = self.STRFgen(self.paramH, self.paramG, f, t[1]-t[0]) 
                 strf['w1'] = strf['w1']*strfGain # adjust STRF gain for spiking, sum of STRF with gain should be ~43.2;
@@ -102,6 +106,9 @@ class GenSTRF(object):
 
                 #print(fs)
                 data = data.astype(np.float64)
+
+                #Add a second to the front of the signal
+                data = np.append(np.zeros((1,200000)), data)
                 #print(np.shape(data))
 
                 # #Rsample the data to match the simulation timestep
@@ -515,7 +522,7 @@ class GenSTRF(object):
                 #print(offset_rate)
                 #print(firstneg)
 
-                if firstneg > 5500: firstneg = 2501 # for AM stimuli
+                #if firstneg > 5500: firstneg = 2501 # for AM stimuli
                 
                 # offset rate
                 offset_rate[:firstneg] = 0
