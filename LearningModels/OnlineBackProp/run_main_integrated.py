@@ -127,7 +127,7 @@ class runSimulation(object):
 
     
 
-    for epoch in range(100):
+    for epoch in range(1000):
 
         #spks = call_inputs(p,batch_size)
         #on_spks = np.transpose(spks[f'locs_masker_None_target_0_on'][f'stimulus_0_poisson_spks'],(2,0,1))

@@ -4,7 +4,7 @@ from BuildFile import Forwards_Method, Compile_Solve, calculate_loss
 import numpy as np
 import time
 from datetime import datetime
-import Update_params
+import Update_params_GA
 import InitParams
 from scipy.io import loadmat, savemat
 import yaml
@@ -140,7 +140,7 @@ class runSimulation(object):
         #print(p)
 
         #Make it so that you don't have to supply data if you are not running gradients
-        output, grads, on_track, off_track, loss_holder = generated_solve_file.solve_run(on_spks,off_spks,noise,data,p) #Python Verison to build
+        output = generated_solve_file.solve_run(on_spks,off_spks,noise,data,p) #Python Verison to build
         
         #print(grads)
 
@@ -160,10 +160,10 @@ class runSimulation(object):
         #print(grads)
         #print(np.shape(grads))
 
-        out_grads,loss = calculate_loss.calculate(output,grads)
+        loss = calculate_loss.calculate(output)
 
 
-        grads = np.squeeze(grads)
+        #grads = np.squeeze(grads)
 
         #print(np.shape(out_grads))
 
@@ -199,8 +199,20 @@ class runSimulation(object):
         #print(np.shape(grads))
         
         #Using grads here for of e-prop
-        m, v, p, t = Update_params.adam_update(m, v, p, t, beta1, beta2, lr, eps, grads)
+        #m, v, p, t = Update_params.adam_update(m, v, p, t, beta1, beta2, lr, eps, grads)
         #m, v, p, t = Update_params.adam_update(m, v, p, t, beta1, beta2, lr, eps, out_grads)
+        
+        #Initilze GA Hyper-Parameters
+        mutation_rate = 0.1 #Change to learn
+        mutation_strength = 0.003 #(Learning Rate)
+        elite_pop_frac = 0.05 #Keep no matter what
+
+        selection_type = "tournament"
+        crossover_type = "random_even"
+        mutation_type = "random"
+        p = Update_params_GA.GA_update(p,loss[1],selection_type,crossover_type,mutation_type,mutation_rate,mutation_strength,elite_pop_frac)
+
+
 
         #print('p3')
         #print(p[13:17,1:5])
@@ -217,7 +229,7 @@ class runSimulation(object):
     print(f"{elapsed:.2f} s")
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    savemat(f"output_compressed_Eprop_{timestamp}.mat", {"output": output, "losses":losses, "params" : param_tracker,  "best_loss" : np.asarray(best_loss, dtype=np.float32),"best_output" : np.asarray(best_output, dtype=np.float32),"best_params" : np.asarray(best_params, dtype=np.float32)}, do_compression=True)
+    savemat(f"output_compressed_GA_{timestamp}.mat", {"output": output, "losses":losses, "params" : param_tracker,  "best_loss" : np.asarray(best_loss, dtype=np.float32),"best_output" : np.asarray(best_output, dtype=np.float32),"best_params" : np.asarray(best_params, dtype=np.float32)}, do_compression=True)
 
     # # ============== PARAMETER EVOLUTION PLOT ==============
     # # param_tracker is a list of arrays, each with shape (1, 100) or (num_params, batch_size)

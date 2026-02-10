@@ -25,6 +25,7 @@ class PrepInput(object):
         self.strfGain = args.strfGain
         self.std = args.std
         self.fr = args.FR
+        self.num_cells = args.num_cells
         
         #self.fr = p[4,:]
         self.batch_size = batch_size
@@ -152,7 +153,7 @@ class PrepInput(object):
         return spike_train
     
     
-    def gen_poisson_times(self, chans, FR, std, simlen, trials):
+    def gen_poisson_times(self, chans, FR, std, simlen, trials, num_cells):
         """
         Generate Poisson spike trains with refractory period.
 
@@ -186,19 +187,23 @@ class PrepInput(object):
 
         #rand_gauss = firing_rate_reshape[:,:,None,None] + std * np.random.randn(self.batch_size,simlen, chans, trials)
         
-        rand_gauss = FR + std * np.random.randn(simlen, chans, trials)
-        rand_bin = np.random.rand(self.batch_size,simlen, chans, trials) < (rand_gauss * self.dt / 1000)
+        #rand_gauss = FR + std * np.random.randn(simlen, chans, trials)
+        #rand_bin = np.random.rand(self.batch_size,simlen, chans, trials) < (rand_gauss * self.dt / 1000)
+        firing_rate_reshape = np.reshape(FR,(num_cells,1,1,1,1))
+        rand_gauss = firing_rate_reshape + std * np.random.randn(num_cells, self.batch_size,simlen, chans, trials)
+        rand_bin = np.random.rand(num_cells,self.batch_size,simlen, chans, trials) < (rand_gauss * self.dt / 1000)
 
         temp = rand_bin.astype(np.uint8)
 
-        for batch in range(self.batch_size):
-            for chan in range(chans):
-                for trial in range(trials):
-                    spk_inds = np.where(temp[batch,:, chan, trial])[0]
-                    if len(spk_inds) > 1:
-                        ISIs = np.diff(spk_inds) * self.dt
-                        violate_inds = np.where(ISIs < self.refrac)[0] + 1
-                        temp[batch,spk_inds[violate_inds], chan, trial] = 0
+        for num in range(num_cells):
+            for batch in range(self.batch_size):
+                for chan in range(chans):
+                    for trial in range(trials):
+                        spk_inds = np.where(temp[num,batch,:, chan, trial])[0]
+                        if len(spk_inds) > 1:
+                            ISIs = np.diff(spk_inds) * self.dt
+                            violate_inds = np.where(ISIs < self.refrac)[0] + 1
+                            temp[num,batch,spk_inds[violate_inds], chan, trial] = 0
 
         
         #print(np.shape(np.array(temp)))
@@ -380,7 +385,7 @@ class PrepInput(object):
                     spks_dict[f'locs_masker_{locs[0]}_target_{locs[1]}_off'][f'stimulus_{stimulus}_poisson_spks'] = off_poisson_spks
            
             # Generate spiking activity
-            spk_noise = self.gen_poisson_times(self.chans, self.fr, self.std, self.simlen, self.trials)
+            spk_noise = self.gen_poisson_times(self.chans, self.fr, self.std, self.simlen, self.trials, self.num_cells)
             spks_dict[f'noise_masker_{locs[0]}_target_{locs[1]}'] = spk_noise
                 
         return spks_dict

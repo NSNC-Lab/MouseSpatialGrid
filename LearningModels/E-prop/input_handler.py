@@ -2,7 +2,7 @@ from prep_input_data import PrepInput
 from argparse import ArgumentParser
 import yaml
 
-def call_inputs(FR,batch_size):
+def call_inputs(num_cells,FR,batch_size):
     '''
     Example usage of the PrepInput class to generate spike trains based on STRF data.
     1. Load configuration from YAML file.
@@ -18,12 +18,13 @@ def call_inputs(FR,batch_size):
     args = ArgumentParser()
     args.add_argument('--chans', type=int, default=1, help='Number of channels')
     args.add_argument('--trials', type=int, default=10, help='Number of trials')
-    args.add_argument('--padToTime', type=float, default=3980.1, help='Time to pad spike trains to (ms)')
+    args.add_argument('--padToTime', type=float, default=2980.1, help='Time to pad spike trains to (ms)')
     args.add_argument('--sigma', type=int, default=300, help='Standard deviation for Gaussian tuning curves')    
     args.add_argument('--dt', type=float, default=0.1, help='Time step in ms')
     args.add_argument('--FR', type=float, default=FR, help='Firing rate of neurons in Hz')
+    args.add_argument('--num_cells', type=int, default=num_cells, help='Number of cells')
     args.add_argument('--std', type=float, default=0.0, help='Standard deviation of the firing rate.')
-    args.add_argument('--simlen', type=int, default=39801, help='Number of time steps (default = 35000).')
+    args.add_argument('--simlen', type=int, default=29801, help='Number of time steps (default = 35000).')
     args.add_argument('--strfGain', type=int, default=0.1, help='Flat multiplier applied to the STRF firing rates.')
     args.add_argument('--target_dir', type=str, default='../resampled-stimuli/target', help='directory containing target stimuli')
     args.add_argument('--masker_dir', type=str, default='../resampled-stimuli/masker', help='directory containing masker stimuli')

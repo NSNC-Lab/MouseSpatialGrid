@@ -89,9 +89,10 @@ def declare_vars(neurons,synapses,options):
                 #elif
                 elif j != 'name' and j != 'response':
                     variable_declaration += f'\n    {j} = {variable[j]}'
+                    print(f'Declaring variable {j} with value {variable[j]}')
 
     variable_declaration += f'\n    loss_vals = np.array([0])'
-    variable_declaration += f'\n    loss_bin_width = 2000'
+    variable_declaration += f'\n    loss_bin_width = 200'
 
     for synk in synapses:
         synapse_name = synk["name"]

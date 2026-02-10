@@ -104,7 +104,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     ROn_g_postIC = 0.17
     ROn_E_exc = 0
     ROn_netcon = np.eye(1)
-    ROn_nSYN = 0.011
+    ROn_nSYN = 0.015
     ROn_noise_E_exc = 0
     ROn_tauR_N = 0.7
     ROn_tauD_N = 1.5
@@ -114,7 +114,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     On_ROn_tauD = 1.5
     On_ROn_tauR = 0.7
     On_ROn_PSC_delay = 3
-    On_ROn_gSYN = p[0].reshape(100, 1, 1)
+    On_ROn_gSYN = p[0].reshape(1000, 1, 1)
     On_ROn_PSC_fF = 0
     On_ROn_PSC_fP = 0.1
     On_ROn_tauF = 180
@@ -126,7 +126,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     Off_ROn_tauD = 1.5
     Off_ROn_tauR = 0.7
     Off_ROn_PSC_delay = 3
-    Off_ROn_gSYN = p[1].reshape(100, 1, 1)
+    Off_ROn_gSYN = p[1].reshape(1000, 1, 1)
     Off_ROn_PSC_fF = 0
     Off_ROn_PSC_fP = 0.1
     Off_ROn_tauF = 180
@@ -138,7 +138,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     On_SOnOff_tauD = 1
     On_SOnOff_tauR = 0.1
     On_SOnOff_PSC_delay = 1
-    On_SOnOff_gSYN = p[2].reshape(100, 1, 1)
+    On_SOnOff_gSYN = p[2].reshape(1000, 1, 1)
     On_SOnOff_PSC_fF = 0
     On_SOnOff_PSC_fP = 0.2
     On_SOnOff_tauF = 180
@@ -150,7 +150,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     Off_SOnOff_tauD = 1
     Off_SOnOff_tauR = 0.1
     Off_SOnOff_PSC_delay = 1
-    Off_SOnOff_gSYN = p[3].reshape(100, 1, 1)
+    Off_SOnOff_gSYN = p[3].reshape(1000, 1, 1)
     Off_SOnOff_PSC_fF = 0
     Off_SOnOff_PSC_fP = 0.0
     Off_SOnOff_tauF = 180
@@ -162,7 +162,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     SOnOff_ROn_tauD = 4.5
     SOnOff_ROn_tauR = 1
     SOnOff_ROn_PSC_delay = 0.5
-    SOnOff_ROn_gSYN = p[4].reshape(100, 1, 1)
+    SOnOff_ROn_gSYN = p[4].reshape(1000, 1, 1)
     SOnOff_ROn_PSC_fF = 0
     SOnOff_ROn_PSC_fP = 0.5
     SOnOff_ROn_tauF = 180
@@ -180,71 +180,71 @@ def solve_run(on_input,off_input,noise_token,data,p):
 
     #Declare Holders
 
-    On_V = np.ones((100,10,1,2)) * On_E_L
-    On_g_ad = np.zeros((100,10,1,2))
-    On_tspike = np.ones((100,10,1,5)) * -30
-    On_buffer_index = np.ones((100,10,1))
-    spike_wrt_tau_ad_On = np.zeros((100,10,1))
-    spike_wrt_g_inc_On = np.zeros((100,10,1))
-    Off_V = np.ones((100,10,1,2)) * Off_E_L
-    Off_g_ad = np.zeros((100,10,1,2))
-    Off_tspike = np.ones((100,10,1,5)) * -30
-    Off_buffer_index = np.ones((100,10,1))
-    spike_wrt_tau_ad_Off = np.zeros((100,10,1))
-    spike_wrt_g_inc_Off = np.zeros((100,10,1))
-    SOnOff_V = np.ones((100,10,1,2)) * SOnOff_E_L
-    SOnOff_g_ad = np.zeros((100,10,1,2))
-    SOnOff_tspike = np.ones((100,10,1,5)) * -30
-    SOnOff_buffer_index = np.ones((100,10,1))
-    spike_wrt_tau_ad_SOnOff = np.zeros((100,10,1))
-    spike_wrt_g_inc_SOnOff = np.zeros((100,10,1))
-    ROn_V = np.ones((100,10,1,2)) * ROn_E_L
-    ROn_g_ad = np.zeros((100,10,1,2))
-    ROn_tspike = np.ones((100,10,1,5)) * -30
-    ROn_buffer_index = np.ones((100,10,1))
-    ROn_spikes_holder = np.zeros((100,10,1,29801), dtype=np.int8)
-    On_SOnOff_PSC_s_holder = np.zeros((100,10,1,29801), dtype=np.int8)
-    Off_SOnOff_PSC_s_holder = np.zeros((100,10,1,29801), dtype=np.int8)
-    losses_holder = np.zeros((100,1,1,29801), dtype=np.int8)
-    ROn_noise_sn = np.zeros((100,10,1,2))
-    ROn_noise_xn = np.zeros((100,10,1,2))
-    spike_wrt_tau_ad_ROn = np.zeros((100,10,1))
-    spike_wrt_g_inc_ROn = np.zeros((100,10,1))
-    On_ROn_PSC_s = np.zeros((100,10,1,2))
-    On_ROn_PSC_x = np.zeros((100,10,1,2))
-    On_ROn_PSC_F = np.ones((100,10,1,2))
-    On_ROn_PSC_P = np.ones((100,10,1,2))
-    On_ROn_PSC_q = np.ones((100,10,1,2))
-    spike_wrt_gsyn_On_ROn_accumulate = np.zeros((100,10,1,loss_bin_width))
-    grad_On_ROn = np.zeros((100,10,1))
-    Off_ROn_PSC_s = np.zeros((100,10,1,2))
-    Off_ROn_PSC_x = np.zeros((100,10,1,2))
-    Off_ROn_PSC_F = np.ones((100,10,1,2))
-    Off_ROn_PSC_P = np.ones((100,10,1,2))
-    Off_ROn_PSC_q = np.ones((100,10,1,2))
-    spike_wrt_gsyn_Off_ROn_accumulate = np.zeros((100,10,1,loss_bin_width))
-    grad_Off_ROn = np.zeros((100,10,1))
-    On_SOnOff_PSC_s = np.zeros((100,10,1,2))
-    On_SOnOff_PSC_x = np.zeros((100,10,1,2))
-    On_SOnOff_PSC_F = np.ones((100,10,1,2))
-    On_SOnOff_PSC_P = np.ones((100,10,1,2))
-    On_SOnOff_PSC_q = np.ones((100,10,1,2))
-    spike_wrt_gsyn_On_SOnOff_accumulate = np.zeros((100,10,1,loss_bin_width))
-    grad_On_SOnOff = np.zeros((100,10,1))
-    Off_SOnOff_PSC_s = np.zeros((100,10,1,2))
-    Off_SOnOff_PSC_x = np.zeros((100,10,1,2))
-    Off_SOnOff_PSC_F = np.ones((100,10,1,2))
-    Off_SOnOff_PSC_P = np.ones((100,10,1,2))
-    Off_SOnOff_PSC_q = np.ones((100,10,1,2))
-    spike_wrt_gsyn_Off_SOnOff_accumulate = np.zeros((100,10,1,loss_bin_width))
-    grad_Off_SOnOff = np.zeros((100,10,1))
-    SOnOff_ROn_PSC_s = np.zeros((100,10,1,2))
-    SOnOff_ROn_PSC_x = np.zeros((100,10,1,2))
-    SOnOff_ROn_PSC_F = np.ones((100,10,1,2))
-    SOnOff_ROn_PSC_P = np.ones((100,10,1,2))
-    SOnOff_ROn_PSC_q = np.ones((100,10,1,2))
-    spike_wrt_gsyn_SOnOff_ROn_accumulate = np.zeros((100,10,1,loss_bin_width))
-    grad_SOnOff_ROn = np.zeros((100,10,1))
+    On_V = np.ones((1000,10,1,2)) * On_E_L
+    On_g_ad = np.zeros((1000,10,1,2))
+    On_tspike = np.ones((1000,10,1,5)) * -30
+    On_buffer_index = np.ones((1000,10,1))
+    spike_wrt_tau_ad_On = np.zeros((1000,10,1))
+    spike_wrt_g_inc_On = np.zeros((1000,10,1))
+    Off_V = np.ones((1000,10,1,2)) * Off_E_L
+    Off_g_ad = np.zeros((1000,10,1,2))
+    Off_tspike = np.ones((1000,10,1,5)) * -30
+    Off_buffer_index = np.ones((1000,10,1))
+    spike_wrt_tau_ad_Off = np.zeros((1000,10,1))
+    spike_wrt_g_inc_Off = np.zeros((1000,10,1))
+    SOnOff_V = np.ones((1000,10,1,2)) * SOnOff_E_L
+    SOnOff_g_ad = np.zeros((1000,10,1,2))
+    SOnOff_tspike = np.ones((1000,10,1,5)) * -30
+    SOnOff_buffer_index = np.ones((1000,10,1))
+    spike_wrt_tau_ad_SOnOff = np.zeros((1000,10,1))
+    spike_wrt_g_inc_SOnOff = np.zeros((1000,10,1))
+    ROn_V = np.ones((1000,10,1,2)) * ROn_E_L
+    ROn_g_ad = np.zeros((1000,10,1,2))
+    ROn_tspike = np.ones((1000,10,1,5)) * -30
+    ROn_buffer_index = np.ones((1000,10,1))
+    ROn_spikes_holder = np.zeros((1000,10,1,29801), dtype=np.int8)
+    On_SOnOff_PSC_s_holder = np.zeros((1000,10,1,29801), dtype=np.int8)
+    Off_SOnOff_PSC_s_holder = np.zeros((1000,10,1,29801), dtype=np.int8)
+    losses_holder = np.zeros((1000,1,1,29801), dtype=np.int8)
+    ROn_noise_sn = np.zeros((1000,10,1,2))
+    ROn_noise_xn = np.zeros((1000,10,1,2))
+    spike_wrt_tau_ad_ROn = np.zeros((1000,10,1))
+    spike_wrt_g_inc_ROn = np.zeros((1000,10,1))
+    On_ROn_PSC_s = np.zeros((1000,10,1,2))
+    On_ROn_PSC_x = np.zeros((1000,10,1,2))
+    On_ROn_PSC_F = np.ones((1000,10,1,2))
+    On_ROn_PSC_P = np.ones((1000,10,1,2))
+    On_ROn_PSC_q = np.ones((1000,10,1,2))
+    spike_wrt_gsyn_On_ROn_accumulate = np.zeros((1000,10,1,loss_bin_width))
+    grad_On_ROn = np.zeros((1000,10,1))
+    Off_ROn_PSC_s = np.zeros((1000,10,1,2))
+    Off_ROn_PSC_x = np.zeros((1000,10,1,2))
+    Off_ROn_PSC_F = np.ones((1000,10,1,2))
+    Off_ROn_PSC_P = np.ones((1000,10,1,2))
+    Off_ROn_PSC_q = np.ones((1000,10,1,2))
+    spike_wrt_gsyn_Off_ROn_accumulate = np.zeros((1000,10,1,loss_bin_width))
+    grad_Off_ROn = np.zeros((1000,10,1))
+    On_SOnOff_PSC_s = np.zeros((1000,10,1,2))
+    On_SOnOff_PSC_x = np.zeros((1000,10,1,2))
+    On_SOnOff_PSC_F = np.ones((1000,10,1,2))
+    On_SOnOff_PSC_P = np.ones((1000,10,1,2))
+    On_SOnOff_PSC_q = np.ones((1000,10,1,2))
+    spike_wrt_gsyn_On_SOnOff_accumulate = np.zeros((1000,10,1,loss_bin_width))
+    grad_On_SOnOff = np.zeros((1000,10,1))
+    Off_SOnOff_PSC_s = np.zeros((1000,10,1,2))
+    Off_SOnOff_PSC_x = np.zeros((1000,10,1,2))
+    Off_SOnOff_PSC_F = np.ones((1000,10,1,2))
+    Off_SOnOff_PSC_P = np.ones((1000,10,1,2))
+    Off_SOnOff_PSC_q = np.ones((1000,10,1,2))
+    spike_wrt_gsyn_Off_SOnOff_accumulate = np.zeros((1000,10,1,loss_bin_width))
+    grad_Off_SOnOff = np.zeros((1000,10,1))
+    SOnOff_ROn_PSC_s = np.zeros((1000,10,1,2))
+    SOnOff_ROn_PSC_x = np.zeros((1000,10,1,2))
+    SOnOff_ROn_PSC_F = np.ones((1000,10,1,2))
+    SOnOff_ROn_PSC_P = np.ones((1000,10,1,2))
+    SOnOff_ROn_PSC_q = np.ones((1000,10,1,2))
+    spike_wrt_gsyn_SOnOff_ROn_accumulate = np.zeros((1000,10,1,loss_bin_width))
+    grad_SOnOff_ROn = np.zeros((1000,10,1))
 
     for timestep,t in enumerate(np.arange(0,29801*0.1-0.1,0.1)):
 
@@ -359,21 +359,6 @@ def solve_run(on_input,off_input,noise_token,data,p):
         SOnOff_ROn_PSC_P[:,:,:,-1] = SOnOff_ROn_PSC_P[:,:,:,-1] + 0.1*SOnOff_ROn_PSC_P_k1
         SOnOff_ROn_PSC_q[:,:,:,-2] = SOnOff_ROn_PSC_q[:,:,:,-1]
         SOnOff_ROn_PSC_q[:,:,:,-1] = SOnOff_ROn_PSC_q[:,:,:,-1] + 0.1*SOnOff_ROn_PSC_q_k1
-        #Compute Phi
-
-        psi_ROn = (1 - np.tanh(ROn_V[:,:,:,-1] - ROn_V_thresh)**2)
-        psi_SOnOff = (1 - np.tanh(SOnOff_V[:,:,:,-1] - SOnOff_V_thresh)**2)
-
-        eligibility_On_ROn = 0.1*(psi_ROn*(-ROn_R) * On_ROn_PSC_s[:,:,:,-1]*On_ROn_netcon*(ROn_V[:,:,:,-1]-On_ROn_ESYN))/ROn_tau
-        eligibility_Off_ROn = 0.1*(psi_ROn*(-ROn_R) * Off_ROn_PSC_s[:,:,:,-1]*Off_ROn_netcon*(ROn_V[:,:,:,-1]-Off_ROn_ESYN))/ROn_tau
-        eligibility_On_SOnOff = 0.1*(psi_SOnOff*(-SOnOff_R) * On_SOnOff_PSC_s[:,:,:,-1]*On_SOnOff_netcon*(SOnOff_V[:,:,:,-1]-On_SOnOff_ESYN))/SOnOff_tau
-        eligibility_Off_SOnOff = 0.1*(psi_SOnOff*(-SOnOff_R) * Off_SOnOff_PSC_s[:,:,:,-1]*Off_SOnOff_netcon*(SOnOff_V[:,:,:,-1]-Off_SOnOff_ESYN))/SOnOff_tau
-        eligibility_SOnOff_ROn = 0.1*(psi_ROn*(-ROn_R) * SOnOff_ROn_PSC_s[:,:,:,-1]*SOnOff_ROn_netcon*(ROn_V[:,:,:,-1]-SOnOff_ROn_ESYN))/ROn_tau
-
-        #Compute Bk
-
-        Bk = -SOnOff_ROn_gSYN*(ROn_V_thresh - SOnOff_ROn_ESYN)
-
 
         #Declare Conditionals
 
@@ -530,35 +515,5 @@ def solve_run(on_input,off_input,noise_token,data,p):
         SOnOff_ROn_PSC_q[:,:,:,-1] = np.where(SOnOff_ROn_mask_psc,SOnOff_ROn_PSC_F[:,:,:,-1] * SOnOff_ROn_PSC_P[:,:,:,-1], SOnOff_ROn_PSC_q[:,:,:,-1])
         SOnOff_ROn_PSC_F[:,:,:,-1] = np.where(SOnOff_ROn_mask_psc,SOnOff_ROn_PSC_F[:,:,:,-1] + SOnOff_ROn_PSC_fF * (SOnOff_ROn_PSC_maxF - SOnOff_ROn_PSC_F[:,:,:,-1]), SOnOff_ROn_PSC_F[:,:,:,-1])
         SOnOff_ROn_PSC_P[:,:,:,-1] = np.where(SOnOff_ROn_mask_psc,SOnOff_ROn_PSC_P[:,:,:,-1] * (1 - SOnOff_ROn_PSC_fP), SOnOff_ROn_PSC_P[:,:,:,-1])
-        #Compute Gradients
 
-        grad_On_ROn_accumulate += eligibility_On_ROn
-        grad_Off_ROn_accumulate += eligibility_Off_ROn
-        grad_On_SOnOff_accumulate += eligibility_On_SOnOff
-        grad_Off_SOnOff_accumulate += eligibility_Off_SOnOff
-        grad_SOnOff_ROn_accumulate += eligibility_SOnOff_ROn
-
-        #grab loss
-
-
-        if timestep % loss_bin_width == 0 and timestep != 0:
-            sim_bin = np.sum(np.squeeze(np.sum(ROn_spikes_holder[:,:,:,timestep-loss_bin_width:timestep], axis=-1)),axis=-1)
-
-            data_bin = np.sum(np.sum(np.squeeze(data[:,timestep-loss_bin_width:timestep,:], axis=-1)),axis=-1)
-
-            loss_deriv = 2.0*(sim_bin - data_bin)
-            grad_On_ROn += grad_On_ROn_accumulate*loss_deriv[:,None,None]
-            grad_On_ROn_accumulate = 0
-            grad_Off_ROn += grad_Off_ROn_accumulate*loss_deriv[:,None,None]
-            grad_Off_ROn_accumulate = 0
-            grad_On_SOnOff += grad_On_SOnOff_accumulate*Bk*loss_deriv[:,None,None]
-            grad_On_SOnOff_accumulate = 0
-            grad_Off_SOnOff += grad_Off_SOnOff_accumulate*Bk*loss_deriv[:,None,None]
-            grad_Off_SOnOff_accumulate = 0
-            grad_SOnOff_ROn += grad_SOnOff_ROn_accumulate*loss_deriv[:,None,None]
-            grad_SOnOff_ROn_accumulate = 0
-    grads = np.sum(np.stack([grad_On_ROn,grad_Off_ROn,grad_On_SOnOff,grad_Off_SOnOff,grad_SOnOff_ROn], axis = 0), axis = 2)
-
-
-
-    return ROn_spikes_holder, grads, On_SOnOff_PSC_s_holder, Off_SOnOff_PSC_s_holder, losses_holder
+    return ROn_spikes_holder

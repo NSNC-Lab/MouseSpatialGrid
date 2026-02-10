@@ -104,7 +104,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     ROn_g_postIC = 0.17
     ROn_E_exc = 0
     ROn_netcon = np.eye(1)
-    ROn_nSYN = 0.011
+    ROn_nSYN = 0.015
     ROn_noise_E_exc = 0
     ROn_tauR_N = 0.7
     ROn_tauD_N = 1.5

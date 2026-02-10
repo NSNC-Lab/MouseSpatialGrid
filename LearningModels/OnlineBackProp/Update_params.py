@@ -46,7 +46,7 @@ def adam_update(m,v,p,t,beta1,beta2,lr,eps,out_grad):
     
     #Make sure Gsyns do not go below zero
     #Gsyn & FR & g_inc -- Must be larger than 0
-    p[0:4,:] = np.where(p[0:4,:]<0,0,p[0:4,:])
+    p[0:5,:] = np.where(p[0:5,:]<0,0,p[0:5,:])
     #p[5,:] = np.where(p[5,:]<0,0,p[5,:])
     #p[9:13,:] = np.where(p[9:13,:]<0,0,p[9:13,:])
     

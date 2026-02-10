@@ -79,7 +79,7 @@ class GenSTRF(object):
                 data = data[np.newaxis, :]
 
                 #Append zeros to the beginning (1 second worth)
-                data = np.reshape(np.append(np.zeros((1,200000)), data),(1,846011))
+                #data = np.reshape(np.append(np.zeros((1,200000)), data),(1,846011))
 
                 spec, t, f = self.STRFspectrogram(data/rms(data)*lvl,fs)                 
                 strf = self.STRFgen(self.paramH, self.paramG, f, t[1]-t[0]) 
@@ -107,8 +107,8 @@ class GenSTRF(object):
                 #print(fs)
                 data = data.astype(np.float64)
 
-                #Add a second to the front of the signal
-                data = np.append(np.zeros((1,200000)), data)
+                #Add a second to the front of the signal ******FOR LOOKING AT PRE-sim response*******
+                #data = np.append(np.zeros((1,200000)), data)
                 #print(np.shape(data))
 
                 # #Rsample the data to match the simulation timestep

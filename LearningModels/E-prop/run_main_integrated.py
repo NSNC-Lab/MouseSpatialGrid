@@ -1,6 +1,7 @@
 import set_options
 import declarations
-from BuildFile import Forwards_Method, Compile_Solve, calculate_loss
+import declarations_output_inhibit
+from BuildFile import Forwards_Method_cupy, Compile_Solve, calculate_loss
 import numpy as np
 import time
 from datetime import datetime
@@ -37,9 +38,10 @@ class runSimulation(object):
     #Set options
     opts = set_options.options()
     #Declare architecture
-    arch = declarations.Declare_Architecture(opts)
+    #arch = declarations.Declare_Architecture(opts)
+    arch = declarations_output_inhibit.Declare_Architecture(opts)
     #Build the forwards euler loop
-    file_body_forwards = Forwards_Method.Euler_Compiler(arch[0],arch[1],arch[2],opts)
+    file_body_forwards = Forwards_Method_cupy.Euler_Compiler(arch[0],arch[1],arch[2],opts)
     #Compile a solve file (python or c++)
 
 
@@ -64,7 +66,7 @@ class runSimulation(object):
     mat = loadmat("all_units_info_with_polished_criteria_modified_perf.mat",variable_names=["all_data"],squeeze_me=True,struct_as_record=False)
     all_data = mat["all_data"]  # numpy array of MATLAB structs
 
-    n = 2  # MATLAB is 1-based
+    n = 7  # MATLAB is 1-based
     unit = all_data[n - 1]
 
     spike_times = unit.ctrl_tar1_timestamps
@@ -73,14 +75,19 @@ class runSimulation(object):
     if isinstance(spike_times, np.ndarray) and spike_times.ndim == 2:
         spike_times = spike_times[:, 0]
 
-    pre_to_aprx_3s_holder = np.zeros((10,39801))
+    #pre_to_aprx_3s_holder = np.zeros((10,39801))
+
+
+    
+    pre_to_aprx_3s_holder = np.zeros((10,29801))
     no_pre_holder = np.zeros((10,29801))
 
     pre_zeros_list = []
     post_zeros_list = []
     for k in range(10):  # MATLAB: 1:10
         times = np.asarray(spike_times[k]).squeeze()
-        pre_to_aprx_3s_holder[k,np.round(times[times < 2.98]*(1000/opts['dt'])+(1000/opts['dt'])).astype(int)] = 1  # Convert to indices
+        pre_to_aprx_3s_holder[k,np.round(times[(times < 2.98) & (times >= 0)]*(1000/opts['dt'])).astype(int)] = 1  # Convert to indices
+        #pre_to_aprx_3s_holder[k,np.round(times[(times < 2.98)]*(1000/opts['dt'])+(1000/opts['dt'])).astype(int)] = 1  # Convert to indices
         #no_pre_holder[k,np.round(times[times < 0]*(1000/opts['dt'])).astype(int)] = 1  # Convert to indices
 
         pre_zeros_list.append(times[times < 0])

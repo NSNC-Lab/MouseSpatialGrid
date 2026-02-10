@@ -22,7 +22,7 @@ def Euler_Compiler(neurons,synapses,projections,options):
 
     #6.5 Declare Gradients
     #phi_declaration,eligbility_declaration,Bk_declaration,Lt_declaration, grad_declaration, return_declaration_grad = Gradient_Method.compileGrad(neurons,synapses,projections,options)
-    phi_declaration,eligbility_declaration,Bk_declaration, grad_declaration,loss_declaration, return_declaration_grad = Gradient_Method_Binned.compileGrad(neurons,synapses,projections,options)
+    #phi_declaration,eligbility_declaration,Bk_declaration, grad_declaration,loss_declaration, return_declaration_grad = Gradient_Method_Binned.compileGrad(neurons,synapses,projections,options)
 
     #7. Declare return statement
     Returns_declaration = declare_returns(neurons)
@@ -30,7 +30,7 @@ def Euler_Compiler(neurons,synapses,projections,options):
     #solve_file_body = variable_declaration + holder_declaration + Euler_loop_declaration + ODE_declaration + VwrtGsyn_declaration + State_Update_declaration + Vwrtspike_declaration + spikewrtV_declaration + Conditionals_declaration + update_declaration + return_declaration_grad + Returns_declaration
 
     #solve_file_body = variable_declaration + holder_declaration + Euler_loop_declaration + ODE_declaration + State_Update_declaration + phi_declaration + eligbility_declaration + Bk_declaration + Conditionals_declaration  + Lt_declaration + grad_declaration  + return_declaration_grad + Returns_declaration
-    solve_file_body = variable_declaration + holder_declaration + Euler_loop_declaration + ODE_declaration + State_Update_declaration + phi_declaration + eligbility_declaration + Bk_declaration + Conditionals_declaration  + grad_declaration + loss_declaration + return_declaration_grad + Returns_declaration
+    solve_file_body = variable_declaration + holder_declaration + Euler_loop_declaration + ODE_declaration + State_Update_declaration + Conditionals_declaration + Returns_declaration
 
     return solve_file_body
 
@@ -458,8 +458,8 @@ def declare_returns(neurons):
     return_declaration = return_declaration[:-1]
 
     #Build out peripherals
-    #return_declaration = '\n\n    return [' + return_declaration + ']'
-    return_declaration = '\n\n    return ' + return_declaration + ', grads, On_SOnOff_PSC_s_holder, Off_SOnOff_PSC_s_holder, losses_holder'
+    return_declaration = '\n\n    return ' + return_declaration
+    #return_declaration = '\n\n    return ' + return_declaration + ', grads, On_SOnOff_PSC_s_holder, Off_SOnOff_PSC_s_holder, losses_holder'
 
 
     return return_declaration

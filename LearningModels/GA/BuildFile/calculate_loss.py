@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import cumulative_trapezoid
 from scipy.io import loadmat, savemat
 
-def calculate(forwards_output, grads):
+def calculate(forwards_output):
 
         # -- Constants
         dt = 0.1 #ms
@@ -24,7 +24,7 @@ def calculate(forwards_output, grads):
         filename = f"C:/Users/ipboy/Documents/Github/ModelingEffort/Multi-Channel/Plotting/OliverDataPlotting/PicturesToFit/picture_fit{7}contra.mat"
         data = loadmat(filename)['picture'].astype(np.float32)[:,:,None]
 
-        savemat("compare.mat", {"data": data, "forwards_out":forwards_out}, do_compression=True)
+        #savemat("compare.mat", {"data": data, "forwards_out":forwards_out}, do_compression=True)
 
         #print(np.shape(data))
 
@@ -38,7 +38,7 @@ def calculate(forwards_output, grads):
         #print(np.shape(diff))
 
         L2_loss_avg = np.mean(np.sum(diff * diff, axis=-1), axis=-1)
-        L2_deriv_avg = 2.0 * np.mean(np.sum(diff, axis=-1),axis=-1)
+        #L2_deriv_avg = 2.0 * np.mean(np.sum(diff, axis=-1),axis=-1)
 
         # -- PSTH Average
         num_bins, remainder = divmod(np.shape(data)[-1], bin_width) 
@@ -62,11 +62,11 @@ def calculate(forwards_output, grads):
 
         PSTH_loss_avg = np.sum(diff * diff, axis=-1)
 
-        PSTH_deriv_avg = 2.0 * np.sum(diff, axis=-1)
+        #PSTH_deriv_avg = 2.0 * np.sum(diff, axis=-1)
 
         #print(np.shape(PSTH_deriv_avg))
         #print(np.shape(grads))
         
-        out_grad = np.squeeze(PSTH_deriv_avg[None,:,None] * grads)
+        #out_grad = np.squeeze(PSTH_deriv_avg[None,:,None] * grads)
 
-        return L2_deriv_avg, [L2_loss_avg, PSTH_loss_avg]
+        return [L2_loss_avg, PSTH_loss_avg]
