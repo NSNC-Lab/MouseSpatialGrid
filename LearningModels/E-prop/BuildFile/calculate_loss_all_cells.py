@@ -58,4 +58,4 @@ def calculate(forwards_output, grads,data):
         
         #out_grad = cp.squeeze(PSTH_deriv_avg[:,None,:,None] * grads)
 
-        return cp.asnumpy(L2_deriv_avg), [cp.asnumpy(L2_loss_avg), cp.asnumpy(PSTH_loss_avg)]
+        return cp.asnumpy(L2_deriv_avg), [cp.asnumpy(L2_loss_avg), cp.asnumpy(PSTH_loss_avg)] 

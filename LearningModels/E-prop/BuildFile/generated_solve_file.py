@@ -389,127 +389,127 @@ def solve_run(on_input,off_input,noise_token,data,p):
         On_mask_1 = ((On_V[:,:,:,:,-1] >= On_V_thresh) & (On_V[:,:,:,:,-2] < On_V_thresh)).astype(cp.int8)
         if cp.any(On_mask_1).item():
             On_spikers_1 = cp.where(On_mask_1)
-            On_tspike[On_spikers_1, On_buffer_index[On_spikers_1].astype(cp.int8)-1] = t
+            On_tspike[On_spikers_1 + (On_buffer_index[On_spikers_1].astype(cp.int8)-1,)] = t
             On_buffer_index[On_spikers_1] = On_buffer_index[On_spikers_1] % 5 + 1
         On_mask_2a = (On_V[:,:,:,:,-1] >= On_V_thresh)
         if cp.any(On_mask_2a).item():
             On_spikers_2a = cp.where(On_mask_2a)
-            On_V[On_spikers_2a,-2] = On_V[On_spikers_2a,-1]
-            On_V[On_spikers_2a,-1] = On_V_reset
-            On_g_ad[On_spikers_2a,-2] = On_g_ad[On_spikers_2a,-1]
-            On_g_ad[On_spikers_2a,-1] = On_g_ad[On_spikers_2a,-1] + On_g_inc
-        On_mask_2b = cp.any((t <= (On_tspike[:,:,:,:,-1] + On_t_ref)), axis=-1)
+            On_V[On_spikers_2a + (-2,)] = On_V[On_spikers_2a + (-1,)]
+            On_V[On_spikers_2a + (-1,)] = On_V_reset
+            On_g_ad[On_spikers_2a + (-2,)] = On_g_ad[On_spikers_2a + (-1,)]
+            On_g_ad[On_spikers_2a + (-1,)] = On_g_ad[On_spikers_2a + (-1,)] + On_g_inc
+        On_mask_2b = cp.any((t <= (On_tspike + On_t_ref)), axis=-1)
         if cp.any(On_mask_2b).item():
             On_spikers_2b = cp.where(On_mask_2b)
-            On_V[On_spikers_2b,-2] = On_V[On_spikers_2b,-1]
-            On_V[On_spikers_2b,-1] = On_V_reset
+            On_V[On_spikers_2b + (-2,)] = On_V[On_spikers_2b + (-1,)]
+            On_V[On_spikers_2b + (-1,)] = On_V_reset
         Off_mask_1 = ((Off_V[:,:,:,:,-1] >= Off_V_thresh) & (Off_V[:,:,:,:,-2] < Off_V_thresh)).astype(cp.int8)
         if cp.any(Off_mask_1).item():
             Off_spikers_1 = cp.where(Off_mask_1)
-            Off_tspike[Off_spikers_1, Off_buffer_index[Off_spikers_1].astype(cp.int8)-1] = t
+            Off_tspike[Off_spikers_1 + (Off_buffer_index[Off_spikers_1].astype(cp.int8)-1,)] = t
             Off_buffer_index[Off_spikers_1] = Off_buffer_index[Off_spikers_1] % 5 + 1
         Off_mask_2a = (Off_V[:,:,:,:,-1] >= Off_V_thresh)
         if cp.any(Off_mask_2a).item():
             Off_spikers_2a = cp.where(Off_mask_2a)
-            Off_V[Off_spikers_2a,-2] = Off_V[Off_spikers_2a,-1]
-            Off_V[Off_spikers_2a,-1] = Off_V_reset
-            Off_g_ad[Off_spikers_2a,-2] = Off_g_ad[Off_spikers_2a,-1]
-            Off_g_ad[Off_spikers_2a,-1] = Off_g_ad[Off_spikers_2a,-1] + Off_g_inc
-        Off_mask_2b = cp.any((t <= (Off_tspike[:,:,:,:,-1] + Off_t_ref)), axis=-1)
+            Off_V[Off_spikers_2a + (-2,)] = Off_V[Off_spikers_2a + (-1,)]
+            Off_V[Off_spikers_2a + (-1,)] = Off_V_reset
+            Off_g_ad[Off_spikers_2a + (-2,)] = Off_g_ad[Off_spikers_2a + (-1,)]
+            Off_g_ad[Off_spikers_2a + (-1,)] = Off_g_ad[Off_spikers_2a + (-1,)] + Off_g_inc
+        Off_mask_2b = cp.any((t <= (Off_tspike + Off_t_ref)), axis=-1)
         if cp.any(Off_mask_2b).item():
             Off_spikers_2b = cp.where(Off_mask_2b)
-            Off_V[Off_spikers_2b,-2] = Off_V[Off_spikers_2b,-1]
-            Off_V[Off_spikers_2b,-1] = Off_V_reset
+            Off_V[Off_spikers_2b + (-2,)] = Off_V[Off_spikers_2b + (-1,)]
+            Off_V[Off_spikers_2b + (-1,)] = Off_V_reset
         SOnOff_mask_1 = ((SOnOff_V[:,:,:,:,-1] >= SOnOff_V_thresh) & (SOnOff_V[:,:,:,:,-2] < SOnOff_V_thresh)).astype(cp.int8)
         if cp.any(SOnOff_mask_1).item():
             SOnOff_spikers_1 = cp.where(SOnOff_mask_1)
-            SOnOff_tspike[SOnOff_spikers_1, SOnOff_buffer_index[SOnOff_spikers_1].astype(cp.int8)-1] = t
+            SOnOff_tspike[SOnOff_spikers_1 + (SOnOff_buffer_index[SOnOff_spikers_1].astype(cp.int8)-1,)] = t
             SOnOff_buffer_index[SOnOff_spikers_1] = SOnOff_buffer_index[SOnOff_spikers_1] % 5 + 1
         SOnOff_mask_2a = (SOnOff_V[:,:,:,:,-1] >= SOnOff_V_thresh)
         if cp.any(SOnOff_mask_2a).item():
             SOnOff_spikers_2a = cp.where(SOnOff_mask_2a)
-            SOnOff_V[SOnOff_spikers_2a,-2] = SOnOff_V[SOnOff_spikers_2a,-1]
-            SOnOff_V[SOnOff_spikers_2a,-1] = SOnOff_V_reset
-            SOnOff_g_ad[SOnOff_spikers_2a,-2] = SOnOff_g_ad[SOnOff_spikers_2a,-1]
-            SOnOff_g_ad[SOnOff_spikers_2a,-1] = SOnOff_g_ad[SOnOff_spikers_2a,-1] + SOnOff_g_inc
-        SOnOff_mask_2b = cp.any((t <= (SOnOff_tspike[:,:,:,:,-1] + SOnOff_t_ref)), axis=-1)
+            SOnOff_V[SOnOff_spikers_2a + (-2,)] = SOnOff_V[SOnOff_spikers_2a + (-1,)]
+            SOnOff_V[SOnOff_spikers_2a + (-1,)] = SOnOff_V_reset
+            SOnOff_g_ad[SOnOff_spikers_2a + (-2,)] = SOnOff_g_ad[SOnOff_spikers_2a + (-1,)]
+            SOnOff_g_ad[SOnOff_spikers_2a + (-1,)] = SOnOff_g_ad[SOnOff_spikers_2a + (-1,)] + SOnOff_g_inc
+        SOnOff_mask_2b = cp.any((t <= (SOnOff_tspike + SOnOff_t_ref)), axis=-1)
         if cp.any(SOnOff_mask_2b).item():
             SOnOff_spikers_2b = cp.where(SOnOff_mask_2b)
-            SOnOff_V[SOnOff_spikers_2b,-2] = SOnOff_V[SOnOff_spikers_2b,-1]
-            SOnOff_V[SOnOff_spikers_2b,-1] = SOnOff_V_reset
+            SOnOff_V[SOnOff_spikers_2b + (-2,)] = SOnOff_V[SOnOff_spikers_2b + (-1,)]
+            SOnOff_V[SOnOff_spikers_2b + (-1,)] = SOnOff_V_reset
         ROn_mask_1 = ((ROn_V[:,:,:,:,-1] >= ROn_V_thresh) & (ROn_V[:,:,:,:,-2] < ROn_V_thresh)).astype(cp.int8)
         ROn_spikes_holder[:,:,:,:,timestep] = ROn_mask_1
         if cp.any(ROn_mask_1).item():
             ROn_spikers_1 = cp.where(ROn_mask_1)
-            ROn_tspike[ROn_spikers_1, ROn_buffer_index[ROn_spikers_1].astype(cp.int8)-1] = t
+            ROn_tspike[ROn_spikers_1 + (ROn_buffer_index[ROn_spikers_1].astype(cp.int8)-1,)] = t
             ROn_buffer_index[ROn_spikers_1] = ROn_buffer_index[ROn_spikers_1] % 5 + 1
         ROn_mask_2a = (ROn_V[:,:,:,:,-1] >= ROn_V_thresh)
         if cp.any(ROn_mask_2a).item():
             ROn_spikers_2a = cp.where(ROn_mask_2a)
-            ROn_V[ROn_spikers_2a,-2] = ROn_V[ROn_spikers_2a,-1]
-            ROn_V[ROn_spikers_2a,-1] = ROn_V_reset
-            ROn_g_ad[ROn_spikers_2a,-2] = ROn_g_ad[ROn_spikers_2a,-1]
-            ROn_g_ad[ROn_spikers_2a,-1] = ROn_g_ad[ROn_spikers_2a,-1] + ROn_g_inc
-        ROn_mask_2b = cp.any((t <= (ROn_tspike[:,:,:,:,-1] + ROn_t_ref)), axis=-1)
+            ROn_V[ROn_spikers_2a + (-2,)] = ROn_V[ROn_spikers_2a + (-1,)]
+            ROn_V[ROn_spikers_2a + (-1,)] = ROn_V_reset
+            ROn_g_ad[ROn_spikers_2a + (-2,)] = ROn_g_ad[ROn_spikers_2a + (-1,)]
+            ROn_g_ad[ROn_spikers_2a + (-1,)] = ROn_g_ad[ROn_spikers_2a + (-1,)] + ROn_g_inc
+        ROn_mask_2b = cp.any((t <= (ROn_tspike + ROn_t_ref)), axis=-1)
         if cp.any(ROn_mask_2b).item():
             ROn_spikers_2b = cp.where(ROn_mask_2b)
-            ROn_V[ROn_spikers_2b,-2] = ROn_V[ROn_spikers_2b,-1]
-            ROn_V[ROn_spikers_2b,-1] = ROn_V_reset
-        On_ROn_mask_3 = cp.any((t == (On_tspike[:,:,:,:,-1] + On_ROn_PSC_delay)), axis=-1)
+            ROn_V[ROn_spikers_2b + (-2,)] = ROn_V[ROn_spikers_2b + (-1,)]
+            ROn_V[ROn_spikers_2b + (-1,)] = ROn_V_reset
+        On_ROn_mask_3 = cp.any((t == (On_tspike + On_ROn_PSC_delay)), axis=-1)
         if cp.any(On_ROn_mask_3).item():
             On_ROn_spikers_3 = cp.where(On_ROn_mask_3)
-            On_ROn_PSC_x[On_ROn_spikers_3, -2] = On_ROn_PSC_x[On_ROn_spikers_3, -1]
-            On_ROn_PSC_q[On_ROn_spikers_3, -2] = On_ROn_PSC_q[On_ROn_spikers_3, -1]
-            On_ROn_PSC_F[On_ROn_spikers_3, -2] = On_ROn_PSC_F[On_ROn_spikers_3, -1]
-            On_ROn_PSC_P[On_ROn_spikers_3, -2] = On_ROn_PSC_P[On_ROn_spikers_3, -1]
-            On_ROn_PSC_x[On_ROn_spikers_3, -2] = On_ROn_PSC_x[On_ROn_spikers_3, -1] + On_ROn_PSC_q[On_ROn_spikers_3, -1]
-            On_ROn_PSC_q[On_ROn_spikers_3, -2] = On_ROn_PSC_F[On_ROn_spikers_3, -1] * On_ROn_PSC_P[On_ROn_spikers_3, -1]
-            On_ROn_PSC_F[On_ROn_spikers_3, -2] = On_ROn_PSC_F[On_ROn_spikers_3, -1] + On_ROn_PSC_fF *(On_ROn_PSC_maxF - On_ROn_PSC_F[On_ROn_spikers_3, -1])
-            On_ROn_PSC_P[On_ROn_spikers_3, -2] = On_ROn_PSC_P[On_ROn_spikers_3, -1] * (1 - On_ROn_PSC_fP)
-        Off_ROn_mask_3 = cp.any((t == (Off_tspike[:,:,:,:,-1] + Off_ROn_PSC_delay)), axis=-1)
+            On_ROn_PSC_x[On_ROn_spikers_3 + (-2,)] = On_ROn_PSC_x[On_ROn_spikers_3 + (-1,)]
+            On_ROn_PSC_q[On_ROn_spikers_3 + (-2,)] = On_ROn_PSC_q[On_ROn_spikers_3 + (-1,)]
+            On_ROn_PSC_F[On_ROn_spikers_3 + (-2,)] = On_ROn_PSC_F[On_ROn_spikers_3 + (-1,)]
+            On_ROn_PSC_P[On_ROn_spikers_3 + (-2,)] = On_ROn_PSC_P[On_ROn_spikers_3 + (-1,)]
+            On_ROn_PSC_x[On_ROn_spikers_3 + (-1,)] = On_ROn_PSC_x[On_ROn_spikers_3 + (-1,)] + On_ROn_PSC_q[On_ROn_spikers_3 + (-1,)]
+            On_ROn_PSC_q[On_ROn_spikers_3 + (-1,)] = On_ROn_PSC_F[On_ROn_spikers_3 + (-1,)] * On_ROn_PSC_P[On_ROn_spikers_3 + (-1,)]
+            On_ROn_PSC_F[On_ROn_spikers_3 + (-1,)] = On_ROn_PSC_F[On_ROn_spikers_3 + (-1,)] + On_ROn_PSC_fF *(On_ROn_PSC_maxF - On_ROn_PSC_F[On_ROn_spikers_3 + (-1,)])
+            On_ROn_PSC_P[On_ROn_spikers_3 + (-1,)] = On_ROn_PSC_P[On_ROn_spikers_3 + (-1,)] * (1 - On_ROn_PSC_fP)
+        Off_ROn_mask_3 = cp.any((t == (Off_tspike + Off_ROn_PSC_delay)), axis=-1)
         if cp.any(Off_ROn_mask_3).item():
             Off_ROn_spikers_3 = cp.where(Off_ROn_mask_3)
-            Off_ROn_PSC_x[Off_ROn_spikers_3, -2] = Off_ROn_PSC_x[Off_ROn_spikers_3, -1]
-            Off_ROn_PSC_q[Off_ROn_spikers_3, -2] = Off_ROn_PSC_q[Off_ROn_spikers_3, -1]
-            Off_ROn_PSC_F[Off_ROn_spikers_3, -2] = Off_ROn_PSC_F[Off_ROn_spikers_3, -1]
-            Off_ROn_PSC_P[Off_ROn_spikers_3, -2] = Off_ROn_PSC_P[Off_ROn_spikers_3, -1]
-            Off_ROn_PSC_x[Off_ROn_spikers_3, -2] = Off_ROn_PSC_x[Off_ROn_spikers_3, -1] + Off_ROn_PSC_q[Off_ROn_spikers_3, -1]
-            Off_ROn_PSC_q[Off_ROn_spikers_3, -2] = Off_ROn_PSC_F[Off_ROn_spikers_3, -1] * Off_ROn_PSC_P[Off_ROn_spikers_3, -1]
-            Off_ROn_PSC_F[Off_ROn_spikers_3, -2] = Off_ROn_PSC_F[Off_ROn_spikers_3, -1] + Off_ROn_PSC_fF *(Off_ROn_PSC_maxF - Off_ROn_PSC_F[Off_ROn_spikers_3, -1])
-            Off_ROn_PSC_P[Off_ROn_spikers_3, -2] = Off_ROn_PSC_P[Off_ROn_spikers_3, -1] * (1 - Off_ROn_PSC_fP)
-        On_SOnOff_mask_3 = cp.any((t == (On_tspike[:,:,:,:,-1] + On_SOnOff_PSC_delay)), axis=-1)
+            Off_ROn_PSC_x[Off_ROn_spikers_3 + (-2,)] = Off_ROn_PSC_x[Off_ROn_spikers_3 + (-1,)]
+            Off_ROn_PSC_q[Off_ROn_spikers_3 + (-2,)] = Off_ROn_PSC_q[Off_ROn_spikers_3 + (-1,)]
+            Off_ROn_PSC_F[Off_ROn_spikers_3 + (-2,)] = Off_ROn_PSC_F[Off_ROn_spikers_3 + (-1,)]
+            Off_ROn_PSC_P[Off_ROn_spikers_3 + (-2,)] = Off_ROn_PSC_P[Off_ROn_spikers_3 + (-1,)]
+            Off_ROn_PSC_x[Off_ROn_spikers_3 + (-1,)] = Off_ROn_PSC_x[Off_ROn_spikers_3 + (-1,)] + Off_ROn_PSC_q[Off_ROn_spikers_3 + (-1,)]
+            Off_ROn_PSC_q[Off_ROn_spikers_3 + (-1,)] = Off_ROn_PSC_F[Off_ROn_spikers_3 + (-1,)] * Off_ROn_PSC_P[Off_ROn_spikers_3 + (-1,)]
+            Off_ROn_PSC_F[Off_ROn_spikers_3 + (-1,)] = Off_ROn_PSC_F[Off_ROn_spikers_3 + (-1,)] + Off_ROn_PSC_fF *(Off_ROn_PSC_maxF - Off_ROn_PSC_F[Off_ROn_spikers_3 + (-1,)])
+            Off_ROn_PSC_P[Off_ROn_spikers_3 + (-1,)] = Off_ROn_PSC_P[Off_ROn_spikers_3 + (-1,)] * (1 - Off_ROn_PSC_fP)
+        On_SOnOff_mask_3 = cp.any((t == (On_tspike + On_SOnOff_PSC_delay)), axis=-1)
         if cp.any(On_SOnOff_mask_3).item():
             On_SOnOff_spikers_3 = cp.where(On_SOnOff_mask_3)
-            On_SOnOff_PSC_x[On_SOnOff_spikers_3, -2] = On_SOnOff_PSC_x[On_SOnOff_spikers_3, -1]
-            On_SOnOff_PSC_q[On_SOnOff_spikers_3, -2] = On_SOnOff_PSC_q[On_SOnOff_spikers_3, -1]
-            On_SOnOff_PSC_F[On_SOnOff_spikers_3, -2] = On_SOnOff_PSC_F[On_SOnOff_spikers_3, -1]
-            On_SOnOff_PSC_P[On_SOnOff_spikers_3, -2] = On_SOnOff_PSC_P[On_SOnOff_spikers_3, -1]
-            On_SOnOff_PSC_x[On_SOnOff_spikers_3, -2] = On_SOnOff_PSC_x[On_SOnOff_spikers_3, -1] + On_SOnOff_PSC_q[On_SOnOff_spikers_3, -1]
-            On_SOnOff_PSC_q[On_SOnOff_spikers_3, -2] = On_SOnOff_PSC_F[On_SOnOff_spikers_3, -1] * On_SOnOff_PSC_P[On_SOnOff_spikers_3, -1]
-            On_SOnOff_PSC_F[On_SOnOff_spikers_3, -2] = On_SOnOff_PSC_F[On_SOnOff_spikers_3, -1] + On_SOnOff_PSC_fF *(On_SOnOff_PSC_maxF - On_SOnOff_PSC_F[On_SOnOff_spikers_3, -1])
-            On_SOnOff_PSC_P[On_SOnOff_spikers_3, -2] = On_SOnOff_PSC_P[On_SOnOff_spikers_3, -1] * (1 - On_SOnOff_PSC_fP)
-        Off_SOnOff_mask_3 = cp.any((t == (Off_tspike[:,:,:,:,-1] + Off_SOnOff_PSC_delay)), axis=-1)
+            On_SOnOff_PSC_x[On_SOnOff_spikers_3 + (-2,)] = On_SOnOff_PSC_x[On_SOnOff_spikers_3 + (-1,)]
+            On_SOnOff_PSC_q[On_SOnOff_spikers_3 + (-2,)] = On_SOnOff_PSC_q[On_SOnOff_spikers_3 + (-1,)]
+            On_SOnOff_PSC_F[On_SOnOff_spikers_3 + (-2,)] = On_SOnOff_PSC_F[On_SOnOff_spikers_3 + (-1,)]
+            On_SOnOff_PSC_P[On_SOnOff_spikers_3 + (-2,)] = On_SOnOff_PSC_P[On_SOnOff_spikers_3 + (-1,)]
+            On_SOnOff_PSC_x[On_SOnOff_spikers_3 + (-1,)] = On_SOnOff_PSC_x[On_SOnOff_spikers_3 + (-1,)] + On_SOnOff_PSC_q[On_SOnOff_spikers_3 + (-1,)]
+            On_SOnOff_PSC_q[On_SOnOff_spikers_3 + (-1,)] = On_SOnOff_PSC_F[On_SOnOff_spikers_3 + (-1,)] * On_SOnOff_PSC_P[On_SOnOff_spikers_3 + (-1,)]
+            On_SOnOff_PSC_F[On_SOnOff_spikers_3 + (-1,)] = On_SOnOff_PSC_F[On_SOnOff_spikers_3 + (-1,)] + On_SOnOff_PSC_fF *(On_SOnOff_PSC_maxF - On_SOnOff_PSC_F[On_SOnOff_spikers_3 + (-1,)])
+            On_SOnOff_PSC_P[On_SOnOff_spikers_3 + (-1,)] = On_SOnOff_PSC_P[On_SOnOff_spikers_3 + (-1,)] * (1 - On_SOnOff_PSC_fP)
+        Off_SOnOff_mask_3 = cp.any((t == (Off_tspike + Off_SOnOff_PSC_delay)), axis=-1)
         if cp.any(Off_SOnOff_mask_3).item():
             Off_SOnOff_spikers_3 = cp.where(Off_SOnOff_mask_3)
-            Off_SOnOff_PSC_x[Off_SOnOff_spikers_3, -2] = Off_SOnOff_PSC_x[Off_SOnOff_spikers_3, -1]
-            Off_SOnOff_PSC_q[Off_SOnOff_spikers_3, -2] = Off_SOnOff_PSC_q[Off_SOnOff_spikers_3, -1]
-            Off_SOnOff_PSC_F[Off_SOnOff_spikers_3, -2] = Off_SOnOff_PSC_F[Off_SOnOff_spikers_3, -1]
-            Off_SOnOff_PSC_P[Off_SOnOff_spikers_3, -2] = Off_SOnOff_PSC_P[Off_SOnOff_spikers_3, -1]
-            Off_SOnOff_PSC_x[Off_SOnOff_spikers_3, -2] = Off_SOnOff_PSC_x[Off_SOnOff_spikers_3, -1] + Off_SOnOff_PSC_q[Off_SOnOff_spikers_3, -1]
-            Off_SOnOff_PSC_q[Off_SOnOff_spikers_3, -2] = Off_SOnOff_PSC_F[Off_SOnOff_spikers_3, -1] * Off_SOnOff_PSC_P[Off_SOnOff_spikers_3, -1]
-            Off_SOnOff_PSC_F[Off_SOnOff_spikers_3, -2] = Off_SOnOff_PSC_F[Off_SOnOff_spikers_3, -1] + Off_SOnOff_PSC_fF *(Off_SOnOff_PSC_maxF - Off_SOnOff_PSC_F[Off_SOnOff_spikers_3, -1])
-            Off_SOnOff_PSC_P[Off_SOnOff_spikers_3, -2] = Off_SOnOff_PSC_P[Off_SOnOff_spikers_3, -1] * (1 - Off_SOnOff_PSC_fP)
-        SOnOff_ROn_mask_3 = cp.any((t == (SOnOff_tspike[:,:,:,:,-1] + SOnOff_ROn_PSC_delay)), axis=-1)
+            Off_SOnOff_PSC_x[Off_SOnOff_spikers_3 + (-2,)] = Off_SOnOff_PSC_x[Off_SOnOff_spikers_3 + (-1,)]
+            Off_SOnOff_PSC_q[Off_SOnOff_spikers_3 + (-2,)] = Off_SOnOff_PSC_q[Off_SOnOff_spikers_3 + (-1,)]
+            Off_SOnOff_PSC_F[Off_SOnOff_spikers_3 + (-2,)] = Off_SOnOff_PSC_F[Off_SOnOff_spikers_3 + (-1,)]
+            Off_SOnOff_PSC_P[Off_SOnOff_spikers_3 + (-2,)] = Off_SOnOff_PSC_P[Off_SOnOff_spikers_3 + (-1,)]
+            Off_SOnOff_PSC_x[Off_SOnOff_spikers_3 + (-1,)] = Off_SOnOff_PSC_x[Off_SOnOff_spikers_3 + (-1,)] + Off_SOnOff_PSC_q[Off_SOnOff_spikers_3 + (-1,)]
+            Off_SOnOff_PSC_q[Off_SOnOff_spikers_3 + (-1,)] = Off_SOnOff_PSC_F[Off_SOnOff_spikers_3 + (-1,)] * Off_SOnOff_PSC_P[Off_SOnOff_spikers_3 + (-1,)]
+            Off_SOnOff_PSC_F[Off_SOnOff_spikers_3 + (-1,)] = Off_SOnOff_PSC_F[Off_SOnOff_spikers_3 + (-1,)] + Off_SOnOff_PSC_fF *(Off_SOnOff_PSC_maxF - Off_SOnOff_PSC_F[Off_SOnOff_spikers_3 + (-1,)])
+            Off_SOnOff_PSC_P[Off_SOnOff_spikers_3 + (-1,)] = Off_SOnOff_PSC_P[Off_SOnOff_spikers_3 + (-1,)] * (1 - Off_SOnOff_PSC_fP)
+        SOnOff_ROn_mask_3 = cp.any((t == (SOnOff_tspike + SOnOff_ROn_PSC_delay)), axis=-1)
         if cp.any(SOnOff_ROn_mask_3).item():
             SOnOff_ROn_spikers_3 = cp.where(SOnOff_ROn_mask_3)
-            SOnOff_ROn_PSC_x[SOnOff_ROn_spikers_3, -2] = SOnOff_ROn_PSC_x[SOnOff_ROn_spikers_3, -1]
-            SOnOff_ROn_PSC_q[SOnOff_ROn_spikers_3, -2] = SOnOff_ROn_PSC_q[SOnOff_ROn_spikers_3, -1]
-            SOnOff_ROn_PSC_F[SOnOff_ROn_spikers_3, -2] = SOnOff_ROn_PSC_F[SOnOff_ROn_spikers_3, -1]
-            SOnOff_ROn_PSC_P[SOnOff_ROn_spikers_3, -2] = SOnOff_ROn_PSC_P[SOnOff_ROn_spikers_3, -1]
-            SOnOff_ROn_PSC_x[SOnOff_ROn_spikers_3, -2] = SOnOff_ROn_PSC_x[SOnOff_ROn_spikers_3, -1] + SOnOff_ROn_PSC_q[SOnOff_ROn_spikers_3, -1]
-            SOnOff_ROn_PSC_q[SOnOff_ROn_spikers_3, -2] = SOnOff_ROn_PSC_F[SOnOff_ROn_spikers_3, -1] * SOnOff_ROn_PSC_P[SOnOff_ROn_spikers_3, -1]
-            SOnOff_ROn_PSC_F[SOnOff_ROn_spikers_3, -2] = SOnOff_ROn_PSC_F[SOnOff_ROn_spikers_3, -1] + SOnOff_ROn_PSC_fF *(SOnOff_ROn_PSC_maxF - SOnOff_ROn_PSC_F[SOnOff_ROn_spikers_3, -1])
-            SOnOff_ROn_PSC_P[SOnOff_ROn_spikers_3, -2] = SOnOff_ROn_PSC_P[SOnOff_ROn_spikers_3, -1] * (1 - SOnOff_ROn_PSC_fP)
+            SOnOff_ROn_PSC_x[SOnOff_ROn_spikers_3 + (-2,)] = SOnOff_ROn_PSC_x[SOnOff_ROn_spikers_3 + (-1,)]
+            SOnOff_ROn_PSC_q[SOnOff_ROn_spikers_3 + (-2,)] = SOnOff_ROn_PSC_q[SOnOff_ROn_spikers_3 + (-1,)]
+            SOnOff_ROn_PSC_F[SOnOff_ROn_spikers_3 + (-2,)] = SOnOff_ROn_PSC_F[SOnOff_ROn_spikers_3 + (-1,)]
+            SOnOff_ROn_PSC_P[SOnOff_ROn_spikers_3 + (-2,)] = SOnOff_ROn_PSC_P[SOnOff_ROn_spikers_3 + (-1,)]
+            SOnOff_ROn_PSC_x[SOnOff_ROn_spikers_3 + (-1,)] = SOnOff_ROn_PSC_x[SOnOff_ROn_spikers_3 + (-1,)] + SOnOff_ROn_PSC_q[SOnOff_ROn_spikers_3 + (-1,)]
+            SOnOff_ROn_PSC_q[SOnOff_ROn_spikers_3 + (-1,)] = SOnOff_ROn_PSC_F[SOnOff_ROn_spikers_3 + (-1,)] * SOnOff_ROn_PSC_P[SOnOff_ROn_spikers_3 + (-1,)]
+            SOnOff_ROn_PSC_F[SOnOff_ROn_spikers_3 + (-1,)] = SOnOff_ROn_PSC_F[SOnOff_ROn_spikers_3 + (-1,)] + SOnOff_ROn_PSC_fF *(SOnOff_ROn_PSC_maxF - SOnOff_ROn_PSC_F[SOnOff_ROn_spikers_3 + (-1,)])
+            SOnOff_ROn_PSC_P[SOnOff_ROn_spikers_3 + (-1,)] = SOnOff_ROn_PSC_P[SOnOff_ROn_spikers_3 + (-1,)] * (1 - SOnOff_ROn_PSC_fP)
         #Compute Gradients
 
         grad_On_ROn_accumulate += eligibility_On_ROn

@@ -1,0 +1,22 @@
+# Core scientific stack
+# - Python 3.6 is EOL, so we pin older versions for cluster compatibility.
+numpy==1.19.5; python_version < '3.7'
+scipy==1.5.4; python_version < '3.7'
+matplotlib==3.3.4; python_version < '3.7'
+
+numpy; python_version >= '3.7'
+scipy; python_version >= '3.7'
+matplotlib; python_version >= '3.7'
+
+# GPU
+# CuPy generally requires newer Python; on CUDA clusters prefer e.g. cupy-cuda11x / cupy-cuda12x.
+cupy; python_version >= '3.8'
+
+# Config + progress bars
+PyYAML==5.4.1; python_version < '3.7'
+PyYAML; python_version >= '3.7'
+tqdm
+
+# Optional: needed if your .mat files are MATLAB v7.3 (HDF5-backed)
+h5py==3.1.0; python_version < '3.7'
+h5py; python_version >= '3.7'

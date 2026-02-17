@@ -13,17 +13,17 @@ def call_inputs(FR,batch_size):
     6. Adjust parameters as needed for different scenarios.
     '''
     
-    path = "strfMat.mat"
+    path = "C:/Users/ipboy/Documents/GitHub/MouseSpatialGrid/LearningModels/Manual_Tuning/strfMat.mat"
 
     args = ArgumentParser()
-    args.add_argument('--chans', type=int, default=19, help='Number of channels')
+    args.add_argument('--chans', type=int, default=1, help='Number of channels')
     args.add_argument('--trials', type=int, default=10, help='Number of trials')
-    args.add_argument('--padToTime', type=float, default=2980.1, help='Time to pad spike trains to (ms)')
+    args.add_argument('--padToTime', type=int, default=2500, help='Time to pad spike trains to (ms)')
     args.add_argument('--sigma', type=int, default=300, help='Standard deviation for Gaussian tuning curves')    
     args.add_argument('--dt', type=float, default=0.1, help='Time step in ms')
     args.add_argument('--FR', type=float, default=FR, help='Firing rate of neurons in Hz')
     args.add_argument('--std', type=float, default=0.0, help='Standard deviation of the firing rate.')
-    args.add_argument('--simlen', type=int, default=29801, help='Number of time steps (default = 35000).')
+    args.add_argument('--simlen', type=int, default=35000, help='Number of time steps (default = 35000).')
     args.add_argument('--strfGain', type=int, default=0.1, help='Flat multiplier applied to the STRF firing rates.')
     args.add_argument('--target_dir', type=str, default='../resampled-stimuli/target', help='directory containing target stimuli')
     args.add_argument('--masker_dir', type=str, default='../resampled-stimuli/masker', help='directory containing masker stimuli')

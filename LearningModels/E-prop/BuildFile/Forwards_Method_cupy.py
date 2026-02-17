@@ -347,7 +347,7 @@ def declare_condtionals(neurons,synapses):
 
         conditionals_declaration += f'\n        if cp.any({neuron_name}_mask_1).item():'
         conditionals_declaration += f'\n            {neuron_name}_spikers_1 = cp.where({neuron_name}_mask_1)'
-        conditionals_declaration += f'\n            {neuron_name}_tspike[{neuron_name}_spikers_1, {neuron_name}_buffer_index[{neuron_name}_spikers_1].astype(cp.int8)-1] = t'
+        conditionals_declaration += f'\n            {neuron_name}_tspike[{neuron_name}_spikers_1 + ({neuron_name}_buffer_index[{neuron_name}_spikers_1].astype(cp.int8)-1,)] = t'
         conditionals_declaration += f'\n            {neuron_name}_buffer_index[{neuron_name}_spikers_1] = {neuron_name}_buffer_index[{neuron_name}_spikers_1] % 5 + 1'
 
 
@@ -359,17 +359,17 @@ def declare_condtionals(neurons,synapses):
         conditionals_declaration += f'\n        {neuron_name}_mask_2a = ({neuron_name}_V[:,:,:,:,-1] >= {neuron_name}_V_thresh)'
         conditionals_declaration += f'\n        if cp.any({neuron_name}_mask_2a).item():'
         conditionals_declaration += f'\n            {neuron_name}_spikers_2a = cp.where({neuron_name}_mask_2a)'
-        conditionals_declaration += f'\n            {neuron_name}_V[{neuron_name}_spikers_2a,-2] = {neuron_name}_V[{neuron_name}_spikers_2a,-1]'
-        conditionals_declaration += f'\n            {neuron_name}_V[{neuron_name}_spikers_2a,-1] = {neuron_name}_V_reset'
-        conditionals_declaration += f'\n            {neuron_name}_g_ad[{neuron_name}_spikers_2a,-2] = {neuron_name}_g_ad[{neuron_name}_spikers_2a,-1]'
-        conditionals_declaration += f'\n            {neuron_name}_g_ad[{neuron_name}_spikers_2a,-1] = {neuron_name}_g_ad[{neuron_name}_spikers_2a,-1] + {neuron_name}_g_inc'
+        conditionals_declaration += f'\n            {neuron_name}_V[{neuron_name}_spikers_2a + (-2,)] = {neuron_name}_V[{neuron_name}_spikers_2a + (-1,)]'
+        conditionals_declaration += f'\n            {neuron_name}_V[{neuron_name}_spikers_2a + (-1,)] = {neuron_name}_V_reset'
+        conditionals_declaration += f'\n            {neuron_name}_g_ad[{neuron_name}_spikers_2a + (-2,)] = {neuron_name}_g_ad[{neuron_name}_spikers_2a + (-1,)]'
+        conditionals_declaration += f'\n            {neuron_name}_g_ad[{neuron_name}_spikers_2a + (-1,)] = {neuron_name}_g_ad[{neuron_name}_spikers_2a + (-1,)] + {neuron_name}_g_inc'
         #2b (Refractory period implementation)
 
-        conditionals_declaration += f'\n        {neuron_name}_mask_2b = cp.any((t <= ({neuron_name}_tspike[:,:,:,:,-1] + {neuron_name}_t_ref)), axis=-1)'
+        conditionals_declaration += f'\n        {neuron_name}_mask_2b = cp.any((t <= ({neuron_name}_tspike + {neuron_name}_t_ref)), axis=-1)'
         conditionals_declaration += f'\n        if cp.any({neuron_name}_mask_2b).item():'
         conditionals_declaration += f'\n            {neuron_name}_spikers_2b = cp.where({neuron_name}_mask_2b)'
-        conditionals_declaration += f'\n            {neuron_name}_V[{neuron_name}_spikers_2b,-2] = {neuron_name}_V[{neuron_name}_spikers_2b,-1]'
-        conditionals_declaration += f'\n            {neuron_name}_V[{neuron_name}_spikers_2b,-1] = {neuron_name}_V_reset'
+        conditionals_declaration += f'\n            {neuron_name}_V[{neuron_name}_spikers_2b + (-2,)] = {neuron_name}_V[{neuron_name}_spikers_2b + (-1,)]'
+        conditionals_declaration += f'\n            {neuron_name}_V[{neuron_name}_spikers_2b + (-1,)] = {neuron_name}_V_reset'
 
         #Updated condition 3 post pythran
 
@@ -378,18 +378,18 @@ def declare_condtionals(neurons,synapses):
         synapse_name = j["name"]
         pre_neuron_name = synapse_name.split('_',-1)[0]
 
-        conditionals_declaration += f'\n        {synapse_name}_mask_3 = cp.any((t == ({pre_neuron_name}_tspike[:,:,:,:,-1] + {synapse_name}_PSC_delay)), axis=-1)'
+        conditionals_declaration += f'\n        {synapse_name}_mask_3 = cp.any((t == ({pre_neuron_name}_tspike + {synapse_name}_PSC_delay)), axis=-1)'
         conditionals_declaration += f'\n        if cp.any({synapse_name}_mask_3).item():'
         conditionals_declaration += f'\n            {synapse_name}_spikers_3 = cp.where({synapse_name}_mask_3)'
-        conditionals_declaration += f'\n            {synapse_name}_PSC_x[{synapse_name}_spikers_3, -2] = {synapse_name}_PSC_x[{synapse_name}_spikers_3, -1]'
-        conditionals_declaration += f'\n            {synapse_name}_PSC_q[{synapse_name}_spikers_3, -2] = {synapse_name}_PSC_q[{synapse_name}_spikers_3, -1]'
-        conditionals_declaration += f'\n            {synapse_name}_PSC_F[{synapse_name}_spikers_3, -2] = {synapse_name}_PSC_F[{synapse_name}_spikers_3, -1]'
-        conditionals_declaration += f'\n            {synapse_name}_PSC_P[{synapse_name}_spikers_3, -2] = {synapse_name}_PSC_P[{synapse_name}_spikers_3, -1]'
+        conditionals_declaration += f'\n            {synapse_name}_PSC_x[{synapse_name}_spikers_3 + (-2,)] = {synapse_name}_PSC_x[{synapse_name}_spikers_3 + (-1,)]'
+        conditionals_declaration += f'\n            {synapse_name}_PSC_q[{synapse_name}_spikers_3 + (-2,)] = {synapse_name}_PSC_q[{synapse_name}_spikers_3 + (-1,)]'
+        conditionals_declaration += f'\n            {synapse_name}_PSC_F[{synapse_name}_spikers_3 + (-2,)] = {synapse_name}_PSC_F[{synapse_name}_spikers_3 + (-1,)]'
+        conditionals_declaration += f'\n            {synapse_name}_PSC_P[{synapse_name}_spikers_3 + (-2,)] = {synapse_name}_PSC_P[{synapse_name}_spikers_3 + (-1,)]'
 
-        conditionals_declaration += f'\n            {synapse_name}_PSC_x[{synapse_name}_spikers_3, -2] = {synapse_name}_PSC_x[{synapse_name}_spikers_3, -1] + {synapse_name}_PSC_q[{synapse_name}_spikers_3, -1]'
-        conditionals_declaration += f'\n            {synapse_name}_PSC_q[{synapse_name}_spikers_3, -2] = {synapse_name}_PSC_F[{synapse_name}_spikers_3, -1] * {synapse_name}_PSC_P[{synapse_name}_spikers_3, -1]'
-        conditionals_declaration += f'\n            {synapse_name}_PSC_F[{synapse_name}_spikers_3, -2] = {synapse_name}_PSC_F[{synapse_name}_spikers_3, -1] + {synapse_name}_PSC_fF *({synapse_name}_PSC_maxF - {synapse_name}_PSC_F[{synapse_name}_spikers_3, -1])'
-        conditionals_declaration += f'\n            {synapse_name}_PSC_P[{synapse_name}_spikers_3, -2] = {synapse_name}_PSC_P[{synapse_name}_spikers_3, -1] * (1 - {synapse_name}_PSC_fP)'
+        conditionals_declaration += f'\n            {synapse_name}_PSC_x[{synapse_name}_spikers_3 + (-1,)] = {synapse_name}_PSC_x[{synapse_name}_spikers_3 + (-1,)] + {synapse_name}_PSC_q[{synapse_name}_spikers_3 + (-1,)]'
+        conditionals_declaration += f'\n            {synapse_name}_PSC_q[{synapse_name}_spikers_3 + (-1,)] = {synapse_name}_PSC_F[{synapse_name}_spikers_3 + (-1,)] * {synapse_name}_PSC_P[{synapse_name}_spikers_3 + (-1,)]'
+        conditionals_declaration += f'\n            {synapse_name}_PSC_F[{synapse_name}_spikers_3 + (-1,)] = {synapse_name}_PSC_F[{synapse_name}_spikers_3 + (-1,)] + {synapse_name}_PSC_fF *({synapse_name}_PSC_maxF - {synapse_name}_PSC_F[{synapse_name}_spikers_3 + (-1,)])'
+        conditionals_declaration += f'\n            {synapse_name}_PSC_P[{synapse_name}_spikers_3 + (-1,)] = {synapse_name}_PSC_P[{synapse_name}_spikers_3 + (-1,)] * (1 - {synapse_name}_PSC_fP)'
 
 
     #     #conditionals_declaration += f'\n        if cp.any({neuron_name}_mask):'
