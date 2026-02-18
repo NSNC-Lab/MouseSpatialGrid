@@ -20,11 +20,11 @@ strf_config:
   mean_rate: 0.1
 
   paramH:
-    alpha: 0.005 # time constant of temporal kernel [s] 0.0097
-    N1: 5  #Nominally 5
+    alpha: 0.0030 # time constant of temporal kernel [s] 0.0097
+    N1: 3  #Nominally 5
     N2: 8  #Nominally 8
-    SC1: 3.4 #Nominally 1
-    SC2: 3.3  #increase -> more inhibition #0.88 in paper 
+    SC1: 2 #Nominally 1
+    SC2: 1.9  #increase -> more inhibition #0.88 in paper 
   
   # frequency parameters - static
   paramG:

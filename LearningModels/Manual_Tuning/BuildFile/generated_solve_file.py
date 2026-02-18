@@ -58,7 +58,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     Off_tauD_N = 1.5
     Off_noise_scale = 1.9481350796278847
     final_grad_node = 0
-    SOnOff_C = 0.01
+    SOnOff_C = 0.1
     SOnOff_g_L = 0.01
     SOnOff_E_L = -57
     SOnOff_noise = 0
@@ -69,7 +69,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     SOnOff_Itonic = 0
     SOnOff_Imask = np.ones((1,1))
     SOnOff_R = 100.0
-    SOnOff_tau = 1.0
+    SOnOff_tau = 10.0
     SOnOff_V_thresh = -47
     SOnOff_V_reset = -52
     is_output = 0
@@ -88,10 +88,10 @@ def solve_run(on_input,off_input,noise_token,data,p):
     ROn_g_L = 0.005
     ROn_E_L = -65
     ROn_noise = 0
-    ROn_t_ref = 1
+    ROn_t_ref = 4
     ROn_E_k = -80
-    ROn_tau_ad = 10
-    ROn_g_inc = 0.0001
+    ROn_tau_ad = 100
+    ROn_g_inc = 0.01
     ROn_Itonic = 0
     ROn_Imask = np.ones((1,1))
     ROn_R = 200.0
@@ -114,7 +114,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     On_ROn_tauD = 1.5
     On_ROn_tauR = 0.7
     On_ROn_PSC_delay = 1
-    On_ROn_gSYN = 0.02
+    On_ROn_gSYN = 0.12
     On_ROn_PSC_fF = 0
     On_ROn_PSC_fP = 0.1
     On_ROn_tauF = 180
@@ -138,7 +138,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     On_SOnOff_tauD = 1
     On_SOnOff_tauR = 0.1
     On_SOnOff_PSC_delay = 3
-    On_SOnOff_gSYN = 0.01
+    On_SOnOff_gSYN = 0.0
     On_SOnOff_PSC_fF = 0
     On_SOnOff_PSC_fP = 0.2
     On_SOnOff_tauF = 180

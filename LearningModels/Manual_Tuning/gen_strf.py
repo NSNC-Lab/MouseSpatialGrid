@@ -505,7 +505,7 @@ class GenSTRF(object):
                 frate = frate*mean_rate
                 
                 # offset rate
-                offset_rate = -frate + np.max(frate) #-frate + max(frate)*0.6;
+                offset_rate = -frate + np.max(frate)*0.3 #-frate + max(frate)*0.6;
 
                 #print(np.shape(offset_rate))
 

@@ -14,7 +14,6 @@ from strf_handler import call_strfs
 from input_handler import call_inputs
 import matplotlib.pyplot as plt
 
-
 class runSimulation(object):
 
     #Remove the outer loop later. Just for testing purposes.

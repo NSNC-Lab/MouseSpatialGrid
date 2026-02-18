@@ -20,7 +20,7 @@ class runSimulation(object):
 
     #Little control pannel for now (Eventually move this to a yaml file or whatever makes the most sense)
 
-    gen_strfs_toggle = 1  #Toggle generating the STRFs
+    gen_strfs_toggle = 0  #Toggle generating the STRFs
     gradients_toggle = 0  #Toggle generating the graidnets in the forwards process *Also toggles running epochs
 
     #Run STRF
