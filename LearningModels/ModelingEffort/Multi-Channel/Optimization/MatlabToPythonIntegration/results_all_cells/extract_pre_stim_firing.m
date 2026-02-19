@@ -1,0 +1,20 @@
+cd(userpath);
+cd('../GitHub/ModelingEffort/Multi-Channel/Plotting/OliverDataPlotting')
+
+load('all_units_info_with_polished_criteria_modified_perf.mat','all_data');
+load('sound_files.mat','sampleRate','target1','target2');  %Sample Rate 195312 Hz
+
+n = 7;
+SpikeTimes = all_data(n).ctrl_tar1_timestamps(:,1);
+
+
+pre_zeros = [];
+
+for k = 1:10
+    times = SpikeTimes{k};
+    mask = times<0;
+    pre_zeros = [pre_zeros;times(mask)];
+    
+end
+
+FR = length(pre_zeros)/10
