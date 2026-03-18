@@ -1,7 +1,7 @@
 import set_options
 import declarations
 import declarations_output_inhibit
-from BuildFile import Forwards_Method_cupy, Compile_Solve, calculate_loss
+from BuildFile import Forwards_Method_cupy, Forwards_Method, Compile_Solve, calculate_loss
 import numpy as np
 import time
 from datetime import datetime
@@ -38,9 +38,16 @@ class runSimulation(object):
     opts = set_options.options()
     #Declare architecture
     #arch = declarations.Declare_Architecture(opts)
-    arch = declarations_output_inhibit.Declare_Architecture(opts)
+    arch = declarations.Declare_Architecture(opts)
     #Build the forwards euler loop
-    file_body_forwards = Forwards_Method_cupy.Euler_Compiler(arch[0],arch[1],arch[2],opts)
+
+    #All Cells
+    #file_body_forwards = Forwards_Method_cupy.Euler_Compiler(arch[0],arch[1],arch[2],opts)
+    
+    #Single Cell
+    file_body_forwards = Forwards_Method.Euler_Compiler(arch[0],arch[1],arch[2],opts)
+
+    
     #Compile a solve file (python or c++)
 
 
@@ -51,6 +58,7 @@ class runSimulation(object):
 
     ############
     #- Move the data loading to a seperate file and make it toggleable
+    cwd_path = os.getcwd()
 
     #Calculate the approximate spontaneous firing rate before fitting.
     from pathlib import Path
@@ -65,7 +73,9 @@ class runSimulation(object):
     mat = loadmat("all_units_info_with_polished_criteria_modified_perf.mat",variable_names=["all_data"],squeeze_me=True,struct_as_record=False)
     all_data = mat["all_data"]  # numpy array of MATLAB structs
 
-    n = 7  # MATLAB is 1-based
+    os.chdir(cwd_path)
+
+    n = 200  # MATLAB is 1-based
     unit = all_data[n - 1]
 
     spike_times = unit.ctrl_tar1_timestamps
@@ -104,22 +114,24 @@ class runSimulation(object):
     #data = data[:,:,None]
     data = pre_to_aprx_3s_holder[:,:,None]
 
-    num_params = 5
+    num_params = 8
     batch_size = opts['N_batch']
     #Learnign rate currently set to 0.05 abs(p). Update once we have multiple parameters
     p,lr = InitParams.pinit(batch_size,num_params)
 
 
-    spks = call_inputs(FR,batch_size)
-    on_spks = np.transpose(spks[f'locs_masker_None_target_0_on'][f'stimulus_0_poisson_spks'],(2,0,1))
-    off_spks = np.transpose(spks[f'locs_masker_None_target_0_off'][f'stimulus_0_poisson_spks'],(2,0,1))
-    noise = np.transpose(spks['noise_masker_None_target_0'],(0,3,1,2))
+    # spks = call_inputs(1,FR,batch_size)
+    # on_spks = np.transpose(spks[f'locs_masker_None_target_0_on'][f'stimulus_0_poisson_spks'],(2,0,1))
+    # off_spks = np.transpose(spks[f'locs_masker_None_target_0_off'][f'stimulus_0_poisson_spks'],(2,0,1))
+    # rate_on = np.transpose(spks[f'locs_masker_None_target_0_on'][f'stimulus_0_rate'],(2,0,1))
+    # rate_off = np.transpose(spks[f'locs_masker_None_target_0_off'][f'stimulus_0_rate'],(2,0,1))
+    # noise = np.transpose(spks['noise_masker_None_target_0'],(0,3,1,2))
 
 
     #print('p1')
     #print(p[13:17,1:5])
 
-    savemat("compare3.mat", {"data": data, "forwards_out":on_spks, "noise": noise}, do_compression=True)
+    #savemat("compare3.mat", {"data": data, "forwards_out":on_spks, "noise": noise}, do_compression=True)
 
     #Grad Params
     beta1, beta2 = 0.5, 0.9995 
@@ -142,21 +154,51 @@ class runSimulation(object):
 
     start = time.perf_counter()
 
-    
 
-    for epoch in range(1):
+
+    for epoch in range(50):
 
         #spks = call_inputs(p,batch_size)
         #on_spks = np.transpose(spks[f'locs_masker_None_target_0_on'][f'stimulus_0_poisson_spks'],(2,0,1))
         #off_spks = np.transpose(spks[f'locs_masker_None_target_0_off'][f'stimulus_0_poisson_spks'],(2,0,1))
         #noise = np.transpose(spks['noise_masker_None_target_0'],(0,3,1,2))
 
-    
+
+        #p[0,:] = np.ones((1, batch_size))*0.6
+
+        #print(p)
+
+        #Generate STRFs
+        target_dict = call_strfs(p,batch_size)
+
+
+        #IMPORTANT remember to divide out the gain on rate on and rate off at some point. The currne tderivitives I believe include the gains implicitly in rate.
+
+        #It would be something like target_dict[fr_deriv]/p[0] <- strf gain
+        
+        #Generate Inputs
+        spks = call_inputs(1,FR,batch_size,target_dict)
+        
+        #Organize as batch,trial,channel,time 
+
+
+        
+        
+        on_spks = np.transpose(spks[f'locs_masker_None_target_0_on'][f'stimulus_0_poisson_spks'],(3,2,1,0))
+        off_spks = np.transpose(spks[f'locs_masker_None_target_0_off'][f'stimulus_0_poisson_spks'],(3,2,1,0))
+        rate_on = spks[f'locs_masker_None_target_0_on'][f'stimulus_0_rate']
+        rate_off = spks[f'locs_masker_None_target_0_off'][f'stimulus_0_rate']
+        rate_on_deriv = spks[f'locs_masker_None_target_0_on'][f'stimulus_0_rate_deriv']
+        rate_off_deriv = spks[f'locs_masker_None_target_0_off'][f'stimulus_0_rate_deriv']
+        noise = np.transpose(spks['noise_masker_None_target_0'],(0,3,1,2))
+
+
+
 
         #print(p)
 
         #Make it so that you don't have to supply data if you are not running gradients
-        output, grads, on_track, off_track, loss_holder = generated_solve_file.solve_run(on_spks,off_spks,noise,data,p) #Python Verison to build
+        output, grads, on_track, off_track, loss_holder = generated_solve_file.solve_run(on_spks,off_spks,noise,rate_on,rate_off,rate_on_deriv,rate_off_deriv,data,p) #Python Verison to build
         
         #print(grads)
 

@@ -41,7 +41,7 @@ def declare_vars(neurons,synapses,options):
     #Set header
     variable_declaration = '\n\n    #Declare Variables\n'
     
-    gsyn_t = 0
+    gsyn_t = 3
     tau_ad_t = 4
     g_inc_t = 5
     tauP_t = 6
@@ -74,9 +74,9 @@ def declare_vars(neurons,synapses,options):
                 #      variable_declaration += f'\n    {j} = p[{tauP_t}].reshape({options["N_batch"]}, 1, 1)'
                 #      tauP_t+=1
 
-                # if j == 'On_tau_ad':
-                #      variable_declaration += f'\n    {j} = p[{tau_ad_t}].reshape({options["N_batch"]}, 1, 1)'
-                #      tau_ad_t+=1
+                elif j == 'ROn_g_inc':
+                      variable_declaration += f'\n    {j} = p[2].reshape({options["N_batch"]}, 1, 1)'
+                      tau_ad_t+=1
 
                 # if j == 'On_g_inc':
                 #      variable_declaration += f'\n    {j} = p[{g_inc_t}].reshape({options["N_batch"]}, 1, 1)'
@@ -89,7 +89,7 @@ def declare_vars(neurons,synapses,options):
                 #elif
                 elif j != 'name' and j != 'response':
                     variable_declaration += f'\n    {j} = {variable[j]}'
-                    print(f'Declaring variable {j} with value {variable[j]}')
+                    #print(f'Declaring variable {j} with value {variable[j]}')
 
     variable_declaration += f'\n    loss_vals = np.array([0])'
     variable_declaration += f'\n    loss_bin_width = 200'
@@ -97,6 +97,10 @@ def declare_vars(neurons,synapses,options):
     for synk in synapses:
         synapse_name = synk["name"]
         variable_declaration += f'\n    grad_{synapse_name}_accumulate=0'
+
+    variable_declaration += f'\n    grad_strf_gain_accumulate=0'
+    variable_declaration += f'\n    grad_strf_latency_accumulate=0'
+    variable_declaration += f'\n    grad_output_adaptation_accumulate=0'
 
     return variable_declaration
 
@@ -166,6 +170,11 @@ def declare_holders(neurons, synapses, options):
         #holder_declaration += f'\n    spike_wrt_gsyn_{synapse_name} = np.zeros(({options["N_batch"]},{options["N_trials"]},{options["N_channels"]}))'
 
     #holder_declaration += f'\n    spike_wrt_FR = np.zeros(({options["N_batch"]},{options["N_trials"]},{options["N_channels"]}))'
+    holder_declaration += f'\n    grad_strf_gain = np.zeros(({options["N_batch"]},{options["N_trials"]},{options["N_channels"]}))'
+    holder_declaration += f'\n    grad_strf_latency = np.zeros(({options["N_batch"]},{options["N_trials"]},{options["N_channels"]}))'
+    holder_declaration += f'\n    grad_output_adaptation = np.zeros(({options["N_batch"]},{options["N_trials"]},{options["N_channels"]}))'
+        
+    
 
     return holder_declaration
 
@@ -216,10 +225,10 @@ def declare_odes(neurons,synapses,projections,options):
                 raise ValueError(f"error building ODES. You must declare response type when declaring an input.")
 
             if k['response'] == 'onset':
-                input_str = 'on_input[:,timestep,:]'
+                input_str = 'on_input[:,:,:,timestep]'
             
             if k['response'] == 'offset':
-                input_str = 'off_input[:,timestep,:]'
+                input_str = 'off_input[:,:,:,timestep]'
 
             ODE_declaration += f'\n        {neuron_name}_V_k1 = ((({neuron_name}_E_L - {neuron_name}_V[:,:,:,-1]) - {neuron_name}_R*{neuron_name}_g_ad[:,:,:,-1]*({neuron_name}_V[:,:,:,-1]-{neuron_name}_E_k) - {neuron_name}_R*{neuron_name}_g_postIC*{input_str}*{neuron_name}_netcon*({neuron_name}_V[:,:,:,-1]-{neuron_name}_E_exc) + {neuron_name}_R*{neuron_name}_Itonic*{neuron_name}_Imask) / {neuron_name}_tau)'
 

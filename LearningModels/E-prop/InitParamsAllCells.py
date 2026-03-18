@@ -3,10 +3,10 @@ import numpy as np
 #Note! One option to resolve the learning rate issue would be to set them all up here. Basically set it so that each parameter moves relatively easily based on the initial values used.
 
 
-def pinit(batch_size, num_params):
+def pinit(batch_size, num_params, num_cells):
     rng = np.random
-    p = np.zeros((num_params,batch_size))
-    lrs = np.zeros((num_params,1))
+    p = np.zeros((num_params,num_cells,batch_size))
+    lrs = np.zeros((num_params,1,1))
     lr_frac = 0.05
 
     #All tested starting conditions
@@ -23,24 +23,8 @@ def pinit(batch_size, num_params):
     #p[0:4,:] = rng.uniform(0, 0.01, size=(4, batch_size)).astype(np.float32) #g_inc
     
     #current 4 parameter test
-    #p[0:5,:] = rng.uniform(0, 0.08, size=(5, batch_size)).astype(np.float32) #GSYNs
-    #lrs[0:5] = 0.08*lr_frac
-    
-    p[0,:] = rng.uniform(0, 0.03, size=(1, batch_size)).astype(np.float32) #strf gains
-    #p[0,:] = np.ones((1,batch_size)).astype(np.float32)*0.015
-    lrs[0] = 0.03*lr_frac
-
-    p[1,:] = rng.uniform(0, 0.02, size=(1, batch_size)).astype(np.float32) #strf Latencies
-    lrs[1] = 0.02*lr_frac
-
-    p[2,:] = rng.uniform(0, 0.01, size=(1, batch_size)).astype(np.float32) #output adaptation
-    lrs[2] = 0.01*lr_frac
-
-    p[3:8,:] = rng.uniform(0, 0.2, size=(5, batch_size)).astype(np.float32) #GSYNs
-    lrs[3:8] = 0.2*lr_frac
-
-
-    
+    p[0:5,:] = rng.uniform(0.001, 0.08, size=(5,num_cells,batch_size)).astype(np.float32) #GSYNs
+    lrs[0:5] = 0.08*lr_frac
     # p[4,:] = rng.uniform(5, 20, size=(1, batch_size)).astype(np.float32) #tau_ad
     # lrs[4] = 20*lr_frac
     # p[5,:] = rng.uniform(0.0, 0.01, size=(1, batch_size)).astype(np.float32) #g_inc

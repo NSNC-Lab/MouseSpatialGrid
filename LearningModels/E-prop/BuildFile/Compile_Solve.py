@@ -31,7 +31,7 @@ def bring_in_imports():
 
 def gen_py_header():
     
-    header = 'def solve_run(on_input,off_input,noise_token,data,p):\n'
+    header = 'def solve_run(on_input,off_input,noise_token,rate_on,rate_off,rate_on_deriv,rate_off_deriv,data,p):\n'
     
     return header
 

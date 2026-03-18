@@ -208,6 +208,9 @@ class PrepInput(object):
         
         #print(np.shape(np.array(temp)))
 
+        if num_cells == 1:
+            return np.squeeze(temp, axis=0)
+
         return np.array(temp)
 
 
@@ -233,10 +236,10 @@ class PrepInput(object):
             for trial_num in range(rate.shape[2]):
                 s[:, chan, trial_num] = self.spike_generator(rate[:, chan, trial_num])
             
-        return s
+        return s,rate
     
     
-    def process_input(self, strf_path, list_locs, on_neuron=True, off_neuron=True):
+    def process_input(self, strf_path, list_locs, on_neuron=True, off_neuron=True, target_dict=None):
         '''
         Process input STRF data to generate spike trains for specified masker and target locations.
         Parameters:
@@ -367,8 +370,9 @@ class PrepInput(object):
                         strfGain=strfGain
                     )
 
-                    on_poisson_spks = self.gen_poisson_inputs(on_spks)
+                    on_poisson_spks, rate_on = self.gen_poisson_inputs(on_spks)
                     spks_dict[f'locs_masker_{locs[0]}_target_{locs[1]}_on'][f'stimulus_{stimulus}_poisson_spks'] = on_poisson_spks
+                    spks_dict[f'locs_masker_{locs[0]}_target_{locs[1]}_on'][f'stimulus_{stimulus}_rate'] = rate_on
                 
             if off_neuron:
                 spks_dict[f'locs_masker_{locs[0]}_target_{locs[1]}_off'] = {}
@@ -381,8 +385,9 @@ class PrepInput(object):
                         newStrfGain=newStrfGain,
                         strfGain=strfGain
                     )
-                    off_poisson_spks = self.gen_poisson_inputs(off_spks)
+                    off_poisson_spks, rate_off = self.gen_poisson_inputs(off_spks)
                     spks_dict[f'locs_masker_{locs[0]}_target_{locs[1]}_off'][f'stimulus_{stimulus}_poisson_spks'] = off_poisson_spks
+                    spks_dict[f'locs_masker_{locs[0]}_target_{locs[1]}_off'][f'stimulus_{stimulus}_rate'] = rate_off
            
             # Generate spiking activity
             spk_noise = self.gen_poisson_times(self.chans, self.fr, self.std, self.simlen, self.trials, self.num_cells)

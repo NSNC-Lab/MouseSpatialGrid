@@ -1,8 +1,9 @@
-from prep_input_data import PrepInput
+from prep_input_data_Learnable_STRF import PrepInput
 from argparse import ArgumentParser
 import yaml
+import os
 
-def call_inputs(num_cells,FR,batch_size):
+def call_inputs(num_cells,FR,batch_size,target_dict):
     '''
     Example usage of the PrepInput class to generate spike trains based on STRF data.
     1. Load configuration from YAML file.
@@ -32,13 +33,9 @@ def call_inputs(num_cells,FR,batch_size):
     parsed_args = args.parse_args()
     
 
-    import os
-
-    os.chdir("C:/Users/ipboy/Documents/GitHub/MouseSpatialGrid/LearningModels/SingleChannelModel_Full_Python/pytoc")
-
-
     # the yaml cofig file is constant and does not need to be changed for different runs
-    yaml_path = '../config/config.yaml'
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    yaml_path = os.path.abspath(os.path.join(base_dir, '..', 'config', 'config.yaml'))
     config = yaml.safe_load(open(yaml_path, 'r'))
     sub_config = config['input_spike_train']
     
@@ -53,7 +50,8 @@ def call_inputs(num_cells,FR,batch_size):
                 strf_path=path, 
                 list_locs=list_locs, 
                 on_neuron=True, 
-                off_neuron=True)
+                off_neuron=True,
+                target_dict=target_dict)
 
     return spks
     

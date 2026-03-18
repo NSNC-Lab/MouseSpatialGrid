@@ -16,15 +16,15 @@ strf_config:
   targetlvl: 0.01
   maskerlvl: 0.01 #default is 0.01
   maxWeight: 1 #maximum mixed tuning weight capped at this level.
-  strfGain: 0.1
+  strfGain: 0.0061
   mean_rate: 0.1
 
   paramH:
-    alpha: 0.0030 # time constant of temporal kernel [s] 0.0097
+    alpha: 0.0082 # time constant of temporal kernel [s] 0.0097
     N1: 3  #Nominally 5
     N2: 8  #Nominally 8
-    SC1: 2 #Nominally 1
-    SC2: 1.9  #increase -> more inhibition #0.88 in paper 
+    SC1: 8 #Nominally 1
+    SC2: 7.6  #increase -> more inhibition #0.88 in paper 
   
   # frequency parameters - static
   paramG:

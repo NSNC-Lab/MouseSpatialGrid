@@ -1,0 +1,47 @@
+load('all_units_info_with_polished_criteria_modified_perf.mat','all_data');
+L23 = 0
+L56 = 0
+L4 = 0
+NaN0 = 0
+
+for k = 1:220
+    
+    if strcmp(all_data(k).layer, 'L2/3')
+        L23 = L23 + 1;
+    elseif strcmp(all_data(k).layer, 'L4')
+        L4 = L4 + 1;
+    elseif strcmp(all_data(k).layer, 'L5/6')
+        L56 = L56 + 1;
+    elseif strcmp(all_data(k).layer, 'NaN')
+        NaN0 = NaN0 + 1;
+    end
+
+    
+
+end
+
+%%
+load('sound_files.mat','sampleRate','target1','target2');  %Sample Rate 195312 Hz
+
+figure(Position=[500,500,1000,200]);
+plot(target1,'k')
+xlabel('')
+ylabel('')
+yticks('')
+xticks('')
+
+%%
+% Poisson PMF plot using poisspdf
+% Poisson PMF plot computed manually
+lambda = 5;
+kMax = 25;
+k = 0:kMax;
+
+pmf = exp(-lambda) .* (lambda.^k) ./ factorial(k);
+
+figure;
+stem(k, pmf, 'filled');
+xlabel('k');
+ylabel('P(X = k)');
+title(sprintf('Poisson PMF (\\lambda = %.3g)', lambda));
+grid on;

@@ -14,10 +14,10 @@ def Declare_Architecture(opts):
     from Variable_Initializations import Lif_Neuron
     from Variable_Initializations import Lif_Synapse
 
-    Onset_input = Lif_Neuron.Build_Vars(name = 'On',is_input=1, response = 'onset',g_postIC = 0.17, g_inc = 0.0001, tau_ad = 10,is_output=0,C=0.1)
-    Offset_input = Lif_Neuron.Build_Vars(name = 'Off',is_input=1, response = 'offset', g_inc = 0.001, tau_ad = 10,g_postIC = 0.17,C=0.1)
+    Onset_input = Lif_Neuron.Build_Vars(name = 'On',is_input=1, response = 'onset',g_postIC = 0.17, g_inc = 0.0003, tau_ad = 10,is_output=0,C=0.1)
+    Offset_input = Lif_Neuron.Build_Vars(name = 'Off',is_input=1, response = 'offset', g_inc = 0.0003, tau_ad = 10,g_postIC = 0.17,C=0.1)
     PV_1 = Lif_Neuron.Build_Vars(name = 'SOnOff',is_output=0, g_L = 1/100, g_inc = 0.0000, E_L = -57, V_reset = -52, t_ref = 0.5,C=0.1)
-    Relay_1 = Lif_Neuron.Build_Vars(name = 'ROn',is_output=1,is_noise=1, g_inc = 0.01, tau_ad = 100,final_grad_node = 1,nSYN=0.015,C=0.1, t_ref = 4)
+    Relay_1 = Lif_Neuron.Build_Vars(name = 'ROn',is_output=1,is_noise=1, g_inc = 0.000157, tau_ad = 100,final_grad_node = 1,nSYN=0.015,C=0.1, t_ref = 4)
 
     neurons = [Onset_input,Offset_input,PV_1,Relay_1]
 
@@ -25,12 +25,12 @@ def Declare_Architecture(opts):
     # Next, please declare your synapses and respective synapse properies #
     #---------------------------------------------------------------------#
     # Convention : Pre Node  ->  Post Node   Ex. On_ROn 
-    On_R1_synapse = Lif_Synapse.Build_Vars(name = 'On_ROn',fP=0.1,gSYN=0.12,tauP=30, tauR=0.7, tauD=1.5,delay=1)
-    Off_R1_synapse = Lif_Synapse.Build_Vars(name = 'Off_ROn',fP=0.1,gSYN=0.00,tauP=30, tauR=0.7, tauD=1.5,delay=1)
-    On_S1_synapse = Lif_Synapse.Build_Vars(name = 'On_SOnOff', gSYN = 0.00, fP = 0.2,tauP=80, tauR=0.1, tauD=1, delay=3)
-    Off_S1_synapse = Lif_Synapse.Build_Vars(name = 'Off_SOnOff', gSYN = 0.08, fP = 0.0,tauP=80, tauR=0.1, tauD=1, delay=3)
-    S1_R1_synapse = Lif_Synapse.Build_Vars(name = 'SOnOff_ROn',gSYN=0.2,fP=0.5,tauP=120, tauR=1, tauD=4.5,ESYN=-80, delay=0.5)
-    
+    On_R1_synapse = Lif_Synapse.Build_Vars(name = 'On_ROn',fP=0.1,gSYN=0.0196,tauP=30, tauR=0.7, tauD=1.5,delay=1)
+    Off_R1_synapse = Lif_Synapse.Build_Vars(name = 'Off_ROn',fP=0.1,gSYN=0.0224,tauP=30, tauR=0.7, tauD=1.5,delay=1)
+    On_S1_synapse = Lif_Synapse.Build_Vars(name = 'On_SOnOff', gSYN = 0.0770, fP = 0.2,tauP=80, tauR=0.1, tauD=1, delay=3)
+    Off_S1_synapse = Lif_Synapse.Build_Vars(name = 'Off_SOnOff', gSYN = 0.0435, fP = 0.0,tauP=80, tauR=0.1, tauD=1, delay=3)
+    S1_R1_synapse = Lif_Synapse.Build_Vars(name = 'SOnOff_ROn',gSYN=0.0181,fP=0.5,tauP=120, tauR=1, tauD=4.5,ESYN=-80, delay=0.5)
+
 
     synapses = [On_R1_synapse,Off_R1_synapse,On_S1_synapse,Off_S1_synapse,S1_R1_synapse]
     #print(synapses)

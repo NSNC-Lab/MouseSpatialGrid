@@ -589,6 +589,14 @@ def fetch_loss(synapses):
             fetch_loss_declaration += f'            grad_{synapse_name} += grad_{synapse_name}_accumulate*loss_deriv[:,None,None]\n'
    
         fetch_loss_declaration += f'            grad_{synapse_name}_accumulate = 0\n'
+
+    fetch_loss_declaration += f'            grad_strf_gain += grad_strf_gain_accumulate*loss_deriv[:,None,None]\n'
+    fetch_loss_declaration += f'            grad_strf_gain_accumulate = 0\n'
+    fetch_loss_declaration += f'            grad_strf_latency += grad_strf_latency_accumulate*loss_deriv[:,None,None]\n'
+    fetch_loss_declaration += f'            grad_strf_latency_accumulate = 0\n'
+    fetch_loss_declaration += f'            grad_output_adaptation += grad_output_adaptation_accumulate*loss_deriv[:,None,None]\n'
+    fetch_loss_declaration += f'            grad_output_adaptation_accumulate = 0\n'
+
    
     #fetch_loss_declaration += f'\n        else:'
     #fetch_loss_declaration += f'\n            loss_vals = np.array([1])'
@@ -602,6 +610,8 @@ def fetch_loss(synapses):
 def compute_phi():
     phi_declaration = '\n        #Compute Phi\n\n'
 
+    phi_declaration += '        psi_On = (1 - np.tanh(On_V[:,:,:,-1] - On_V_thresh)**2)\n'
+    phi_declaration += '        psi_Off = (1 - np.tanh(Off_V[:,:,:,-1] - Off_V_thresh)**2)\n'
     phi_declaration += '        psi_ROn = (1 - np.tanh(ROn_V[:,:,:,-1] - ROn_V_thresh)**2)\n'
     phi_declaration += '        psi_SOnOff = (1 - np.tanh(SOnOff_V[:,:,:,-1] - SOnOff_V_thresh)**2)\n'
     
@@ -609,11 +619,13 @@ def compute_phi():
 
 def compute_eligibility(synapses):
     #This function creates takes the derivative of the same equation in the PSC derivative but wrt gsyn (synaptic weight)
-    # -- This is a learnable parameter
+    # -- This is learnable parameter 1.
     #-------------------------------------------
     # V = R*gsyn*pscs*netcon*(V-ESYN)
     #-------------------------------------------
 
+
+    #Gsyn
     eligbility_delcaration = '\n'
 
     for k in synapses:
@@ -622,6 +634,13 @@ def compute_eligibility(synapses):
 
         #python version
         eligbility_delcaration += f'        eligibility_{synapse_name} = 0.1*(psi_{post_node}*(-{post_node}_R) * {synapse_name}_PSC_s[:,:,:,-1]*{synapse_name}_netcon*({post_node}_V[:,:,:,-1]-{synapse_name}_ESYN))/{post_node}_tau\n'
+
+
+    #STRF-related eligibilities
+
+    eligbility_delcaration += f'        eligibility_strf_gain = ((psi_On * (-On_R) * On_g_postIC * 30 * (1 - np.tanh(0.0001*rate_on[timestep,:][:,None,None]-1.5)**2) * On_netcon * (On_V[:,:,:,-1]-On_E_exc)) / On_tau) + ((psi_Off * (-Off_R) * Off_g_postIC * 30 *(1 - np.tanh(0.0001*rate_off[timestep,:][:,None,None]-1.5)**2) * Off_netcon * (Off_V[:,:,:,-1]-Off_E_exc)) / Off_tau)\n'
+    eligbility_delcaration += f'        eligibility_strf_latency = ((psi_On * (-On_R) * On_g_postIC * 30 *(1 - np.tanh(0.0001*rate_on_deriv[timestep,:][:,None,None]-1.5)**2) * On_netcon * (On_V[:,:,:,-1]-On_E_exc)) / On_tau) + ((psi_Off * (-Off_R) * Off_g_postIC * 30 *(1 - np.tanh(0.0001*rate_off_deriv[timestep,:][:,None,None]-1.5)**2) * Off_netcon * (Off_V[:,:,:,-1]-Off_E_exc)) / Off_tau)\n'
+    eligbility_delcaration += f'        eligibility_output_adaptation = (-ROn_R*(((1+np.tanh(ROn_V[:,:,:,-1]-ROn_V_thresh))/2)*((1+np.tanh(-(ROn_V[:,:,:,-2]-ROn_V_thresh)))/2))*0.1*(ROn_V[:,:,:,-1]-ROn_E_k))/ROn_tau\n'
 
     return eligbility_delcaration
     
@@ -647,6 +666,10 @@ def compute_gradients(synapses):
         synapse_name = k['name']
         
         gradients_declaration += f'        grad_{synapse_name}_accumulate += eligibility_{synapse_name}\n'
+
+    gradients_declaration += f'        grad_strf_gain_accumulate += eligibility_strf_gain\n'
+    gradients_declaration += f'        grad_strf_latency_accumulate += eligibility_strf_latency\n'
+    gradients_declaration += f'        grad_output_adaptation_accumulate += eligibility_output_adaptation\n'
         
 
     return gradients_declaration
@@ -734,6 +757,9 @@ def compile_return(synapses,neurons,VwrtGsyn_declaration=''):
 
     return_statement = '    grads = np.sum(np.stack(['
     if len(VwrtGsyn_declaration) > 0:  
+    
+        return_statement += 'grad_strf_gain,grad_strf_latency,grad_output_adaptation,'
+    
         #Compile Gsyn related derivatives (one per synapse)
         for k in synapses:                      #Go through each synapse
             synapse_name = k['name']
@@ -744,9 +770,12 @@ def compile_return(synapses,neurons,VwrtGsyn_declaration=''):
         #     #return_statement += f'spike_wrt_fP_{synapse_name},'
          
         
+        
         # return_statement = return_statement[:-1]
 
-        #return_statement += 'spike_wrt_FR,'
+        #return_statement += 'grad_output_adaptation,'
+
+        
 
         for k in neurons:     
             

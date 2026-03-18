@@ -8,9 +8,10 @@ import InitParams
 from scipy.io import loadmat, savemat
 import yaml
 import os
-from strf_handler import call_strfs
+from strf_handler import call_strfs, export_strf_temporal_kernel_svg, export_onset_offset_rate_svg
 from input_handler import call_inputs
 import matplotlib.pyplot as plt
+from plot_data_raster_svg import make_poster_raster, make_poster_psth_overlay
 
 
 class runSimulation(object):
@@ -20,12 +21,29 @@ class runSimulation(object):
 
     #Little control pannel for now (Eventually move this to a yaml file or whatever makes the most sense)
 
-    gen_strfs_toggle = 0  #Toggle generating the STRFs
+    gen_strfs_toggle = 1  #Toggle generating the STRFs
     gradients_toggle = 0  #Toggle generating the graidnets in the forwards process *Also toggles running epochs
+    export_data_raster_svg_toggle = 1  # Toggle exporting data-only raster as SVG
+    export_sim_raster_svg_toggle = 1  # Toggle exporting simulation raster as SVG (same style as data raster)
+    export_psth_overlay_svg_toggle = 1  # Toggle exporting minimal sim/data PSTH overlay as SVG
+    export_strf_temporal_kernel_svg_toggle = 1  # Toggle exporting STRF temporal kernel as SVG
+    export_onset_offset_rate_svg_toggle = 1  # Toggle exporting onset/offset firing-rate SVG
+    onset_offset_trial_index = 0  # Trial index used if onset/offset rate has multiple trials
+    onset_offset_stimulus_index = 0  # Target stimulus index
 
     #Run STRF
     if gen_strfs_toggle == 1:
         call_strfs()
+
+    if export_strf_temporal_kernel_svg_toggle == 1:
+        export_strf_temporal_kernel_svg("strf_temporal_kernel.svg")
+
+    if export_onset_offset_rate_svg_toggle == 1:
+        export_onset_offset_rate_svg(
+            output_svg="strf_onset_offset_single_trial.svg",
+            stimulus_index=onset_offset_stimulus_index,
+            trial_index=onset_offset_trial_index,
+        )
 
 
     #Set options
@@ -58,7 +76,7 @@ class runSimulation(object):
     mat = loadmat("all_units_info_with_polished_criteria_modified_perf.mat",variable_names=["all_data"],squeeze_me=True,struct_as_record=False)
     all_data = mat["all_data"]  # numpy array of MATLAB structs
 
-    n = 133  # MATLAB is 1-based
+    n = 2  # MATLAB is 1-based
     unit = all_data[n - 1]
 
     spike_times = unit.ctrl_tar1_timestamps
@@ -79,6 +97,28 @@ class runSimulation(object):
     filename = f"C:/Users/ipboy/Documents/Github/ModelingEffort/Multi-Channel/Plotting/OliverDataPlotting/PicturesToFit/picture_fit{n}contra.mat"
     data = loadmat(filename)['picture'].astype(np.float32)  #trials,timecourse
     data = data[:,:,None]
+
+    if export_data_raster_svg_toggle == 1:
+        data_trials_time = np.asarray(data).squeeze()
+        if data_trials_time.ndim == 1:
+            data_trials_time = data_trials_time[None, :]
+
+        if data_trials_time.shape[0] > data_trials_time.shape[1]:
+            data_trials_time = data_trials_time.T
+
+        raster_svg_out = Path.cwd() / f"picture_fit{n}_data_raster.svg"
+        make_poster_raster(
+            data_trials_time=data_trials_time,
+            dt_ms=float(opts.get('dt', 1.0)),
+            threshold=0.0,
+            fig_width_in=3.4,
+            fig_height_in=1.5,
+            marker_size=6.5,
+            line_width=1.0,
+            title=f"Unit {n} Data Raster",
+            output_svg=raster_svg_out,
+        )
+        print(f"Saved data raster SVG: {raster_svg_out}")
 
 
 
@@ -139,6 +179,22 @@ class runSimulation(object):
     if spikes.ndim == 4:
         batch_idx = 0
         spikes_tnt = spikes[batch_idx]  # trials x neurons x time
+
+        if export_sim_raster_svg_toggle == 1 and spikes_tnt.ndim == 3:
+            sim_trials_time = (np.sum(spikes_tnt, axis=1) > 0).astype(np.float32)
+            sim_raster_svg_out = Path.cwd() / f"picture_fit{n}_sim_raster.svg"
+            make_poster_raster(
+                data_trials_time=sim_trials_time,
+                dt_ms=float(opts.get('dt', 1.0)),
+                threshold=0.0,
+                fig_width_in=3.4,
+                fig_height_in=1.5,
+                marker_size=6.5,
+                line_width=1.0,
+                title=f"Unit {n} Sim Raster",
+                output_svg=sim_raster_svg_out,
+            )
+            print(f"Saved simulation raster SVG: {sim_raster_svg_out}")
 
         data_trials_time = np.asarray(data).squeeze()
         if data_trials_time.ndim == 1:
@@ -203,6 +259,19 @@ class runSimulation(object):
         if sim_psth_binned is not None and sim_psth_binned.shape[0] > 0:
             t_ms_bins_sim = (np.arange(sim_psth_binned.shape[0]) + 0.5) * actual_bin_ms
             ax_psth.plot(t_ms_bins_sim, sim_psth_binned, label=f'Sim PSTH ({actual_bin_ms:g} ms bins)')
+
+        if export_psth_overlay_svg_toggle == 1:
+            psth_svg_out = Path.cwd() / f"picture_fit{n}_psth_overlay.svg"
+            make_poster_psth_overlay(
+                t_ms=t_ms_bins,
+                data_psth=data_psth_binned,
+                sim_psth=sim_psth_binned,
+                fig_width_in=3.4,
+                fig_height_in=1.5,
+                title=f"Unit {n} PSTH",
+                output_svg=psth_svg_out,
+            )
+            print(f"Saved PSTH overlay SVG: {psth_svg_out}")
 
         ax_psth.set_xlabel('Time (ms)')
         ax_psth.set_ylabel('Mean spikes / 20ms bin')

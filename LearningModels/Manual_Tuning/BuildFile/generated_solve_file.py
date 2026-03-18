@@ -13,7 +13,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     On_t_ref = 1
     On_E_k = -80
     On_tau_ad = 10
-    On_g_inc = 0.0001
+    On_g_inc = 0.0003
     On_Itonic = 0
     On_Imask = np.ones((1,1))
     On_R = 200.0
@@ -39,7 +39,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     Off_t_ref = 1
     Off_E_k = -80
     Off_tau_ad = 10
-    Off_g_inc = 0.001
+    Off_g_inc = 0.0003
     Off_Itonic = 0
     Off_Imask = np.ones((1,1))
     Off_R = 200.0
@@ -91,7 +91,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     ROn_t_ref = 4
     ROn_E_k = -80
     ROn_tau_ad = 100
-    ROn_g_inc = 0.01
+    ROn_g_inc = 0.000157
     ROn_Itonic = 0
     ROn_Imask = np.ones((1,1))
     ROn_R = 200.0
@@ -114,7 +114,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     On_ROn_tauD = 1.5
     On_ROn_tauR = 0.7
     On_ROn_PSC_delay = 1
-    On_ROn_gSYN = 0.12
+    On_ROn_gSYN = 0.0196
     On_ROn_PSC_fF = 0
     On_ROn_PSC_fP = 0.1
     On_ROn_tauF = 180
@@ -126,7 +126,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     Off_ROn_tauD = 1.5
     Off_ROn_tauR = 0.7
     Off_ROn_PSC_delay = 1
-    Off_ROn_gSYN = 0.0
+    Off_ROn_gSYN = 0.0224
     Off_ROn_PSC_fF = 0
     Off_ROn_PSC_fP = 0.1
     Off_ROn_tauF = 180
@@ -138,7 +138,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     On_SOnOff_tauD = 1
     On_SOnOff_tauR = 0.1
     On_SOnOff_PSC_delay = 3
-    On_SOnOff_gSYN = 0.0
+    On_SOnOff_gSYN = 0.077
     On_SOnOff_PSC_fF = 0
     On_SOnOff_PSC_fP = 0.2
     On_SOnOff_tauF = 180
@@ -150,7 +150,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     Off_SOnOff_tauD = 1
     Off_SOnOff_tauR = 0.1
     Off_SOnOff_PSC_delay = 3
-    Off_SOnOff_gSYN = 0.08
+    Off_SOnOff_gSYN = 0.0435
     Off_SOnOff_PSC_fF = 0
     Off_SOnOff_PSC_fP = 0.0
     Off_SOnOff_tauF = 180
@@ -162,7 +162,7 @@ def solve_run(on_input,off_input,noise_token,data,p):
     SOnOff_ROn_tauD = 4.5
     SOnOff_ROn_tauR = 1
     SOnOff_ROn_PSC_delay = 0.5
-    SOnOff_ROn_gSYN = 0.2
+    SOnOff_ROn_gSYN = 0.0181
     SOnOff_ROn_PSC_fF = 0
     SOnOff_ROn_PSC_fP = 0.5
     SOnOff_ROn_tauF = 180
