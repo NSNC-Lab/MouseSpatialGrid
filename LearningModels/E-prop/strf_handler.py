@@ -7,7 +7,7 @@ from gen_strf_Learnable_STRF import GenSTRF
 import numpy as np
 
 #Function to create he STRFs
-def call_strfs(learnable_params,batch_size):
+def call_strfs(learnable_params,batch_size,num_cells):
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
     args = ArgumentParser()
@@ -22,7 +22,7 @@ def call_strfs(learnable_params,batch_size):
     lst_target_stim = [os.path.join(parsed_args.target_dir, stim_path) for stim_path in os.listdir(parsed_args.target_dir)]
     lst_masker_stim = [os.path.join(parsed_args.masker_dir, stim_path) for stim_path in os.listdir(parsed_args.masker_dir)]
         
-    gen_strfs = GenSTRF(parsed_args, strf_config, lst_target_stim[0],learnable_params,batch_size)
+    gen_strfs = GenSTRF(parsed_args, strf_config, lst_target_stim[0],learnable_params,batch_size,num_cells)
         
     target_dict = {}
     for count, stim_path in enumerate(lst_target_stim):

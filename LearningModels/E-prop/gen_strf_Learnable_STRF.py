@@ -1,5 +1,9 @@
 import os
 import numpy as np
+try:
+        import cupy as cp
+except ImportError:
+        cp = None
 import math
 import sys
 import yaml
@@ -53,7 +57,7 @@ class GenSTRF(object):
                         reference stimulus path
         '''
         
-        def __init__(self, args, config, init_stim_path,learnable_params,batch_size):
+        def __init__(self, args, config, init_stim_path,learnable_params,batch_size,num_cells):
                 
                 self.args = args
                 self.strf_config = config
@@ -63,7 +67,7 @@ class GenSTRF(object):
                 self.strfGain = learnable_params[0,:]
                 self.strfTimeConstant = learnable_params[1,:] #np.squeeze(np.ones((1, batch_size))*0.01)
                 self.batch_size = batch_size
-                
+                self.num_cells = num_cells
                 # generating strfs with a reference stimlus
                 #self.strf = self.process_initial_stimulus(init_stim_path, self.strf_config['targetlvl'], self.strf_config['strfGain'])
                 #With learnable parameters
@@ -451,12 +455,21 @@ class GenSTRF(object):
                 
                 self.strfTimeConstant = self.strfTimeConstant[None,:]
 
+                if self.num_cells >1:
+                        t = t[:,:,None] 
+
                 strf['H'] = np.exp(-t/self.strfTimeConstant)*(paramH['SC1']*(t/self.strfTimeConstant)**paramH['N1']/math.factorial(paramH['N1']) - \
                 
                 paramH['SC2'] * (t/self.strfTimeConstant)**paramH['N2']/math.factorial(paramH['N2']))
                 
                 strf['G'] = np.exp(-0.5*((f-paramG['f0'])/paramG['BW'])**2)* np.cos(2*np.pi*paramG['BSM']*(f-paramG['f0']))
-                strf['w1']=strf['G'][:, np.newaxis, np.newaxis]*strf['H'][np.newaxis, :]
+                
+                if self.num_cells >1:
+                        strfG = strf['G'][:, np.newaxis, np.newaxis, np.newaxis]
+                else:
+                        strfG = strf['G'][:, np.newaxis, np.newaxis]
+                
+                strf['w1']=strfG*strf['H'][np.newaxis, :]
                 strf['f']=f
 
 
@@ -464,7 +477,7 @@ class GenSTRF(object):
                 strf['H2_epsion'] = np.exp(-t/self.strfTimeConstant)
                 strf['H2_gamma'] = (paramH['SC1']*(t/self.strfTimeConstant)**paramH['N1']/math.factorial(paramH['N1']) - paramH['SC2'] * (t/self.strfTimeConstant)**paramH['N2']/math.factorial(paramH['N2']))
                 strf['H2'] = strf['H2_epsion']*((paramH['SC1']*paramH['N1']*(-t/self.strfTimeConstant**2))*(t/self.strfTimeConstant)**(paramH['N1']-1)/math.factorial(paramH['N1']) - (paramH['SC2']*paramH['N2']*(-t/self.strfTimeConstant**2)) * (t/self.strfTimeConstant)**(paramH['N2']-1)/math.factorial(paramH['N2'])) + strf['H2_epsion']*strf['H2_gamma']*(t/self.strfTimeConstant**2)
-                strf['w2'] = strf['G'][:, np.newaxis, np.newaxis]*strf['H2'][np.newaxis, :]
+                strf['w2'] = strfG*strf['H2'][np.newaxis, :]
                 
                 return strf
 
@@ -492,14 +505,34 @@ class GenSTRF(object):
 
                 '''
                 samplesize = stim.shape[0]
-                a = np.zeros((samplesize, self.batch_size))
+                xp = cp if cp is not None else np
+                stim_x = xp.asarray(stim)
+                w1_x = xp.asarray(strf['w1'])
+                w2_x = xp.asarray(strf['w2'])
+                b1_x = xp.asarray(strf['b1'])
+                a = xp.zeros((samplesize, self.num_cells, self.batch_size))
                 
+                #if self.num_cells >1:
+                #        stim = stim[None,:,:]
+
                 for ti in range(len(strf['delays'])):
+                        #print(ti)
                         #at = np.matmul(stim, strf['w1'][:,ti][:, np.newaxis]) 
 
                         #With learning
-                        at = np.matmul(stim, np.squeeze(strf['w1'][:,ti][:, np.newaxis])) 
 
+                        
+
+                        #at = np.matmul(stim, np.squeeze(strf['w1'][:,ti][:, np.newaxis])) 
+                        #if self.num_cells >1:
+                        #        at = xp.einsum('tf,fhb->thb', stim_x, xp.squeeze(w1_x[:,ti])) #This is the same as the above line but with broadcasting and should be faster.
+                        #else:
+                        w1_slice = w1_x[:, ti]
+                        if w1_slice.ndim == 2:
+                                w1_slice = w1_slice[:, None, :]
+                        else:
+                                w1_slice = np.squeeze(w1_slice[:, np.newaxis])
+                        at = xp.einsum('tf,fhb->thb', stim_x, w1_slice)
 
                         thisshift = int(strf['delays'][ti])
                         if thisshift>=0: 
@@ -508,29 +541,36 @@ class GenSTRF(object):
                                 offset = thisshift%samplesize
                                 a[:offset] = a[:offset] + at[-thisshift:]
 
-                a = a + strf['b1']
+                a = a + b1_x
                 if strf['outputNL'] == 'linear':   # Linear outputs 
                         resp_strf = a                
                 else:
                         raise Exception('Unknown activation function ', strf['outputNL'])
 
                 # mask for nonvalid frames
-                nanmask = strf['delays']%(stim.shape[0]+1)
+                nanmask = np.asarray(strf['delays'])%(stim.shape[0]+1)
                 nanmask = nanmask[nanmask!=0].astype(np.int64) #no mask for delay 0
-                a[nanmask] = 0
-                resp_strf[nanmask] = 0
+                nanmask_x = xp.asarray(nanmask)
+                a[nanmask_x] = 0
+                resp_strf[nanmask_x] = 0
 
                 #############################################
                 #Copy same code as above for the conv deriv.#
                 #############################################
-                a_deriv = np.zeros((samplesize, self.batch_size))
-                
+                #a_deriv = np.zeros((samplesize, self.batch_size))
+                a_deriv = xp.zeros((samplesize, self.num_cells, self.batch_size))
                 for ti in range(len(strf['delays'])):
                         #at = np.matmul(stim, strf['w1'][:,ti][:, np.newaxis]) 
 
                         #With learning
-                        at_deriv = np.matmul(stim, np.squeeze(strf['w2'][:,ti][:, np.newaxis])) 
-
+                        #at_deriv = np.matmul(stim, np.squeeze(strf['w2'][:,ti][:, np.newaxis])) 
+                        #at_deriv = xp.einsum('tf,fhb->thb', stim_x, xp.squeeze(w2_x[:,ti])) #This is the same as the above line but with broadcasting and should be faster.
+                        w2_slice = w2_x[:, ti]
+                        if w2_slice.ndim == 2:
+                                w2_slice = w2_slice[:, None, :]
+                        else:
+                                w2_slice = np.squeeze(w2_slice[:, np.newaxis])
+                        at_deriv = xp.einsum('tf,fhb->thb', stim_x, w2_slice)
 
                         thisshift = int(strf['delays'][ti])
                         if thisshift>=0: 
@@ -539,18 +579,22 @@ class GenSTRF(object):
                                 offset = thisshift%samplesize
                                 a_deriv[:offset] = a_deriv[:offset] + at_deriv[-thisshift:]
 
-                a_deriv = a_deriv + strf['b1']
+                a_deriv = a_deriv + b1_x
                 if strf['outputNL'] == 'linear':   # Linear outputs 
                         resp_strf_deriv = a_deriv                
                 else:
                         raise Exception('Unknown activation function ', strf['outputNL'])
 
                 # mask for nonvalid frames
-                nanmask = strf['delays']%(stim.shape[0]+1)
+                nanmask = np.asarray(strf['delays'])%(stim.shape[0]+1)
                 nanmask = nanmask[nanmask!=0].astype(np.int64) #no mask for delay 0
-                a_deriv[nanmask] = 0
-                resp_strf_deriv[nanmask] = 0
-                
+                nanmask_x = xp.asarray(nanmask)
+                a_deriv[nanmask_x] = 0
+                resp_strf_deriv[nanmask_x] = 0
+
+                if xp is cp:
+                        return strf, cp.asnumpy(resp_strf), cp.asnumpy(resp_strf_deriv), cp.asnumpy(a)
+
                 return strf, resp_strf, resp_strf_deriv, a
 
 
@@ -585,9 +629,10 @@ class GenSTRF(object):
                 # offset rate
                 #offset_rate[:firstneg] = 0
                 for k in range(self.batch_size):
-                        firstneg = np.where(offset_rate[:,k] <= 0)[0][0]
-                        offset_rate[:firstneg,k] = 0
-                        offset_rate_deriv[:firstneg,k] = 0
+                        for cc in range(self.num_cells):
+                                firstneg = np.where(offset_rate[:,cc,k] <= 0)[0][0]
+                                offset_rate[:firstneg,cc,k] = 0
+                                offset_rate_deriv[:firstneg,cc,k] = 0
                 offset_rate[offset_rate < 0] = 0
                 offset_rate_deriv[offset_rate_deriv < 0] = 0
 

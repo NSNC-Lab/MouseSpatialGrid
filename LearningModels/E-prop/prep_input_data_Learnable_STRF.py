@@ -136,15 +136,14 @@ class PrepInput(object):
             w = np.power(tw - t_ref_samp, self.rec) / (
                 np.power(tw - t_ref_samp, self.rec) + np.power(t_rel_samp, self.rec)
             )
-            w[tw < t_ref_samp] = 0
-            w = np.nan_to_num(w)
+        w[tw < t_ref_samp] = 0
+        w = np.nan_to_num(w)
 
         x = np.random.rand(n)
         
 
         for i in range(n):
             if spike_times and i - spike_times[-1] < n_refab:
-
                 rate[i] *= w[i - spike_times[-1]]
             if x[i] < dt_sec * rate[i]:
                 spike_train[i] = 1
@@ -234,11 +233,12 @@ class PrepInput(object):
         #s = np.zeros_like(rate)
         #for chan in range(rate.shape[1]):
         #    for trial_num in range(rate.shape[2]):
-        s = np.zeros((rate.shape[0],self.chans,self.trials,self.batch_size))
+        s = np.zeros((rate.shape[0],self.chans,self.trials,self.num_cells,self.batch_size))
         for chan in range(self.chans):
             for trial_num in range(self.trials):
                 for batch in range(self.batch_size):
-                    s[:, chan, trial_num, batch] = self.spike_generator(rate[:, batch])
+                    for cell in range(self.num_cells):
+                        s[:, chan, trial_num, cell, batch] = self.spike_generator(rate[:, cell, batch])
             
         return s,rate
     

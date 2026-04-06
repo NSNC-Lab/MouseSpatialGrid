@@ -92,15 +92,17 @@ def declare_vars(neurons,synapses,options):
                     #print(f'Declaring variable {j} with value {variable[j]}')
 
     variable_declaration += f'\n    loss_vals = np.array([0])'
-    variable_declaration += f'\n    loss_bin_width = 200'
+    variable_declaration += f'\n    loss_bin_width = 100'
 
     for synk in synapses:
         synapse_name = synk["name"]
         variable_declaration += f'\n    grad_{synapse_name}_accumulate=0'
+        
 
     variable_declaration += f'\n    grad_strf_gain_accumulate=0'
     variable_declaration += f'\n    grad_strf_latency_accumulate=0'
     variable_declaration += f'\n    grad_output_adaptation_accumulate=0'
+
 
     return variable_declaration
 

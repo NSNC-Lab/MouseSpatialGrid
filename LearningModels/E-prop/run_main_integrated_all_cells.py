@@ -7,6 +7,7 @@ import time
 from datetime import datetime
 import Update_params_all_cells
 import InitParams
+import InitParamsAllCells
 from scipy.io import loadmat, savemat
 import yaml
 import os
@@ -42,7 +43,9 @@ class runSimulation(object):
     opts = set_options.options()
     #Declare architecture
     #arch = declarations.Declare_Architecture(opts)
-    arch = declarations_output_inhibit.Declare_Architecture(opts)
+    #arch = declarations_output_inhibit.Declare_Architecture(opts)
+    #Warning! Make sure you know what declarations you are pulling from
+    arch = declarations.Declare_Architecture(opts)
     #Build the forwards euler loop
     file_body_forwards = Forwards_Method_cupy.Euler_Compiler(arch[0],arch[1],arch[2],opts,num_cells)
     #Compile a solve file (python or c++)
@@ -76,10 +79,27 @@ class runSimulation(object):
     no_pre_holder = np.zeros((num_cells,10,29801))
     FRs = []
 
-    
+    #Get peak indicies
+    peak_indices = []
+    for n in range(num_cells):
+        vals = []
+        for m in range(4):
+            vals2 = 0
+            for k in range(10):
+                if len(np.shape(all_data[n].ctrl_tar1_timestamps[k, m])) != 0:  #This just skips areas where there are no spikes
+                    vals2 += np.shape(all_data[n].ctrl_tar1_timestamps[k, m])[0]
+            vals.append(vals2)
+
+        idx = np.where(vals == np.max(np.array(vals)))[0][0]
+        vals = []
+        peak_indices.append(idx)
+       
+
+
+
     for k in range(num_cells):
         spike_times = all_data[k].ctrl_tar1_timestamps
-        spike_times = spike_times[:, 0]  #Grab -90 degrees
+        spike_times = spike_times[:, peak_indices[k]]  #Grab -90 degrees  #4.1.2026 -> Instead of grabbing -90 grab the indicy corresponding to the peak of the tuning curve.
         #cell_storage.append(spike_times)
 
         pre_zeros_list = []
@@ -137,16 +157,17 @@ class runSimulation(object):
     #data = data[:,:,None]
     data = no_pre_holder[:,:,:,None]
 
-    num_params = 5
+    num_params = 8
     batch_size = opts['N_batch']
     #Learnign rate currently set to 0.05 abs(p). Update once we have multiple parameters
-    p,lr = InitParams.pinit(batch_size,num_params,num_cells)
+    p,lr = InitParamsAllCells.pinit(batch_size,num_params,num_cells)
+    #p,lr = InitParams.pinit(batch_size,num_params)
 
 
-    spks = call_inputs(num_cells,FRs,batch_size)
-    on_spks = np.transpose(spks[f'locs_masker_None_target_0_on'][f'stimulus_0_poisson_spks'],(2,0,1))
-    off_spks = np.transpose(spks[f'locs_masker_None_target_0_off'][f'stimulus_0_poisson_spks'],(2,0,1))
-    noise = np.transpose(spks['noise_masker_None_target_0'],(0,1,4,2,3))
+    #spks = call_inputs(num_cells,FRs,batch_size)
+    #on_spks = np.transpose(spks[f'locs_masker_None_target_0_on'][f'stimulus_0_poisson_spks'],(2,0,1))
+    #off_spks = np.transpose(spks[f'locs_masker_None_target_0_off'][f'stimulus_0_poisson_spks'],(2,0,1))
+    #noise = np.transpose(spks['noise_masker_None_target_0'],(0,1,4,2,3))
 
     #Repeat along the first axis to match the data shape #Note! You might be able to save some space by just using this across all tials... all trials are giong to have the bigger size anyways through so it might not matter much.
     #On second thought this should broadcast correctly.
@@ -193,19 +214,35 @@ class runSimulation(object):
 
     
 
-    for epoch in range(100):
+    for epoch in range(50):
 
         #spks = call_inputs(p,batch_size)
         #on_spks = np.transpose(spks[f'locs_masker_None_target_0_on'][f'stimulus_0_poisson_spks'],(2,0,1))
         #off_spks = np.transpose(spks[f'locs_masker_None_target_0_off'][f'stimulus_0_poisson_spks'],(2,0,1))
         #noise = np.transpose(spks['noise_masker_None_target_0'],(0,3,1,2))
 
+        target_dict = call_strfs(p,batch_size, num_cells)
+
+
+        spks = call_inputs(num_cells,FRs,batch_size,target_dict)
+        
+        #Organize as batch,trial,channel,time 
+        
+        on_spks = np.transpose(spks[f'locs_masker_None_target_0_on'][f'stimulus_0_poisson_spks'],(3,4,2,1,0))
+        off_spks = np.transpose(spks[f'locs_masker_None_target_0_off'][f'stimulus_0_poisson_spks'],(3,4,2,1,0))
+        rate_on = spks[f'locs_masker_None_target_0_on'][f'stimulus_0_rate']
+        rate_off = spks[f'locs_masker_None_target_0_off'][f'stimulus_0_rate']
+        rate_on_deriv = spks[f'locs_masker_None_target_0_on'][f'stimulus_0_rate_deriv']
+        rate_off_deriv = spks[f'locs_masker_None_target_0_off'][f'stimulus_0_rate_deriv']
+        noise = np.transpose(spks['noise_masker_None_target_0'],(0,1,4,3,2))
     
 
         #print(p)
 
         #Make it so that you don't have to supply data if you are not running gradients
-        output, grads, on_track, off_track, loss_holder = generated_solve_file.solve_run(on_spks,off_spks,noise,data,p) #Python Verison to build
+        output, grads, on_track, off_track, loss_holder = generated_solve_file.solve_run(on_spks,off_spks,noise,rate_on,rate_off,rate_on_deriv,rate_off_deriv,data,p) #Python Verison to build
+        
+        #generated_solve_file.solve_run(on_spks,off_spks,noise,rate_on,rate_off,rate_on_deriv,rate_off_deriv,data,p) #Python Verison to build
         
         #print(grads)
 

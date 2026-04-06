@@ -46,11 +46,15 @@ def declare_vars(neurons,synapses,options, num_cells):
     variable_declaration += f'\n\n    #Transfer inputs to GPU\n'
     variable_declaration += f'\n    on_input = cp.asarray(on_input)'
     variable_declaration += f'\n    off_input = cp.asarray(off_input)'
+    variable_declaration += f'\n    rate_on = cp.asarray(rate_on)'
+    variable_declaration += f'\n    rate_off = cp.asarray(rate_off)'
+    variable_declaration += f'\n    rate_on_deriv = cp.asarray(rate_on_deriv)'
+    variable_declaration += f'\n    rate_off_deriv = cp.asarray(rate_off_deriv)'
     variable_declaration += f'\n    noise_token = cp.asarray(noise_token)'
     variable_declaration += f'\n    data = cp.asarray(data)'
     variable_declaration += f'\n    p = cp.asarray(p)'
     
-    gsyn_t = 0
+    gsyn_t = 3
     tau_ad_t = 4
     g_inc_t = 5
     tauP_t = 6
@@ -87,9 +91,9 @@ def declare_vars(neurons,synapses,options, num_cells):
                 #      variable_declaration += f'\n    {j} = p[{tau_ad_t}].reshape({options["N_batch"]}, 1, 1)'
                 #      tau_ad_t+=1
 
-                # if j == 'On_g_inc':
-                #      variable_declaration += f'\n    {j} = p[{g_inc_t}].reshape({options["N_batch"]}, 1, 1)'
-                #      g_inc_t+=1
+                elif j == 'ROn_g_inc':
+                      variable_declaration += f'\n    {j} = p[2].reshape({num_cells}, {options["N_batch"]}, 1, 1)'
+                      g_inc_t+=1
 
                 # if j == 'On_g_postIC' or j == 'Off_g_postIC':
                 #     variable_declaration += f'\n    {j} = p[{t}].reshape({options["N_batch"]}, 1, 1)'
@@ -106,11 +110,21 @@ def declare_vars(neurons,synapses,options, num_cells):
                     #print(f'Declaring variable {j} with value {variable[j]}')
 
     variable_declaration += f'\n    loss_vals = cp.array([0])'
-    variable_declaration += f'\n    loss_bin_width = 200'
+    variable_declaration += f'\n    loss_bin_width = 100'
+    variable_declaration += f'\n    loss_bin_width2 = 300'
 
     for synk in synapses:
         synapse_name = synk["name"]
         variable_declaration += f'\n    grad_{synapse_name}_accumulate=0'
+        variable_declaration += f'\n    grad_{synapse_name}_accumulate2=0'
+
+    variable_declaration += f'\n    grad_strf_gain_accumulate=0'
+    variable_declaration += f'\n    grad_strf_latency_accumulate=0'
+    variable_declaration += f'\n    grad_output_adaptation_accumulate=0'
+
+    variable_declaration += f'\n    grad_strf_gain_accumulate2=0'
+    variable_declaration += f'\n    grad_strf_latency_accumulate2=0'
+    variable_declaration += f'\n    grad_output_adaptation_accumulate2=0'
 
     return variable_declaration
 
@@ -181,6 +195,10 @@ def declare_holders(neurons, synapses, options, num_cells):
 
     #holder_declaration += f'\n    spike_wrt_FR = np.zeros(({options["N_batch"]},{options["N_trials"]},{options["N_channels"]}))'
 
+    holder_declaration += f'\n    grad_strf_gain = cp.zeros(({num_cells},{options["N_batch"]},{options["N_trials"]},{options["N_channels"]}))'
+    holder_declaration += f'\n    grad_strf_latency = cp.zeros(({num_cells},{options["N_batch"]},{options["N_trials"]},{options["N_channels"]}))'
+    holder_declaration += f'\n    grad_output_adaptation = cp.zeros(({num_cells},{options["N_batch"]},{options["N_trials"]},{options["N_channels"]}))'
+
     return holder_declaration
 
 def declare_loop(options):
@@ -230,10 +248,12 @@ def declare_odes(neurons,synapses,projections,options):
                 raise ValueError(f"error building ODES. You must declare response type when declaring an input.")
 
             if k['response'] == 'onset':
-                input_str = 'on_input[:,timestep,:]'
+                #input_str = 'on_input[:,timestep,:]'
+                input_str = 'on_input[:,:,:,:,timestep]'
             
             if k['response'] == 'offset':
-                input_str = 'off_input[:,timestep,:]'
+                #input_str = 'off_input[:,timestep,:]'
+                input_str = 'off_input[:,:,:,:,timestep]'
 
             ODE_declaration += f'\n        {neuron_name}_V_k1 = ((({neuron_name}_E_L - {neuron_name}_V[:,:,:,:,-1]) - {neuron_name}_R*{neuron_name}_g_ad[:,:,:,:,-1]*({neuron_name}_V[:,:,:,:,-1]-{neuron_name}_E_k) - {neuron_name}_R*{neuron_name}_g_postIC*{input_str}*{neuron_name}_netcon*({neuron_name}_V[:,:,:,:,-1]-{neuron_name}_E_exc) + {neuron_name}_R*{neuron_name}_Itonic*{neuron_name}_Imask) / {neuron_name}_tau)'
 
@@ -256,7 +276,8 @@ def declare_odes(neurons,synapses,projections,options):
             ODE_declaration += f' + ((-{neuron_name}_R * {neuron_name}_nSYN * {neuron_name}_noise_sn[:,:,:,:,-1]*({neuron_name}_V[:,:,:,:,-1]-{neuron_name}_noise_E_exc)) / {neuron_name}_tau)'
             #Add in the PSC like ODEs for the noise terms
             ODE_declaration += f'\n        {neuron_name}_noise_sn_k1 = ({neuron_name}_noise_scale * {neuron_name}_noise_xn[:,:,:,:,-1] - {neuron_name}_noise_sn[:,:,:,:,-1]) / {neuron_name}_tauR_N'
-            ODE_declaration += f'\n        {neuron_name}_noise_xn_k1 = -({neuron_name}_noise_xn[:,:,:,:,-1]/{neuron_name}_tauD_N) + noise_token[:,:,:,timestep,:]/{options["dt"]}'
+            #ODE_declaration += f'\n        {neuron_name}_noise_xn_k1 = -({neuron_name}_noise_xn[:,:,:,:,-1]/{neuron_name}_tauD_N) + noise_token[:,:,:,timestep,:]/{options["dt"]}'
+            ODE_declaration += f'\n        {neuron_name}_noise_xn_k1 = -({neuron_name}_noise_xn[:,:,:,:,-1]/{neuron_name}_tauD_N) + noise_token[:,:,:,:,timestep]/{options["dt"]}'
 
             #ODE_declaration += f'\n        print(np.shape(noise_token))'
             #ODE_declaration += f'\n        print(np.shape(noise_token[:,:,timestep,:]))'
@@ -362,9 +383,13 @@ def declare_condtionals(neurons,synapses):
         conditionals_declaration += f'\n            {neuron_name}_V[{neuron_name}_spikers_2a + (-2,)] = {neuron_name}_V[{neuron_name}_spikers_2a + (-1,)]'
         conditionals_declaration += f'\n            {neuron_name}_V[{neuron_name}_spikers_2a + (-1,)] = {neuron_name}_V_reset'
         conditionals_declaration += f'\n            {neuron_name}_g_ad[{neuron_name}_spikers_2a + (-2,)] = {neuron_name}_g_ad[{neuron_name}_spikers_2a + (-1,)]'
-        conditionals_declaration += f'\n            {neuron_name}_g_ad[{neuron_name}_spikers_2a + (-1,)] = {neuron_name}_g_ad[{neuron_name}_spikers_2a + (-1,)] + {neuron_name}_g_inc'
+        #The idea here with the shape,shape,0,0 is to broadcast to the select few that got selected in spikers and add ginc only to those that got selected appropriately.
+        if neuron_name == 'ROn':
+            conditionals_declaration += f'\n            {neuron_name}_g_ad[{neuron_name}_spikers_2a + (-1,)] = {neuron_name}_g_ad[{neuron_name}_spikers_2a + (-1,)] + {neuron_name}_g_inc[{neuron_name}_spikers_2a[0],{neuron_name}_spikers_2a[1],0,0]'
+        else:
+            conditionals_declaration += f'\n            {neuron_name}_g_ad[{neuron_name}_spikers_2a + (-1,)] = {neuron_name}_g_ad[{neuron_name}_spikers_2a + (-1,)] + {neuron_name}_g_inc'
+        
         #2b (Refractory period implementation)
-
         conditionals_declaration += f'\n        {neuron_name}_mask_2b = cp.any((t <= ({neuron_name}_tspike + {neuron_name}_t_ref)), axis=-1)'
         conditionals_declaration += f'\n        if cp.any({neuron_name}_mask_2b).item():'
         conditionals_declaration += f'\n            {neuron_name}_spikers_2b = cp.where({neuron_name}_mask_2b)'

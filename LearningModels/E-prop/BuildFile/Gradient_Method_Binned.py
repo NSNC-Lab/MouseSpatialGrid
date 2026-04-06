@@ -575,7 +575,30 @@ def fetch_loss(synapses):
 
     fetch_loss_declaration += f'\n            sim_bin = np.sum(np.squeeze(np.sum(ROn_spikes_holder[:,:,:,timestep-loss_bin_width:timestep], axis=-1)),axis=-1)\n'
     fetch_loss_declaration += f'\n            data_bin = np.sum(np.sum(np.squeeze(data[:,timestep-loss_bin_width:timestep,:], axis=-1)),axis=-1)\n'
-    fetch_loss_declaration += f'\n            loss_deriv = 2.0*(sim_bin - data_bin)\n'
+    
+    #SSE derivative
+    #fetch_loss_declaration += f'\n            loss_deriv = 2.0*(sim_bin - data_bin)\n'
+
+    #Poisson loss derivative
+    #fetch_loss_declaration += f'\n            epsilon = 1e-8\n'
+    #fetch_loss_declaration += f'\n            loss_deriv = -(1 - (data_bin)*(1/(sim_bin+epsilon)))\n'
+    
+    #SSE + Poisson
+    #fetch_loss_declaration += f'\n            loss_deriv = 2.0*(sim_bin - data_bin) -(1 - (data_bin)*(1/(sim_bin+epsilon)))\n'
+
+    #Just FR
+    #fetch_loss_declaration += f'\n            loss_deriv =  1*[1,None,None]\n' #Just keep this constant?
+
+    #Pearson's r. (correlation)
+    #fetch_loss_declaration += f'\n            xc = sim_bin - np.mean(sim_bin)\n'
+    #fetch_loss_declaration += f'\n            yc = data_bin - np.mean(data_bin)\n'
+    #fetch_loss_declaration += f'\n            nx = np.sqrt(np.sum(xc**2) + eps)\n'
+    #fetch_loss_declaration += f'\n            ny = np.sqrt(np.sum(yc**2) + eps)\n'
+    #fetch_loss_declaration += f'\n            r = np.sum(xc * yc) / (nx * ny)\n'
+    #fetch_loss_declaration += f'\n            loss_deriv = -(yc / (nx * ny) - r * xc / (nx**2))\n'
+    #fetch_loss_declaration += f'\n            loss_deriv = mean_centered_data/(np.abs(mean_centered_sim)*np.abs(mean_centered_data) + epsilon) - ((mean_centered_sim*mean_centered_data)/(np.abs(mean_centered_sim)*np.abs(mean_centered_data) + epsilon))*(mean_centered_sim/(mean_centered_sim + epsilon)**2)\n'
+
+    
     #fetch_loss_declaration += f'\n            print(np.shape(losses_holder))'
     #fetch_loss_declaration += f'\n            print(np.shape(loss_vals))'
     #fetch_loss_declaration += f'\n            losses_holder[:,:,:,timestep] = loss_deriv[:,None,None]\n'

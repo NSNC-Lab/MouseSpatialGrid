@@ -1,5 +1,9 @@
 import yaml
 import numpy as np
+try:
+    import cupy as cp
+except ImportError:
+    cp = None
 import scipy.io
 from tqdm import tqdm
 from argparse import ArgumentParser
@@ -115,41 +119,44 @@ class PrepInput(object):
         parameters:
             rate : np.ndarray
         """
+        xp = cp if cp is not None else np
         dt_sec = self.dt / 1000  # ms to seconds
 
         n = len(rate)
-        spike_train = np.zeros(n)
+        rate_x = xp.asarray(rate)
+        spike_train = xp.zeros(n)
         spike_times = []
 
         #9/17 refractory preiod seems to low compared to real data. Perhaps extend this?
         n_refab = int(0 / 1000 / dt_sec)  # number of samples for ref. period window
         #n_refab = int(15 / 1000 / dt_sec)  # number of samples for ref. period window
         #n_refab = int(30 / 1000 / dt_sec)  # number of samples for ref. period window
-        tw = np.arange(n_refab + 1)
+        tw = xp.arange(n_refab + 1)
 
         t_ref_samp = int(self.t_ref / 1000 / dt_sec)
         t_rel_samp = int(self.t_ref_rel / 1000 / dt_sec)
 
 
         # Recovery function based on Schaette et al. 2005
-        with np.errstate(divide='ignore', invalid='ignore'):
-            w = np.power(tw - t_ref_samp, self.rec) / (
-                np.power(tw - t_ref_samp, self.rec) + np.power(t_rel_samp, self.rec)
-            )
-            w[tw < t_ref_samp] = 0
-            w = np.nan_to_num(w)
+        numerator = xp.power(tw - t_ref_samp, self.rec)
+        denominator = numerator + xp.power(t_rel_samp, self.rec)
+        w = xp.where(denominator != 0, numerator / denominator, 0)
+        w[tw < t_ref_samp] = 0
+        w = xp.nan_to_num(w)
 
-        x = np.random.rand(n)
+        x = xp.random.rand(n)
         
 
         for i in range(n):
             if spike_times and i - spike_times[-1] < n_refab:
 
-                rate[i] *= w[i - spike_times[-1]]
-            if x[i] < dt_sec * rate[i]:
+                rate_x[i] *= w[i - spike_times[-1]]
+            if x[i] < dt_sec * rate_x[i]:
                 spike_train[i] = 1
                 spike_times.append(i)
 
+        if xp is cp:
+            return cp.asnumpy(spike_train)
         return spike_train
     
     
@@ -171,6 +178,7 @@ class PrepInput(object):
             token : np.array
                 Binary spike train matrix of shape (simlen, chans)
         """
+        xp = cp if cp is not None else np
         chans = int(chans)
         simlen = int(simlen)
         std = int(std) #set to 0.0 right now
@@ -180,33 +188,36 @@ class PrepInput(object):
 
         #Convert things from tensors so we can work with them
 
-        #print(np.shape(np.reshape(FR,(100,1))[None][None]))
-        #print(np.shape(std * np.random.randn(self.batch_size,simlen, chans, trials)))
+        #print(xp.shape(xp.reshape(FR,(100,1))[None][None]))
+        #print(xp.shape(std * xp.random.randn(self.batch_size,simlen, chans, trials)))
 
-        #firing_rate_reshape = np.reshape(FR,(100,1))
+        #firing_rate_reshape = xp.reshape(FR,(100,1))
 
-        #rand_gauss = firing_rate_reshape[:,:,None,None] + std * np.random.randn(self.batch_size,simlen, chans, trials)
+        #rand_gauss = firing_rate_reshape[:,:,None,None] + std * xp.random.randn(self.batch_size,simlen, chans, trials)
         
-        #rand_gauss = FR + std * np.random.randn(simlen, chans, trials)
-        #rand_bin = np.random.rand(self.batch_size,simlen, chans, trials) < (rand_gauss * self.dt / 1000)
-        firing_rate_reshape = np.reshape(FR,(num_cells,1,1,1,1))
-        rand_gauss = firing_rate_reshape + std * np.random.randn(num_cells, self.batch_size,simlen, chans, trials)
-        rand_bin = np.random.rand(num_cells,self.batch_size,simlen, chans, trials) < (rand_gauss * self.dt / 1000)
+        #rand_gauss = FR + std * xp.random.randn(simlen, chans, trials)
+        #rand_bin = xp.random.rand(self.batch_size,simlen, chans, trials) < (rand_gauss * self.dt / 1000)
+        firing_rate_reshape = xp.reshape(FR,(num_cells,1,1,1,1))
+        rand_gauss = firing_rate_reshape + std * xp.random.randn(num_cells, self.batch_size,simlen, chans, trials)
+        rand_bin = xp.random.rand(num_cells,self.batch_size,simlen, chans, trials) < (rand_gauss * self.dt / 1000)
 
-        temp = rand_bin.astype(np.uint8)
+        temp = rand_bin.astype(xp.uint8)
 
         for num in range(num_cells):
             for batch in range(self.batch_size):
                 for chan in range(chans):
                     for trial in range(trials):
-                        spk_inds = np.where(temp[num,batch,:, chan, trial])[0]
+                        spk_inds = xp.where(temp[num,batch,:, chan, trial])[0]
                         if len(spk_inds) > 1:
-                            ISIs = np.diff(spk_inds) * self.dt
-                            violate_inds = np.where(ISIs < self.refrac)[0] + 1
+                            ISIs = xp.diff(spk_inds) * self.dt
+                            violate_inds = xp.where(ISIs < self.refrac)[0] + 1
                             temp[num,batch,spk_inds[violate_inds], chan, trial] = 0
 
         
-        #print(np.shape(np.array(temp)))
+        #print(xp.shape(xp.array(temp)))
+
+        if xp is cp:
+            temp = cp.asnumpy(temp)
 
         if num_cells == 1:
             return np.squeeze(temp, axis=0)

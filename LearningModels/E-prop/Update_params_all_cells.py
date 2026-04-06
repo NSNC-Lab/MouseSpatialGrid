@@ -46,9 +46,9 @@ def adam_update(m,v,p,t,beta1,beta2,lr,eps,out_grad):
     
     #Make sure Gsyns do not go below zero
     #Gsyn & FR & g_inc -- Must be larger than 0
-    p[0:2,:] = np.where(p[0:2,:]<0.0001,0.0001,p[0:2,:])
-    p[1,:] = np.where(p[1,:]>0.04,0.04,p[1,:])
-    p[1:8,:,:] = np.where(p[1:8,:,:]<0,0,p[1:8,:,:])
+    p[0:2,:,:] = np.where(p[0:2,:,:]<0.0001,0.0001,p[0:2,:,:])
+    p[1,:,:] = np.where(p[1,:,:]>0.04,0.04,p[1,:,:])
+    p[2:8,:,:] = np.where(p[2:8,:,:]<0,0,p[2:8,:,:])
     #p[5,:] = np.where(p[5,:]<0,0,p[5,:])
     #p[9:13,:] = np.where(p[9:13,:]<0,0,p[9:13,:])
     

@@ -74,8 +74,8 @@ class runSimulation(object):
     all_data = mat["all_data"]  # numpy array of MATLAB structs
 
     os.chdir(cwd_path)
-
-    n = 200  # MATLAB is 1-based
+    num_cells = 1
+    n = 133  # MATLAB is 1-based
     unit = all_data[n - 1]
 
     spike_times = unit.ctrl_tar1_timestamps
@@ -156,7 +156,7 @@ class runSimulation(object):
 
 
 
-    for epoch in range(50):
+    for epoch in range(30):
 
         #spks = call_inputs(p,batch_size)
         #on_spks = np.transpose(spks[f'locs_masker_None_target_0_on'][f'stimulus_0_poisson_spks'],(2,0,1))
@@ -169,7 +169,7 @@ class runSimulation(object):
         #print(p)
 
         #Generate STRFs
-        target_dict = call_strfs(p,batch_size)
+        target_dict = call_strfs(p,batch_size,num_cells)
 
 
         #IMPORTANT remember to divide out the gain on rate on and rate off at some point. The currne tderivitives I believe include the gains implicitly in rate.
@@ -177,19 +177,37 @@ class runSimulation(object):
         #It would be something like target_dict[fr_deriv]/p[0] <- strf gain
         
         #Generate Inputs
-        spks = call_inputs(1,FR,batch_size,target_dict)
+        spks = call_inputs(num_cells,FR,batch_size,target_dict)
         
         #Organize as batch,trial,channel,time 
 
+        #Take out the cell dimension
+        a = spks[f'locs_masker_None_target_0_on'][f'stimulus_0_poisson_spks']
+        a = np.reshape(a,[np.shape(a)[0],np.shape(a)[2],np.shape(a)[3],np.shape(a)[4]])
+        on_spks = np.transpose(a,(3,1,2,0))
 
-        
-        
-        on_spks = np.transpose(spks[f'locs_masker_None_target_0_on'][f'stimulus_0_poisson_spks'],(3,2,1,0))
-        off_spks = np.transpose(spks[f'locs_masker_None_target_0_off'][f'stimulus_0_poisson_spks'],(3,2,1,0))
-        rate_on = spks[f'locs_masker_None_target_0_on'][f'stimulus_0_rate']
-        rate_off = spks[f'locs_masker_None_target_0_off'][f'stimulus_0_rate']
-        rate_on_deriv = spks[f'locs_masker_None_target_0_on'][f'stimulus_0_rate_deriv']
-        rate_off_deriv = spks[f'locs_masker_None_target_0_off'][f'stimulus_0_rate_deriv']
+        b = spks[f'locs_masker_None_target_0_off'][f'stimulus_0_poisson_spks']
+        b = np.reshape(b,[np.shape(b)[0],np.shape(b)[2],np.shape(b)[3],np.shape(b)[4]])
+        off_spks = np.transpose(b,(3,1,2,0))
+
+        c = spks[f'locs_masker_None_target_0_on'][f'stimulus_0_rate']
+        c = np.reshape(c,[np.shape(c)[0],np.shape(c)[2]])
+        rate_on = c
+
+        d = spks[f'locs_masker_None_target_0_off'][f'stimulus_0_rate']
+        d = np.reshape(d,[np.shape(d)[0],np.shape(d)[2]])
+        rate_off = d
+
+        f = spks[f'locs_masker_None_target_0_on'][f'stimulus_0_rate_deriv']
+        f = np.reshape(f,[np.shape(f)[0],np.shape(f)[2]])
+        rate_on_deriv = f
+
+        g = spks[f'locs_masker_None_target_0_off'][f'stimulus_0_rate_deriv']
+        g =np.reshape(g,[np.shape(g)[0],np.shape(g)[2]])
+        rate_off_deriv = g
+
+        #h = spks['noise_masker_None_target_0']
+        #np.reshape(h,np.shape(h)[0],np.shape(h)[2],np.shape(h)[3],np.shape(h)[4])
         noise = np.transpose(spks['noise_masker_None_target_0'],(0,3,1,2))
 
 
