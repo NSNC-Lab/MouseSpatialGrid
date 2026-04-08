@@ -11,9 +11,85 @@ import InitParamsAllCells
 from scipy.io import loadmat, savemat
 import yaml
 import os
+from pathlib import Path
 from strf_handler import call_strfs
 from input_handler import call_inputs
 import matplotlib.pyplot as plt
+
+
+CHECKPOINT_EVERY_EPOCHS = 10
+CHECKPOINT_PREFIX = "checkpoint_Eprop_All_cells"
+TOTAL_EPOCHS = 300
+RESUME_CHECKPOINT_PATH = "C:\\Users\\ipboy\\Documents\\GitHub\\ModelingEffort\\Multi-Channel\\Plotting\\OliverDataPlotting\\checkpoint_Eprop_All_cells_epoch_0030.mat"  # Example: r"checkpoint_Eprop_All_cells_latest.mat"
+
+
+def save_training_checkpoint(
+    epoch_one_indexed,
+    p,
+    m,
+    v,
+    t,
+    losses,
+    prefix=CHECKPOINT_PREFIX,
+):
+    checkpoint_payload = {
+        "epoch": np.asarray(epoch_one_indexed, dtype=np.int32),
+        "params": np.asarray(p, dtype=np.float32),
+        "adam_m": np.asarray(m, dtype=np.float32),
+        "adam_v": np.asarray(v, dtype=np.float32),
+        "adam_t": np.asarray(t, dtype=np.int32),
+        "losses_so_far": np.asarray(losses, dtype=np.float32),
+    }
+
+    checkpoint_path = Path(f"{prefix}_epoch_{epoch_one_indexed:04d}.mat")
+    latest_checkpoint_path = Path(f"{prefix}_latest.mat")
+    latest_epoch_txt_path = Path(f"{prefix}_latest_epoch.txt")
+
+    savemat(str(checkpoint_path), checkpoint_payload, do_compression=True)
+    savemat(str(latest_checkpoint_path), checkpoint_payload, do_compression=True)
+    latest_epoch_txt_path.write_text(f"{epoch_one_indexed}\n", encoding="utf-8")
+
+    print(
+        f"Checkpoint saved at epoch {epoch_one_indexed}: "
+        f"{checkpoint_path} (latest: {latest_checkpoint_path})"
+    )
+
+
+def load_training_checkpoint(checkpoint_path, expected_shape):
+    checkpoint_path = Path(checkpoint_path)
+    if not checkpoint_path.exists():
+        raise FileNotFoundError(f"Checkpoint not found: {checkpoint_path}")
+
+    checkpoint = loadmat(str(checkpoint_path), squeeze_me=True, struct_as_record=False)
+
+    required = ["epoch", "params", "adam_m", "adam_v", "adam_t"]
+    missing = [key for key in required if key not in checkpoint]
+    if missing:
+        raise KeyError(
+            f"Checkpoint missing required key(s): {missing}. "
+            f"Available keys: {[k for k in checkpoint.keys() if not k.startswith('__')]}"
+        )
+
+    p_loaded = np.asarray(checkpoint["params"], dtype=np.float64)
+    m_loaded = np.asarray(checkpoint["adam_m"], dtype=np.float64)
+    v_loaded = np.asarray(checkpoint["adam_v"], dtype=np.float64)
+    t_loaded = int(np.asarray(checkpoint["adam_t"]).squeeze())
+    epoch_loaded = int(np.asarray(checkpoint["epoch"]).squeeze())
+
+    if p_loaded.shape != expected_shape:
+        raise ValueError(
+            f"Checkpoint params shape {p_loaded.shape} does not match expected {expected_shape}."
+        )
+    if m_loaded.shape != expected_shape:
+        raise ValueError(
+            f"Checkpoint adam_m shape {m_loaded.shape} does not match expected {expected_shape}."
+        )
+    if v_loaded.shape != expected_shape:
+        raise ValueError(
+            f"Checkpoint adam_v shape {v_loaded.shape} does not match expected {expected_shape}."
+        )
+
+    return p_loaded, m_loaded, v_loaded, t_loaded, epoch_loaded
 
 
 class runSimulation(object):
@@ -60,8 +136,6 @@ class runSimulation(object):
     #- Move the data loading to a seperate file and make it toggleable
 
     #Calculate the approximate spontaneous firing rate before fitting.
-    from pathlib import Path
-
     # --- paths (MATLAB: cd(userpath); cd('../GitHub/.../OliverDataPlotting')) ---
     userpath = Path(r"C:\Users\ipboy\Documents\MATLAB")  # <-- change this
     plot_dir = userpath / "../GitHub/ModelingEffort/Multi-Channel/Plotting/OliverDataPlotting"
@@ -200,9 +274,22 @@ class runSimulation(object):
     m = np.zeros((num_params,num_cells,batch_size))
     v = np.zeros((num_params,num_cells,batch_size))
     t = 0
+    start_epoch = 30
 
     losses = []
     param_tracker = []
+
+    if RESUME_CHECKPOINT_PATH:
+        expected_shape = p.shape
+        p, m, v, t, loaded_epoch = load_training_checkpoint(
+            checkpoint_path=RESUME_CHECKPOINT_PATH,
+            expected_shape=expected_shape,
+        )
+        start_epoch = loaded_epoch
+        print(
+            f"Resumed from checkpoint '{RESUME_CHECKPOINT_PATH}' "
+            f"(saved after epoch {loaded_epoch})."
+        )
 
     best_loss = 1e32
 
@@ -214,7 +301,7 @@ class runSimulation(object):
 
     
 
-    for epoch in range(50):
+    for epoch in range(start_epoch, TOTAL_EPOCHS):
 
         #spks = call_inputs(p,batch_size)
         #on_spks = np.transpose(spks[f'locs_masker_None_target_0_on'][f'stimulus_0_poisson_spks'],(2,0,1))
@@ -306,6 +393,17 @@ class runSimulation(object):
         #Using grads here for of e-prop
         m, v, p, t = Update_params_all_cells.adam_update(m, v, p, t, beta1, beta2, lr, eps, grads)
         #m, v, p, t = Update_params.adam_update(m, v, p, t, beta1, beta2, lr, eps, out_grads)
+
+        epoch_one_indexed = epoch + 1
+        if epoch_one_indexed % CHECKPOINT_EVERY_EPOCHS == 0:
+            save_training_checkpoint(
+                epoch_one_indexed=epoch_one_indexed,
+                p=p,
+                m=m,
+                v=v,
+                t=t,
+                losses=losses,
+            )
 
         #print('p3')
         #print(p[13:17,1:5])

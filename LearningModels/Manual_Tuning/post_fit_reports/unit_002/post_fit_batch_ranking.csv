@@ -1,0 +1,2 @@
+batch_idx,psth_20ms_sse,rcorr,psth_20ms_pearson_r,noise_corrected_r_10ms
+0,1342,0.0164701662502,0.145533802854,0.0465579239578

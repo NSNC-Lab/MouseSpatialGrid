@@ -9,8 +9,8 @@ load('all_units_info_with_polished_criteria_modified_perf.mat','all_data');
 [a,idx] = min(squeeze(losses(100,2,:,:))'); %Idx is the index of the best amoung the batch
 
 %Look at an example
-figure;
-spy(squeeze(output(7,idx(7),:,:,:)))
+figure(position=[0,0,1000,1000]);%Data plot
+spy(squeeze(output(105,idx(105),:,:,:)))
 
 rasters = zeros([220,10,29801]);
 for k = 1:220
@@ -57,8 +57,8 @@ for n = 1:220
 end
 
 %Look at an example
-figure;
-spy(squeeze(data_rasters(7,:,:)))
+figure(position=[0,0,1000,1000]);%Data plot
+spy(squeeze(data_rasters(105,:,:)))
 
 data_PSTHs = zeros([220,149]);
 for k = 1:220
@@ -1021,7 +1021,7 @@ ylim([0, 0.1])
 load('all_units_info_with_polished_criteria_modified_perf.mat','all_data');
 load('output_compressed_Eprop_All_cells_20260402_090929')
 
-bin_width = 200; %In 0.1 ms
+bin_width = 100; %In 0.1 ms
 
 Rasters_data = zeros(220,10,29801);
 PSTHs_data= zeros([220,floor(29801/bin_width)]);
@@ -1322,7 +1322,11 @@ t = tiledlayout(10,3, ...
                 'TileSpacing','tight', ...
                 'Padding','tight');
 
-cells_along_mds_axis1 = [206,160,166,208,69,133,193,111,42,1];
+%cells_along_mds_axis1 = [206,160,166,208,69,133,193,111,42,1];
+%Note - this is just looking at some of the poor fits according to the
+%noise corrected correlation
+noise_corrected_bad = [37,156,55,185,51,62,17,113,69,173];
+cells_along_mds_axis1 = noise_corrected_bad;
 
 cells_back = [];
 

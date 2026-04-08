@@ -8,64 +8,10 @@ import InitParams
 from scipy.io import loadmat, savemat
 import yaml
 import os
-import re
 from strf_handler import call_strfs, export_strf_temporal_kernel_svg, export_onset_offset_rate_svg
 from input_handler import call_inputs
 import matplotlib.pyplot as plt
 from plot_data_raster_svg import make_poster_raster, make_poster_psth_overlay
-from pathlib import Path
-
-from post_fit_joint_mds_report import run_post_fit_joint_mds_report
-
-
-def _coerce_text_value(raw_value: str):
-    raw_value = raw_value.strip()
-    try:
-        return float(raw_value)
-    except ValueError:
-        return raw_value
-
-
-def _extract_declared_parameter_fields(neurons, synapses):
-    fields = {}
-
-    ro_config = next((node for node in neurons if node.get("name") == "ROn"), {})
-    fields["ROn_tau_ad"] = ro_config.get("ROn_tau_ad")
-    fields["ROn_g_inc"] = ro_config.get("ROn_g_inc")
-
-    for synapse in synapses:
-        synapse_name = synapse.get("name")
-        if not synapse_name:
-            continue
-        gsyn_key = f"{synapse_name}_gSYN"
-        if gsyn_key in synapse:
-            fields[f"{synapse_name}_gSYN"] = synapse.get(gsyn_key)
-
-    return fields
-
-
-def _extract_generated_solver_fields(generated_solve_path: Path):
-    fields = {"generated_solver_path": str(generated_solve_path)}
-    if not generated_solve_path.exists():
-        return fields
-
-    solve_text = generated_solve_path.read_text(encoding="utf-8")
-    tracked_names = [
-        "ROn_tau_ad",
-        "ROn_g_inc",
-        "On_ROn_gSYN",
-        "Off_ROn_gSYN",
-        "On_SOnOff_gSYN",
-        "Off_SOnOff_gSYN",
-        "SOnOff_ROn_gSYN",
-    ]
-
-    for tracked_name in tracked_names:
-        match = re.search(rf"^\s*{re.escape(tracked_name)}\s*=\s*([^\n#]+)", solve_text, flags=re.MULTILINE)
-        if match:
-            fields[tracked_name] = _coerce_text_value(match.group(1))
-
-    return fields
 
 
 class runSimulation(object):
@@ -82,7 +28,6 @@ class runSimulation(object):
     export_psth_overlay_svg_toggle = 1  # Toggle exporting minimal sim/data PSTH overlay as SVG
     export_strf_temporal_kernel_svg_toggle = 1  # Toggle exporting STRF temporal kernel as SVG
     export_onset_offset_rate_svg_toggle = 1  # Toggle exporting onset/offset firing-rate SVG
-    post_fit_joint_mds_report_toggle = 1  # Toggle exporting post-fit metrics and joint-MDS projection report
     onset_offset_trial_index = 0  # Trial index used if onset/offset rate has multiple trials
     onset_offset_stimulus_index = 0  # Target stimulus index
 
@@ -119,6 +64,8 @@ class runSimulation(object):
     #- Move the data loading to a seperate file and make it toggleable
 
     #Calculate the approximate spontaneous firing rate before fitting.
+    from pathlib import Path
+
     # --- paths (MATLAB: cd(userpath); cd('../GitHub/.../OliverDataPlotting')) ---
     userpath = Path(r"C:\Users\ipboy\Documents\MATLAB")  # <-- change this
     plot_dir = userpath / "../GitHub/ModelingEffort/Multi-Channel/Plotting/OliverDataPlotting"
@@ -129,7 +76,7 @@ class runSimulation(object):
     mat = loadmat("all_units_info_with_polished_criteria_modified_perf.mat",variable_names=["all_data"],squeeze_me=True,struct_as_record=False)
     all_data = mat["all_data"]  # numpy array of MATLAB structs
 
-    n = 133  # MATLAB is 1-based
+    n = 2  # MATLAB is 1-based
     unit = all_data[n - 1]
 
     spike_times = unit.ctrl_tar1_timestamps
@@ -339,33 +286,6 @@ class runSimulation(object):
     PSTH_loss_avg = np.sum(diff * diff)
 
     print(f"PSTH loss: {PSTH_loss_avg}")
-
-    if post_fit_joint_mds_report_toggle == 1:
-        script_dir = Path(__file__).resolve().parent
-        report_root = script_dir / "post_fit_reports"
-        config_path = script_dir.parent / "config" / "config.yaml"
-        generated_solve_path = script_dir / "BuildFile" / "generated_solve_file.py"
-        extra_summary_fields = {}
-        extra_summary_fields.update(_extract_declared_parameter_fields(arch[0], arch[1]))
-        extra_summary_fields.update(_extract_generated_solver_fields(generated_solve_path))
-        report_results = run_post_fit_joint_mds_report(
-            unit_index=n,
-            data=data,
-            spikes=spikes,
-            dt_ms=dt_ms,
-            output_dir=report_root,
-            condition_label="contra",
-            config_path=config_path,
-            extra_summary_fields=extra_summary_fields,
-        )
-        print(f"Saved post-fit metrics CSV: {report_results['metrics_csv']}")
-        print(f"Saved post-fit batch ranking CSV: {report_results['batch_csv']}")
-        print(f"Saved post-fit joint MDS figure: {report_results['projection_figure']}")
-        print(f"Updated unit history CSV: {report_results['unit_history_csv']}")
-        print(f"Updated unit history HTML: {report_results['unit_history_html']}")
-        print(f"Saved run manifest JSON: {report_results['manifest_json']}")
-        print(f"Updated cumulative post-fit summary CSV: {report_results['summary_csv']}")
-        print(f"Updated cumulative post-fit summary HTML: {report_results['summary_html']}")
     
 
 
