@@ -1019,7 +1019,9 @@ ylim([0, 0.1])
 
 %% Replot the cells but with PV and SST cells excluded and the new run and the data iwth the peaks of the tuning curves.
 load('all_units_info_with_polished_criteria_modified_perf.mat','all_data');
-load('output_compressed_Eprop_All_cells_20260402_090929')
+%load('output_compressed_Eprop_All_cells_20260402_090929')
+load('LongRunResults')
+
 
 bin_width = 100; %In 0.1 ms
 
@@ -1032,7 +1034,7 @@ dummy_idxs = 1:29801;
 PSTHs_sim = zeros([220,floor(29801/bin_width)]);
 Rasters_sim = zeros(220,10,29801);
 
-[val,idx] = min(squeeze(losses(50,2,:,:))');
+[val,idx] = min(squeeze(losses(end,2,:,:))');
 
 Nss = [];
 
@@ -1176,8 +1178,8 @@ for p = 1:n_pages
     sgtitle("Cells " + cells(start_k) + " to " + cells(end_k), ...
             'FontSize',12,'FontWeight','bold')
 
-    exportgraphics(f, sprintf('all_cells_page_%02d.pdf', p), 'ContentType','vector')
-    exportgraphics(f, sprintf('all_cells_page_%02d.png', p), 'Resolution',300)
+    exportgraphics(f, sprintf('all_cells_page_Long_%02d.pdf', p), 'ContentType','vector')
+    exportgraphics(f, sprintf('all_cells_page_Long_%02d.png', p), 'Resolution',300)
 
     close(f)
 end

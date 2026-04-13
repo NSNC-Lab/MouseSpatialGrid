@@ -19,8 +19,8 @@ import matplotlib.pyplot as plt
 
 CHECKPOINT_EVERY_EPOCHS = 10
 CHECKPOINT_PREFIX = "checkpoint_Eprop_All_cells"
-TOTAL_EPOCHS = 300
-RESUME_CHECKPOINT_PATH = "C:\\Users\\ipboy\\Documents\\GitHub\\ModelingEffort\\Multi-Channel\\Plotting\\OliverDataPlotting\\checkpoint_Eprop_All_cells_epoch_0030.mat"  # Example: r"checkpoint_Eprop_All_cells_latest.mat"
+TOTAL_EPOCHS = 240
+RESUME_CHECKPOINT_PATH = "C:\\Users\\ipboy\\Documents\\GitHub\\ModelingEffort\\Multi-Channel\\Plotting\\OliverDataPlotting\\checkpoint_Eprop_All_cells_epoch_0230.mat"  # Example: r"checkpoint_Eprop_All_cells_latest.mat"
 
 
 def save_training_checkpoint(
@@ -274,10 +274,11 @@ class runSimulation(object):
     m = np.zeros((num_params,num_cells,batch_size))
     v = np.zeros((num_params,num_cells,batch_size))
     t = 0
-    start_epoch = 30
+    
 
     losses = []
     param_tracker = []
+    start_epoch = 239
 
     if RESUME_CHECKPOINT_PATH:
         expected_shape = p.shape
@@ -299,10 +300,11 @@ class runSimulation(object):
 
     start = time.perf_counter()
 
-    
+    start_epoch = 239
 
     for epoch in range(start_epoch, TOTAL_EPOCHS):
 
+        print(range(start_epoch, TOTAL_EPOCHS))
         #spks = call_inputs(p,batch_size)
         #on_spks = np.transpose(spks[f'locs_masker_None_target_0_on'][f'stimulus_0_poisson_spks'],(2,0,1))
         #off_spks = np.transpose(spks[f'locs_masker_None_target_0_off'][f'stimulus_0_poisson_spks'],(2,0,1))

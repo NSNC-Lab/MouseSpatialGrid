@@ -1,0 +1,31 @@
+History file: C:\Users\ipboy\Documents\GitHub\MouseSpatialGrid\LearningModels\Manual_Tuning\post_fit_reports\unit_133\post_fit_unit_history.csv
+Target metric: mds_manual_fit_distance_to_data
+
+Top 10 absolute Pearson correlations against the target metric:
+  mds_distance_improvement: r=-1.0, n=57, abs_r=1.0
+  manual_fit_mds_y: r=-0.9517778172847844, n=57, abs_r=0.9517778172847844
+  offset_responsiveness_abs_error: r=0.5650485510860049, n=57, abs_r=0.5650485510860049
+  psth_5ms_pearson_r: r=-0.5043713369474468, n=57, abs_r=0.5043713369474468
+  noise_corrected_r_10ms: r=-0.48745665374853975, n=57, abs_r=0.48745665374853975
+  psth_10ms_pearson_r: r=-0.48743115386558056, n=57, abs_r=0.48743115386558056
+  rcorr: r=-0.48743115386558056, n=57, abs_r=0.48743115386558056
+  psth_20ms_cosine_similarity: r=-0.46220159171610564, n=57, abs_r=0.46220159171610564
+  psth_20ms_pearson_r: r=-0.428799704393814, n=57, abs_r=0.428799704393814
+  SOnOff_ROn_gSYN: r=0.347262108249853, n=45, abs_r=0.347262108249853
+
+Top 15 absolute Pearson correlations across all metric pairs:
+  lifetime_sparseness_model_20ms vs lifetime_sparseness_abs_error_20ms: r=-1.0, n=57, abs_r=1.0
+  mds_manual_fit_distance_to_data vs mds_distance_improvement: r=-1.0, n=57, abs_r=1.0
+  psth_10ms_pearson_r vs rcorr: r=1.0, n=57, abs_r=1.0
+  raw_raster_mse vs raw_raster_mae: r=0.9999999999999998, n=57, abs_r=0.9999999999999998
+  psth_10ms_pearson_r vs noise_corrected_r_10ms: r=0.9999893042018253, n=57, abs_r=0.9999893042018253
+  rcorr vs noise_corrected_r_10ms: r=0.9999893042018253, n=57, abs_r=0.9999893042018253
+  raw_raster_mse vs raw_raster_rmse: r=0.9986185395392997, n=57, abs_r=0.9986185395392997
+  raw_raster_rmse vs raw_raster_mae: r=0.9986185395392997, n=57, abs_r=0.9986185395392997
+  psth_20ms_pearson_r vs psth_20ms_cosine_similarity: r=0.9951989122780331, n=57, abs_r=0.9951989122780331
+  psth_5ms_sse vs psth_10ms_sse: r=0.9899587553239836, n=57, abs_r=0.9899587553239836
+  psth_5ms_pearson_r vs noise_corrected_r_10ms: r=0.9898054981592322, n=57, abs_r=0.9898054981592322
+  psth_5ms_pearson_r vs psth_10ms_pearson_r: r=0.9896079066903104, n=57, abs_r=0.9896079066903104
+  psth_5ms_pearson_r vs rcorr: r=0.9896079066903104, n=57, abs_r=0.9896079066903104
+  psth_10ms_pearson_r vs psth_20ms_cosine_similarity: r=0.984794688822162, n=57, abs_r=0.984794688822162
+  rcorr vs psth_20ms_cosine_similarity: r=0.984794688822162, n=57, abs_r=0.984794688822162

@@ -668,8 +668,10 @@ def compute_response_features(trial_bins: np.ndarray, bin_ms: float, stimulus_in
     else:
         peak_latency_ms = centers_ms[peak_idx]
 
-    onset_resp = window_responsiveness_index(mean_rate, clip_indices(stimulus_info["onset_bins"], mean_rate.size))
-    offset_resp = window_responsiveness_index(mean_rate, clip_indices(stimulus_info["offset_bins"], mean_rate.size))
+    #onset_resp = window_responsiveness_index(mean_rate, clip_indices(stimulus_info["onset_bins"], mean_rate.size))
+    #offset_resp = window_responsiveness_index(mean_rate, clip_indices(stimulus_info["offset_bins"], mean_rate.size))
+    onset_resp = window_responsiveness_index(mean_rate, clip_indices(stimulus_info["first_onset_bins"], mean_rate.size))
+    offset_resp = window_responsiveness_index(mean_rate, clip_indices(stimulus_info["first_offset_bins"], mean_rate.size))
 
     return {
         "peak_rate_hz": float(peak_rate),
@@ -761,7 +763,7 @@ def compute_fit_metrics(
     metrics["onset_responsiveness_abs_error"] = abs(
         model_features["onset_responsiveness"] - data_features["onset_responsiveness"]
     )
-    metrics["offset_responsiveness_abs_error"] = abs(
+    metrics["offset_responsiveness_abs_error_Just_first_bump"] = abs(
         model_features["offset_responsiveness"] - data_features["offset_responsiveness"]
     )
 
@@ -789,7 +791,8 @@ def compute_fit_metrics(
         "peak_rate_abs_error_hz": metrics["peak_rate_abs_error_hz"],
         "peak_latency_abs_error_ms": metrics["peak_latency_abs_error_ms"],
         "onset_responsiveness_abs_error": metrics["onset_responsiveness_abs_error"],
-        "offset_responsiveness_abs_error": metrics["offset_responsiveness_abs_error"],
+        "offset_responsiveness_abs_error": 0, #Was previously being calculated wrong
+        "offset_responsiveness_abs_error_Just_first_bump": metrics["offset_responsiveness_abs_error_Just_first_bump"],
     }
     return ordered_metrics
 
