@@ -17,11 +17,11 @@ from input_handler import call_inputs
 import matplotlib.pyplot as plt
 
 
-CHECKPOINT_EVERY_EPOCHS = 10
+CHECKPOINT_EVERY_EPOCHS = 1
 CHECKPOINT_PREFIX = "checkpoint_Eprop_All_cells"
-TOTAL_EPOCHS = 240
-RESUME_CHECKPOINT_PATH = "C:\\Users\\ipboy\\Documents\\GitHub\\ModelingEffort\\Multi-Channel\\Plotting\\OliverDataPlotting\\checkpoint_Eprop_All_cells_epoch_0230.mat"  # Example: r"checkpoint_Eprop_All_cells_latest.mat"
-
+TOTAL_EPOCHS = 15
+#RESUME_CHECKPOINT_PATH = "CW:\\Users\\ipboy\\Documents\\GitHub\\ModelingEffort\\Multi-Channel\\Plotting\\OliverDataPlotting\\checkpoint_Eprop_All_cells_epoch_0230.mat"  # Example: r"checkpoint_Eprop_All_cells_latest.mat"
+RESUME_CHECKPOINT_PATH = ""
 
 def save_training_checkpoint(
     epoch_one_indexed,
@@ -30,6 +30,11 @@ def save_training_checkpoint(
     v,
     t,
     losses,
+    best_output_per_cell=None,
+    best_loss_per_cell=None,
+    best_batch_id_per_cell=None,
+    best_epoch_per_cell=None,
+    best_params_per_cell=None,
     prefix=CHECKPOINT_PREFIX,
 ):
     checkpoint_payload = {
@@ -40,6 +45,17 @@ def save_training_checkpoint(
         "adam_t": np.asarray(t, dtype=np.int32),
         "losses_so_far": np.asarray(losses, dtype=np.float32),
     }
+
+    if best_output_per_cell is not None:
+        checkpoint_payload.update(
+            {
+                "best_output_per_cell": np.asarray(best_output_per_cell, dtype=np.int8),
+                "best_loss_per_cell": np.asarray(best_loss_per_cell, dtype=np.float32),
+                "best_batch_id_per_cell": np.asarray(best_batch_id_per_cell, dtype=np.int32),
+                "best_epoch_per_cell": np.asarray(best_epoch_per_cell, dtype=np.int32),
+                "best_params_per_cell": np.asarray(best_params_per_cell, dtype=np.float32),
+            }
+        )
 
     checkpoint_path = Path(f"{prefix}_epoch_{epoch_one_indexed:04d}.mat")
     latest_checkpoint_path = Path(f"{prefix}_latest.mat")
@@ -89,7 +105,19 @@ def load_training_checkpoint(checkpoint_path, expected_shape):
             f"Checkpoint adam_v shape {v_loaded.shape} does not match expected {expected_shape}."
         )
 
-    return p_loaded, m_loaded, v_loaded, t_loaded, epoch_loaded
+    best_state = {}
+    optional_best_keys = [
+        "best_output_per_cell",
+        "best_loss_per_cell",
+        "best_batch_id_per_cell",
+        "best_epoch_per_cell",
+        "best_params_per_cell",
+    ]
+    for key in optional_best_keys:
+        if key in checkpoint:
+            best_state[key] = checkpoint[key]
+
+    return p_loaded, m_loaded, v_loaded, t_loaded, epoch_loaded, best_state
 
 
 class runSimulation(object):
@@ -278,15 +306,45 @@ class runSimulation(object):
 
     losses = []
     param_tracker = []
-    start_epoch = 239
+    start_epoch = 0
+
+    best_output_per_cell = np.zeros((num_cells, opts["N_trials"], opts["N_channels"], opts["sim_len"]), dtype=np.int8)
+    best_loss_per_cell = np.full((num_cells,), np.inf, dtype=np.float32)
+    best_batch_id_per_cell = np.zeros((num_cells,), dtype=np.int32)
+    best_epoch_per_cell = np.zeros((num_cells,), dtype=np.int32)
+    best_params_per_cell = np.zeros((num_params, num_cells), dtype=np.float32)
 
     if RESUME_CHECKPOINT_PATH:
         expected_shape = p.shape
-        p, m, v, t, loaded_epoch = load_training_checkpoint(
+        p, m, v, t, loaded_epoch, checkpoint_best_state = load_training_checkpoint(
             checkpoint_path=RESUME_CHECKPOINT_PATH,
             expected_shape=expected_shape,
         )
         start_epoch = loaded_epoch
+        if checkpoint_best_state:
+            loaded_best_output_per_cell = np.asarray(
+                checkpoint_best_state.get("best_output_per_cell", best_output_per_cell),
+                dtype=np.int8,
+            )
+            if loaded_best_output_per_cell.ndim == 3:
+                loaded_best_output_per_cell = loaded_best_output_per_cell[:, :, None, :]
+            best_output_per_cell = loaded_best_output_per_cell
+            best_loss_per_cell = np.asarray(
+                checkpoint_best_state.get("best_loss_per_cell", best_loss_per_cell),
+                dtype=np.float32,
+            ).reshape(num_cells)
+            best_batch_id_per_cell = np.asarray(
+                checkpoint_best_state.get("best_batch_id_per_cell", best_batch_id_per_cell),
+                dtype=np.int32,
+            ).reshape(num_cells)
+            best_epoch_per_cell = np.asarray(
+                checkpoint_best_state.get("best_epoch_per_cell", best_epoch_per_cell),
+                dtype=np.int32,
+            ).reshape(num_cells)
+            best_params_per_cell = np.asarray(
+                checkpoint_best_state.get("best_params_per_cell", best_params_per_cell),
+                dtype=np.float32,
+            )
         print(
             f"Resumed from checkpoint '{RESUME_CHECKPOINT_PATH}' "
             f"(saved after epoch {loaded_epoch})."
@@ -300,7 +358,7 @@ class runSimulation(object):
 
     start = time.perf_counter()
 
-    start_epoch = 239
+    start_epoch = 0
 
     for epoch in range(start_epoch, TOTAL_EPOCHS):
 
@@ -372,16 +430,28 @@ class runSimulation(object):
 
         print(f'L2 loss : {np.mean(loss[0]):.2f}  -:-  MSE loss : {np.mean(loss[1]):.2f} ---- Epoch: {epoch}')
 
+        psth_loss = np.asarray(loss[1], dtype=np.float32)
+        best_batch_idx_this_epoch = np.argmin(psth_loss, axis=1)
+        best_loss_this_epoch = psth_loss[np.arange(num_cells), best_batch_idx_this_epoch]
+        improved_cells = best_loss_this_epoch < best_loss_per_cell
 
-        #Removing best for now since it doesn't make much sense to keep across cells.
+        if np.any(improved_cells):
+            improved_idx = np.where(improved_cells)[0]
+            chosen_batch_idx = best_batch_idx_this_epoch[improved_idx]
 
-        #best_loss_idx = np.argmin(np.array(loss)[1,:])
+            best_output_per_cell[improved_idx, :, :, :] = np.asarray(
+                output[improved_idx, chosen_batch_idx, :, :, :],
+                dtype=np.int8,
+            )
+            best_loss_per_cell[improved_idx] = best_loss_this_epoch[improved_idx]
+            best_batch_id_per_cell[improved_idx] = chosen_batch_idx.astype(np.int32) + 1
+            best_epoch_per_cell[improved_idx] = epoch + 1
+            best_params_per_cell[:, improved_idx] = p[:, improved_idx, chosen_batch_idx].astype(np.float32)
 
-        
-        #if np.array(loss)[1,best_loss_idx] < best_loss:
-        #    best_output = output[best_loss_idx,:,:,:]
-        #    best_loss = np.array(loss)[1,best_loss_idx]
-        #    best_params = p[:,best_loss_idx]
+            print(
+                f'Updated best output for {len(improved_idx)} cells '
+                f'(median best PSTH loss: {np.nanmedian(best_loss_per_cell):.2f})'
+            )
 
         # print(out_grads)
 
@@ -405,6 +475,11 @@ class runSimulation(object):
                 v=v,
                 t=t,
                 losses=losses,
+                best_output_per_cell=best_output_per_cell,
+                best_loss_per_cell=best_loss_per_cell,
+                best_batch_id_per_cell=best_batch_id_per_cell,
+                best_epoch_per_cell=best_epoch_per_cell,
+                best_params_per_cell=best_params_per_cell,
             )
 
         #print('p3')
@@ -423,7 +498,20 @@ class runSimulation(object):
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     #savemat(f"output_compressed_Eprop_{timestamp}.mat", {"output": output, "losses":losses, "params" : param_tracker,  "best_loss" : np.asarray(best_loss, dtype=np.float32),"best_output" : np.asarray(best_output, dtype=np.float32),"best_params" : np.asarray(best_params, dtype=np.float32)}, do_compression=True)
-    savemat(f"output_compressed_Eprop_All_cells_{timestamp}.mat", {"output": output, "losses":losses, "params" : param_tracker}, do_compression=True)
+    savemat(
+        f"output_compressed_Eprop_All_cells_{timestamp}.mat",
+        {
+            "output": output,
+            "losses": losses,
+            "params": param_tracker,
+            "best_output_per_cell": best_output_per_cell,
+            "best_loss_per_cell": best_loss_per_cell,
+            "best_batch_id_per_cell": best_batch_id_per_cell,
+            "best_epoch_per_cell": best_epoch_per_cell,
+            "best_params_per_cell": best_params_per_cell,
+        },
+        do_compression=True,
+    )
 
     # # ============== PARAMETER EVOLUTION PLOT ==============
     # # param_tracker is a list of arrays, each with shape (1, 100) or (num_params, batch_size)

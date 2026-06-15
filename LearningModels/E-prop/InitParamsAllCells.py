@@ -36,6 +36,19 @@ def pinit(batch_size, num_params, num_cells):
     p[3:8,:,:] = rng.uniform(0, 0.2, size=(5, num_cells, batch_size)).astype(np.float32) #GSYNs
     lrs[3:8] = 0.2*lr_frac
 
+
+    p[8,:,:] = rng.uniform(0, 10, size=(1, num_cells, batch_size)).astype(np.float32) #Absolute refractory period in ms
+    lrs[8] = 10*lr_frac
+
+    p[9,:,:] = rng.uniform(0.1, 10, size=(1, num_cells, batch_size)).astype(np.float32) #tanh sharpness
+    lrs[9] = 10*lr_frac
+
+    p[10,:,:] = rng.uniform(0, 10, size=(1, num_cells, batch_size)).astype(np.float32) #tanh delay
+    lrs[10] = 10*lr_frac
+
+    p[11,:,:] = rng.uniform(0, 1, size=(1, num_cells, batch_size)).astype(np.float32) #Recovery probability return value
+    lrs[11] = 1*lr_frac
+
     # p[4,:] = rng.uniform(5, 20, size=(1, batch_size)).astype(np.float32) #tau_ad
     # lrs[4] = 20*lr_frac
     # p[5,:] = rng.uniform(0.0, 0.01, size=(1, batch_size)).astype(np.float32) #g_inc

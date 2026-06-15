@@ -17,6 +17,10 @@ from scipy.signal import resample_poly
 import matplotlib.pyplot as plt
 
 
+_PLOTTED_STIMULUS_SPECTROGRAM = False
+_PLOTTED_STRF_DIAGNOSTICS = False
+
+
 def rms(data):
         """
         Calculates the Root Mean Square (RMS) of a NumPy array.
@@ -41,6 +45,67 @@ def get_f(fftLen, samprate, tfParams):
         f = np.linspace(f0[minIndx], f0[maxIndx], 1 + int((f0[maxIndx]-f0[minIndx]+1)/fstep)) #f0(minIndx):fstep:f0(maxIndx)
                 
         return f
+
+
+def _plot_line_trace(ax, x, y, xlabel, ylabel, title):
+        ax.plot(x, y, linewidth=1.5)
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+        ax.set_title(title)
+        ax.grid(True, alpha=0.25)
+
+
+def _select_first_trace(values):
+        values = np.asarray(values)
+        if values.ndim == 1:
+                return values
+        return values[(slice(None),) + (0,) * (values.ndim - 1)]
+
+
+def _select_first_matrix(values):
+        values = np.asarray(values)
+        if values.ndim <= 2:
+                return np.squeeze(values)
+        return values[(slice(None), slice(None)) + (0,) * (values.ndim - 2)]
+
+
+def _flat_index_of_min(values):
+        values = np.asarray(values, dtype=np.float64).reshape(-1)
+        if values.size == 0:
+                return 0
+        finite_values = np.where(np.isfinite(values), values, np.inf)
+        return int(np.argmin(finite_values))
+
+
+def _select_trace_at_flat_index(values, flat_index):
+        values = np.asarray(values)
+        if values.ndim == 1:
+                return values
+        columns = values.reshape(values.shape[0], -1)
+        return columns[:, flat_index % columns.shape[1]]
+
+
+def _select_matrix_at_flat_index(values, flat_index):
+        values = np.asarray(values)
+        if values.ndim <= 2:
+                return np.squeeze(values)
+        matrices = values.reshape(values.shape[0], values.shape[1], -1)
+        return matrices[:, :, flat_index % matrices.shape[2]]
+
+
+def _diagnostic_output_dir():
+        output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'strf_diagnostic_plots')
+        os.makedirs(output_dir, exist_ok=True)
+        return output_dir
+
+
+def _save_and_show(fig, filename):
+        save_path = os.path.join(_diagnostic_output_dir(), filename)
+        fig.tight_layout()
+        fig.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.show(block=False)
+        plt.pause(0.001)
+        return save_path
 
 
 class GenSTRF(object):
@@ -72,6 +137,7 @@ class GenSTRF(object):
                 #self.strf = self.process_initial_stimulus(init_stim_path, self.strf_config['targetlvl'], self.strf_config['strfGain'])
                 #With learnable parameters
                 self.strf = self.process_initial_stimulus(init_stim_path, self.strf_config['targetlvl'], self.strfGain)
+                self._plotted_stimulus_spectrogram = False
 
         def process_initial_stimulus(self, stim_path, lvl, strfGain):
                 '''
@@ -93,8 +159,19 @@ class GenSTRF(object):
                 spec, t, f = self.STRFspectrogram(data/rms(data)*lvl,fs)                 
                 strf = self.STRFgen(self.paramH, self.paramG, f, t[1]-t[0]) 
                 #Learnable version
-                strf['w1'] = strf['w1'][:,:,None]*np.squeeze(strfGain)[None,None,:]  #The idea here is that for the STRF we have some spectrogram that is 2500 by ~50 and we want to scale it by the strfGain across each batch trial. So we create fake axis and broadcast across them.
-                strf['w2'] = strf['w2'][:,:,None]*np.squeeze(strfGain)[None,None,:]  
+                #strf['w1'] = strf['w1'][:,:,None]*np.squeeze(strfGain)[None,None,:]  #The idea here is that for the STRF we have some spectrogram that is 2500 by ~50 and we want to scale it by the strfGain across each batch trial. So we create fake axis and broadcast across them.
+                #strf['w2'] = strf['w2'][:,:,None]*np.squeeze(strfGain)[None,None,:]  
+                gain = np.asarray(strfGain)
+                if self.num_cells > 1:
+                        gain = gain.reshape(self.num_cells, self.batch_size)[None, None, :, :]
+                else:
+                        gain = gain.reshape(self.batch_size)[None, None, :]
+
+                strf['w1'] = strf['w1'] * gain
+                strf['w2'] = strf['w2'] * gain
+
+                self.plot_strf_diagnostics(f, strf, stim_path)
+                
                 return strf
         
         def process_stimulus(self, stim_path, lvl, stimGain):
@@ -141,7 +218,9 @@ class GenSTRF(object):
 
                 #print(np.shape(data))
 
-                spec,_,_ = self.STRFspectrogram(data/rms(data)*lvl,fs)
+                spec, t, f = self.STRFspectrogram(data/rms(data)*lvl,fs)
+                self.plot_stimulus_spectrogram(spec, t, f, stim_path)
+
                 fr_on, fr_off, fr_on_deriv, fr_off_deriv = self.STRFconvolve(self.strf,spec*stimGain, self.strf_config['mean_rate'])
 
                 #print(np.shape(fr_on))
@@ -156,6 +235,71 @@ class GenSTRF(object):
                 #print(np.shape(fr_on))
 
                 return fr_on, fr_off, fr_on_deriv, fr_off_deriv
+
+
+        def plot_stimulus_spectrogram(self, spec, t, f, stim_path):
+                global _PLOTTED_STIMULUS_SPECTROGRAM
+                if self._plotted_stimulus_spectrogram or _PLOTTED_STIMULUS_SPECTROGRAM:
+                        return
+
+                self._plotted_stimulus_spectrogram = True
+                _PLOTTED_STIMULUS_SPECTROGRAM = True
+                fig, ax = plt.subplots(figsize=(10, 4))
+                extent = [t[0], t[-1], f[0], f[-1]]
+                im = ax.imshow(spec.T, aspect='auto', origin='lower', extent=extent)
+                ax.set_xlabel('Time (s)')
+                ax.set_ylabel('Frequency (Hz)')
+                ax.set_title(f'Input stimulus spectrogram: {os.path.basename(stim_path)}')
+                fig.colorbar(im, ax=ax, label='Spectrogram power')
+                _save_and_show(fig, 'input_stimulus_spectrogram.png')
+
+
+        def plot_strf_diagnostics(self, f, strf, stim_path):
+                global _PLOTTED_STRF_DIAGNOSTICS
+                if _PLOTTED_STRF_DIAGNOSTICS:
+                        return
+
+                _PLOTTED_STRF_DIAGNOSTICS = True
+
+                time_constants = np.asarray(strf.get('time_constant', []), dtype=np.float64).reshape(-1)
+                temporal_example_idx = _flat_index_of_min(time_constants)
+                selected_time_constant = time_constants[temporal_example_idx] if time_constants.size else np.nan
+
+                temporal_kernel = _select_trace_at_flat_index(strf['H'], temporal_example_idx)
+                temporal_t = np.asarray(strf['t'])[:temporal_kernel.shape[0]]
+                frequency_kernel = _select_first_trace(strf['G'])
+                w1_matrix = _select_matrix_at_flat_index(strf['w1'], temporal_example_idx)
+
+                fig_temporal, ax_temporal = plt.subplots(figsize=(8, 4))
+                _plot_line_trace(
+                        ax_temporal,
+                        temporal_t,
+                        temporal_kernel,
+                        'Delay (s)',
+                        'Weight',
+                        f'STRF temporal kernel (short tau = {selected_time_constant * 1000:.2f} ms)',
+                )
+                _save_and_show(fig_temporal, 'strf_temporal_kernel.png')
+
+                fig_frequency, ax_frequency = plt.subplots(figsize=(8, 4))
+                _plot_line_trace(
+                        ax_frequency,
+                        f[:frequency_kernel.shape[0]],
+                        frequency_kernel,
+                        'Frequency (Hz)',
+                        'Weight',
+                        'STRF frequency kernel',
+                )
+                _save_and_show(fig_frequency, 'strf_frequency_kernel.png')
+
+                fig_w1, ax_w1 = plt.subplots(figsize=(8, 5))
+                w1_extent = [temporal_t[0], temporal_t[-1], f[0], f[-1]]
+                im_w1 = ax_w1.imshow(w1_matrix, aspect='auto', origin='lower', extent=w1_extent)
+                ax_w1.set_xlabel('Delay (s)')
+                ax_w1.set_ylabel('Frequency (Hz)')
+                ax_w1.set_title(f'w1 weight matrix / STRF (short tau = {selected_time_constant * 1000:.2f} ms)')
+                fig_w1.colorbar(im_w1, ax=ax_w1, label='Weight')
+                _save_and_show(fig_w1, 'strf_w1_weight_matrix.png')
 
 
         def GaussianSpectrum(self, input_, increment, winLength, samprate, nstd = 6):
@@ -454,6 +598,7 @@ class GenSTRF(object):
                 #strf['H'] = np.exp(-t/paramH['alpha'])*(paramH['SC1']*(t/paramH['alpha'])**paramH['N1']/math.factorial(paramH['N1']) - \
                 
                 self.strfTimeConstant = self.strfTimeConstant[None,:]
+                strf['time_constant'] = np.asarray(self.strfTimeConstant).copy()
 
                 if self.num_cells >1:
                         t = t[:,:,None] 
@@ -616,7 +761,7 @@ class GenSTRF(object):
                 frate_deriv = frate_deriv*mean_rate
                 
                 # offset rate
-                offset_rate = -frate + np.max(frate,axis=0)*0.3 #-frate + max(frate)*0.6;
+                offset_rate = -frate + np.max(frate,axis=0)*0.75 #-frate + max(frate)*0.6;
 
                 offset_rate_deriv = -frate_deriv + np.max(frate_deriv,axis=0)*0.3 #-frate + max(frate)*0.6
 

@@ -1,0 +1,1028 @@
+[
+  {
+    "test": "memory",
+    "method": "backprop_cpu",
+    "batch_size": 5,
+    "epochs": 1,
+    "final_loss": 5914.7998046875,
+    "best_loss": 5643.0,
+    "best_batch_id": 5,
+    "best_epoch": 1,
+    "wall_time_s": 224.06898509990424,
+    "peak_cuda_allocated_mb": null,
+    "peak_cuda_reserved_mb": null,
+    "cupy_pool_used_mb": null,
+    "cupy_pool_reserved_mb": null,
+    "rss_start_mb": 957.72265625,
+    "rss_end_mb": 7060.15625,
+    "rss_delta_mb": 6102.43359375,
+    "phase_profile": {
+      "zero_grad_s": 0.0003610001876950264,
+      "forward_s": 83.12422259990126,
+      "backward_s": 77.29667530022562,
+      "optimizer_s": 0.0018637999892234802,
+      "best_trace_s": 63.64557330007665,
+      "total_s": 224.06898509990424
+    },
+    "memory_culprits": [
+      {
+        "name": "input/target/noise tensors",
+        "mb": 22.736358642578125,
+        "source": "measured tensor sizes"
+      },
+      {
+        "name": "optimizer state, parameters, and gradients",
+        "mb": 0.0005340576171875,
+        "source": "measured/estimated tensor sizes"
+      },
+      {
+        "name": "binned PSTH/loss tensors",
+        "mb": 0.008525848388671875,
+        "source": "estimated from bin count"
+      },
+      {
+        "name": "best-output trace snapshot",
+        "mb": 5.684089660644531,
+        "source": "estimated no_grad trace copy"
+      }
+    ],
+    "phase_memory": {
+      "forward_graph_and_intermediates_mb": 22.736358642578125,
+      "backward_extra_peak_mb": 0.0,
+      "inputs_targets_mb": 22.736358642578125,
+      "optimizer_params_grads_mb": 0.0005340576171875
+    }
+  },
+  {
+    "test": "memory",
+    "method": "truncated_backprop_cpu",
+    "batch_size": 5,
+    "epochs": 1,
+    "final_loss": 415.08575439453125,
+    "best_loss": 376.0714416503906,
+    "best_batch_id": 2,
+    "best_epoch": 1,
+    "wall_time_s": 210.3882387999911,
+    "peak_cuda_allocated_mb": null,
+    "peak_cuda_reserved_mb": null,
+    "cupy_pool_used_mb": null,
+    "cupy_pool_reserved_mb": null,
+    "rss_start_mb": 997.89453125,
+    "rss_end_mb": 1649.23828125,
+    "rss_delta_mb": 651.34375,
+    "phase_profile": {
+      "zero_grad_s": 0.0016109996940940619,
+      "forward_s": 80.98817270016298,
+      "backward_s": 66.56059810006991,
+      "optimizer_s": 0.01152600022032857,
+      "best_trace_s": 62.795426100026816,
+      "total_s": 210.3882387999911
+    },
+    "memory_culprits": [
+      {
+        "name": "input/target/noise tensors",
+        "mb": 22.736358642578125,
+        "source": "measured tensor sizes"
+      },
+      {
+        "name": "optimizer state, parameters, and gradients",
+        "mb": 0.0005340576171875,
+        "source": "measured/estimated tensor sizes"
+      },
+      {
+        "name": "binned PSTH/loss tensors",
+        "mb": 0.008525848388671875,
+        "source": "estimated from bin count"
+      },
+      {
+        "name": "best-output trace snapshot",
+        "mb": 5.684089660644531,
+        "source": "estimated no_grad trace copy"
+      }
+    ],
+    "phase_memory": {
+      "forward_graph_and_intermediates_mb": 22.736358642578125,
+      "backward_extra_peak_mb": 0.0,
+      "inputs_targets_mb": 22.736358642578125,
+      "optimizer_params_grads_mb": 0.0005340576171875
+    }
+  },
+  {
+    "test": "memory",
+    "method": "backprop_cuda",
+    "batch_size": 5,
+    "epochs": 1,
+    "final_loss": 5914.7998046875,
+    "best_loss": 5643.0,
+    "best_batch_id": 5,
+    "best_epoch": 1,
+    "wall_time_s": 574.9372256000061,
+    "peak_cuda_allocated_mb": 997.55419921875,
+    "peak_cuda_reserved_mb": 1016.0,
+    "cupy_pool_used_mb": null,
+    "cupy_pool_reserved_mb": null,
+    "rss_start_mb": 1157.85546875,
+    "rss_end_mb": 9840.29296875,
+    "rss_delta_mb": 8682.4375,
+    "phase_profile": {
+      "zero_grad_s": 0.00012809992767870426,
+      "forward_s": 206.6395175999496,
+      "backward_s": 184.6191761000082,
+      "optimizer_s": 0.04370609996840358,
+      "best_trace_s": 183.59613119997084,
+      "total_s": 574.9372256000061
+    },
+    "memory_culprits": [
+      {
+        "name": "autograd saved timestep graph and intermediates",
+        "mb": 974.808780670166,
+        "source": "measured residual from PyTorch peak allocation"
+      },
+      {
+        "name": "input/target/noise tensors",
+        "mb": 22.736358642578125,
+        "source": "measured tensor sizes"
+      },
+      {
+        "name": "optimizer state, parameters, and gradients",
+        "mb": 0.0005340576171875,
+        "source": "measured/estimated tensor sizes"
+      },
+      {
+        "name": "binned PSTH/loss tensors",
+        "mb": 0.008525848388671875,
+        "source": "estimated from bin count"
+      },
+      {
+        "name": "best-output trace snapshot",
+        "mb": 5.684089660644531,
+        "source": "estimated no_grad trace copy"
+      }
+    ],
+    "phase_memory": {
+      "forward_graph_and_intermediates_mb": 974.808780670166,
+      "backward_extra_peak_mb": 0.0,
+      "inputs_targets_mb": 22.736358642578125,
+      "optimizer_params_grads_mb": 0.0005340576171875
+    }
+  },
+  {
+    "test": "memory",
+    "method": "truncated_backprop_cuda",
+    "batch_size": 5,
+    "epochs": 1,
+    "final_loss": 414.82855224609375,
+    "best_loss": 374.78570556640625,
+    "best_batch_id": 2,
+    "best_epoch": 1,
+    "wall_time_s": 347.4440819998272,
+    "peak_cuda_allocated_mb": 87.9873046875,
+    "peak_cuda_reserved_mb": 106.0,
+    "cupy_pool_used_mb": null,
+    "cupy_pool_reserved_mb": null,
+    "rss_start_mb": 1838.03125,
+    "rss_end_mb": 2419.71484375,
+    "rss_delta_mb": 581.68359375,
+    "phase_profile": {
+      "zero_grad_s": 0.0016493992879986763,
+      "forward_s": 144.54453670000657,
+      "backward_s": 126.76828480046242,
+      "optimizer_s": 0.007835499942302704,
+      "best_trace_s": 76.07890590000898,
+      "total_s": 347.4440819998272
+    },
+    "memory_culprits": [
+      {
+        "name": "autograd saved timestep graph and intermediates",
+        "mb": 65.24188613891602,
+        "source": "measured residual from PyTorch peak allocation"
+      },
+      {
+        "name": "input/target/noise tensors",
+        "mb": 22.736358642578125,
+        "source": "measured tensor sizes"
+      },
+      {
+        "name": "optimizer state, parameters, and gradients",
+        "mb": 0.0005340576171875,
+        "source": "measured/estimated tensor sizes"
+      },
+      {
+        "name": "binned PSTH/loss tensors",
+        "mb": 0.008525848388671875,
+        "source": "estimated from bin count"
+      },
+      {
+        "name": "best-output trace snapshot",
+        "mb": 5.684089660644531,
+        "source": "estimated no_grad trace copy"
+      }
+    ],
+    "phase_memory": {
+      "forward_graph_and_intermediates_mb": 65.24188613891602,
+      "backward_extra_peak_mb": 0.0,
+      "inputs_targets_mb": 22.736358642578125,
+      "optimizer_params_grads_mb": 0.0005340576171875
+    }
+  },
+  {
+    "test": "memory",
+    "method": "eprop_cpu",
+    "batch_size": 5,
+    "epochs": 1,
+    "final_loss": 5162.7998046875,
+    "best_loss": 4141.0,
+    "best_batch_id": 3,
+    "best_epoch": 1,
+    "wall_time_s": 12.831806999864057,
+    "peak_cuda_allocated_mb": null,
+    "peak_cuda_reserved_mb": null,
+    "cupy_pool_used_mb": null,
+    "cupy_pool_reserved_mb": null,
+    "rss_start_mb": 2383.58203125,
+    "rss_end_mb": 2387.69140625,
+    "rss_delta_mb": 4.109375,
+    "phase_profile": {
+      "zero_grad_s": 0.0,
+      "forward_s": 12.82664080010727,
+      "backward_s": 0.0,
+      "optimizer_s": 0.000107599887996912,
+      "best_trace_s": 0.0,
+      "total_s": 12.831806999864057
+    },
+    "memory_culprits": [
+      {
+        "name": "output/PSC/loss spike holders",
+        "mb": 5.684089660644531,
+        "source": "estimated generated NumPy/CPU int8 holders"
+      },
+      {
+        "name": "input, noise, and target arrays",
+        "mb": 18.1890869140625,
+        "source": "estimated NumPy/CPU float32 inputs/data"
+      },
+      {
+        "name": "eligibility and gradient accumulators",
+        "mb": 0.19378662109375,
+        "source": "estimated generated NumPy/CPU float64 accumulators"
+      },
+      {
+        "name": "neuron and synapse rolling state",
+        "mb": 0.034332275390625,
+        "source": "estimated generated NumPy/CPU float64 state"
+      },
+      {
+        "name": "STRF rate and derivative arrays",
+        "mb": 2.2736358642578125,
+        "source": "estimated float32 rate arrays"
+      }
+    ],
+    "phase_memory": {
+      "forward_state_and_output_holders_mb": 5.684089660644531,
+      "eligibility_gradient_holders_mb": 0.19378662109375,
+      "inputs_targets_mb": 18.1890869140625
+    }
+  },
+  {
+    "test": "memory",
+    "method": "eprop_cupy",
+    "batch_size": 5,
+    "epochs": 1,
+    "final_loss": 5162.7998046875,
+    "best_loss": 4141.0,
+    "best_batch_id": 3,
+    "best_epoch": 1,
+    "wall_time_s": 794.227223200025,
+    "peak_cuda_allocated_mb": null,
+    "peak_cuda_reserved_mb": null,
+    "cupy_pool_used_mb": 0.0,
+    "cupy_pool_reserved_mb": 25.447265625,
+    "rss_start_mb": 2339.3359375,
+    "rss_end_mb": 2380.07421875,
+    "rss_delta_mb": 40.73828125,
+    "phase_profile": {
+      "zero_grad_s": 0.0,
+      "forward_s": 794.2219252998475,
+      "backward_s": 0.0,
+      "optimizer_s": 3.9899954572319984e-05,
+      "best_trace_s": 0.0,
+      "total_s": 794.227223200025
+    },
+    "memory_culprits": [
+      {
+        "name": "output/PSC/loss spike holders",
+        "mb": 5.684089660644531,
+        "source": "estimated generated CuPy/GPU int8 holders"
+      },
+      {
+        "name": "input, noise, and target arrays",
+        "mb": 18.1890869140625,
+        "source": "estimated CuPy/GPU float32 inputs/data"
+      },
+      {
+        "name": "eligibility and gradient accumulators",
+        "mb": 0.19378662109375,
+        "source": "estimated generated CuPy/GPU float64 accumulators"
+      },
+      {
+        "name": "neuron and synapse rolling state",
+        "mb": 0.034332275390625,
+        "source": "estimated generated CuPy/GPU float64 state"
+      },
+      {
+        "name": "STRF rate and derivative arrays",
+        "mb": 2.2736358642578125,
+        "source": "estimated float32 rate arrays"
+      }
+    ],
+    "phase_memory": {
+      "forward_state_and_output_holders_mb": 5.684089660644531,
+      "eligibility_gradient_holders_mb": 0.19378662109375,
+      "inputs_targets_mb": 18.1890869140625
+    }
+  },
+  {
+    "test": "memory",
+    "method": "backprop_cpu",
+    "batch_size": 20,
+    "epochs": 1,
+    "final_loss": 5912.4501953125,
+    "best_loss": 5480.0,
+    "best_batch_id": 13,
+    "best_epoch": 1,
+    "wall_time_s": 230.71993350004777,
+    "peak_cuda_allocated_mb": null,
+    "peak_cuda_reserved_mb": null,
+    "cupy_pool_used_mb": null,
+    "cupy_pool_reserved_mb": null,
+    "rss_start_mb": 2680.9140625,
+    "rss_end_mb": 9602.78125,
+    "rss_delta_mb": 6921.8671875,
+    "phase_profile": {
+      "zero_grad_s": 0.00014359992928802967,
+      "forward_s": 87.91717050014995,
+      "backward_s": 77.16312969988212,
+      "optimizer_s": 0.00084910006262362,
+      "best_trace_s": 65.63777659996413,
+      "total_s": 230.71993350004777
+    },
+    "memory_culprits": [
+      {
+        "name": "input/target/noise tensors",
+        "mb": 90.9454345703125,
+        "source": "measured tensor sizes"
+      },
+      {
+        "name": "optimizer state, parameters, and gradients",
+        "mb": 0.00213623046875,
+        "source": "measured/estimated tensor sizes"
+      },
+      {
+        "name": "binned PSTH/loss tensors",
+        "mb": 0.0341033935546875,
+        "source": "estimated from bin count"
+      },
+      {
+        "name": "best-output trace snapshot",
+        "mb": 22.736358642578125,
+        "source": "estimated no_grad trace copy"
+      }
+    ],
+    "phase_memory": {
+      "forward_graph_and_intermediates_mb": 90.9454345703125,
+      "backward_extra_peak_mb": 0.0,
+      "inputs_targets_mb": 90.9454345703125,
+      "optimizer_params_grads_mb": 0.00213623046875
+    }
+  },
+  {
+    "test": "memory",
+    "method": "truncated_backprop_cpu",
+    "batch_size": 20,
+    "epochs": 1,
+    "final_loss": 536.1214599609375,
+    "best_loss": 390.3571472167969,
+    "best_batch_id": 17,
+    "best_epoch": 1,
+    "wall_time_s": 214.09627580014057,
+    "peak_cuda_allocated_mb": null,
+    "peak_cuda_reserved_mb": null,
+    "cupy_pool_used_mb": null,
+    "cupy_pool_reserved_mb": null,
+    "rss_start_mb": 3477.125,
+    "rss_end_mb": 2130.4140625,
+    "rss_delta_mb": -1346.7109375,
+    "phase_profile": {
+      "zero_grad_s": 0.001953100087121129,
+      "forward_s": 82.83025780017488,
+      "backward_s": 66.89733330020681,
+      "optimizer_s": 0.015215699560940266,
+      "best_trace_s": 64.31892710016109,
+      "total_s": 214.09627580014057
+    },
+    "memory_culprits": [
+      {
+        "name": "input/target/noise tensors",
+        "mb": 90.9454345703125,
+        "source": "measured tensor sizes"
+      },
+      {
+        "name": "optimizer state, parameters, and gradients",
+        "mb": 0.00213623046875,
+        "source": "measured/estimated tensor sizes"
+      },
+      {
+        "name": "binned PSTH/loss tensors",
+        "mb": 0.0341033935546875,
+        "source": "estimated from bin count"
+      },
+      {
+        "name": "best-output trace snapshot",
+        "mb": 22.736358642578125,
+        "source": "estimated no_grad trace copy"
+      }
+    ],
+    "phase_memory": {
+      "forward_graph_and_intermediates_mb": 90.9454345703125,
+      "backward_extra_peak_mb": 0.0,
+      "inputs_targets_mb": 90.9454345703125,
+      "optimizer_params_grads_mb": 0.00213623046875
+    }
+  },
+  {
+    "test": "memory",
+    "method": "backprop_cuda",
+    "batch_size": 20,
+    "epochs": 1,
+    "final_loss": 5912.4501953125,
+    "best_loss": 5480.0,
+    "best_batch_id": 13,
+    "best_epoch": 1,
+    "wall_time_s": 583.0830626999959,
+    "peak_cuda_allocated_mb": 1909.5927734375,
+    "peak_cuda_reserved_mb": 1940.0,
+    "cupy_pool_used_mb": null,
+    "cupy_pool_reserved_mb": null,
+    "rss_start_mb": 1283.9375,
+    "rss_end_mb": 9652.91796875,
+    "rss_delta_mb": 8368.98046875,
+    "phase_profile": {
+      "zero_grad_s": 0.0001439000479876995,
+      "forward_s": 204.14250730001368,
+      "backward_s": 197.08877079980448,
+      "optimizer_s": 0.0009638001210987568,
+      "best_trace_s": 181.8089459000621,
+      "total_s": 583.0830626999959
+    },
+    "memory_culprits": [
+      {
+        "name": "autograd saved timestep graph and intermediates",
+        "mb": 1818.611099243164,
+        "source": "measured residual from PyTorch peak allocation"
+      },
+      {
+        "name": "input/target/noise tensors",
+        "mb": 90.9454345703125,
+        "source": "measured tensor sizes"
+      },
+      {
+        "name": "optimizer state, parameters, and gradients",
+        "mb": 0.00213623046875,
+        "source": "measured/estimated tensor sizes"
+      },
+      {
+        "name": "binned PSTH/loss tensors",
+        "mb": 0.0341033935546875,
+        "source": "estimated from bin count"
+      },
+      {
+        "name": "best-output trace snapshot",
+        "mb": 22.736358642578125,
+        "source": "estimated no_grad trace copy"
+      }
+    ],
+    "phase_memory": {
+      "forward_graph_and_intermediates_mb": 1818.611099243164,
+      "backward_extra_peak_mb": 0.0,
+      "inputs_targets_mb": 90.9454345703125,
+      "optimizer_params_grads_mb": 0.00213623046875
+    }
+  },
+  {
+    "test": "memory",
+    "method": "truncated_backprop_cuda",
+    "batch_size": 20,
+    "epochs": 1,
+    "final_loss": 547.0714721679688,
+    "best_loss": 390.78570556640625,
+    "best_batch_id": 17,
+    "best_epoch": 1,
+    "wall_time_s": 553.540163199883,
+    "peak_cuda_allocated_mb": 212.685546875,
+    "peak_cuda_reserved_mb": 242.0,
+    "cupy_pool_used_mb": null,
+    "cupy_pool_reserved_mb": null,
+    "rss_start_mb": 5142.2890625,
+    "rss_end_mb": 2128.18359375,
+    "rss_delta_mb": -3014.10546875,
+    "phase_profile": {
+      "zero_grad_s": 0.00236579985357821,
+      "forward_s": 196.065297100693,
+      "backward_s": 178.30980699998327,
+      "optimizer_s": 0.00857079983688891,
+      "best_trace_s": 179.09259409992956,
+      "total_s": 553.540163199883
+    },
+    "memory_culprits": [
+      {
+        "name": "autograd saved timestep graph and intermediates",
+        "mb": 121.70387268066406,
+        "source": "measured residual from PyTorch peak allocation"
+      },
+      {
+        "name": "input/target/noise tensors",
+        "mb": 90.9454345703125,
+        "source": "measured tensor sizes"
+      },
+      {
+        "name": "optimizer state, parameters, and gradients",
+        "mb": 0.00213623046875,
+        "source": "measured/estimated tensor sizes"
+      },
+      {
+        "name": "binned PSTH/loss tensors",
+        "mb": 0.0341033935546875,
+        "source": "estimated from bin count"
+      },
+      {
+        "name": "best-output trace snapshot",
+        "mb": 22.736358642578125,
+        "source": "estimated no_grad trace copy"
+      }
+    ],
+    "phase_memory": {
+      "forward_graph_and_intermediates_mb": 121.70387268066406,
+      "backward_extra_peak_mb": 0.0,
+      "inputs_targets_mb": 90.9454345703125,
+      "optimizer_params_grads_mb": 0.00213623046875
+    }
+  },
+  {
+    "test": "memory",
+    "method": "eprop_cpu",
+    "batch_size": 20,
+    "epochs": 1,
+    "final_loss": 5284.7001953125,
+    "best_loss": 3471.0,
+    "best_batch_id": 11,
+    "best_epoch": 1,
+    "wall_time_s": 42.15394749981351,
+    "peak_cuda_allocated_mb": null,
+    "peak_cuda_reserved_mb": null,
+    "cupy_pool_used_mb": null,
+    "cupy_pool_reserved_mb": null,
+    "rss_start_mb": 1217.31640625,
+    "rss_end_mb": 1231.4453125,
+    "rss_delta_mb": 14.12890625,
+    "phase_profile": {
+      "zero_grad_s": 0.0,
+      "forward_s": 42.12071879999712,
+      "backward_s": 0.0,
+      "optimizer_s": 6.29001297056675e-05,
+      "best_trace_s": 0.0,
+      "total_s": 42.15394749981351
+    },
+    "memory_culprits": [
+      {
+        "name": "output/PSC/loss spike holders",
+        "mb": 22.736358642578125,
+        "source": "estimated generated NumPy/CPU int8 holders"
+      },
+      {
+        "name": "input, noise, and target arrays",
+        "mb": 69.34589385986328,
+        "source": "estimated NumPy/CPU float32 inputs/data"
+      },
+      {
+        "name": "eligibility and gradient accumulators",
+        "mb": 0.775146484375,
+        "source": "estimated generated NumPy/CPU float64 accumulators"
+      },
+      {
+        "name": "neuron and synapse rolling state",
+        "mb": 0.1373291015625,
+        "source": "estimated generated NumPy/CPU float64 state"
+      },
+      {
+        "name": "STRF rate and derivative arrays",
+        "mb": 9.09454345703125,
+        "source": "estimated float32 rate arrays"
+      }
+    ],
+    "phase_memory": {
+      "forward_state_and_output_holders_mb": 22.736358642578125,
+      "eligibility_gradient_holders_mb": 0.775146484375,
+      "inputs_targets_mb": 69.34589385986328
+    }
+  },
+  {
+    "test": "memory",
+    "method": "eprop_cupy",
+    "batch_size": 20,
+    "epochs": 1,
+    "final_loss": 5284.7001953125,
+    "best_loss": 3471.0,
+    "best_batch_id": 11,
+    "best_epoch": 1,
+    "wall_time_s": 784.9043145000469,
+    "peak_cuda_allocated_mb": null,
+    "peak_cuda_reserved_mb": null,
+    "cupy_pool_used_mb": 0.0,
+    "cupy_pool_reserved_mb": 97.58837890625,
+    "rss_start_mb": 1096.01953125,
+    "rss_end_mb": 1192.65625,
+    "rss_delta_mb": 96.63671875,
+    "phase_profile": {
+      "zero_grad_s": 0.0,
+      "forward_s": 784.8729556999169,
+      "backward_s": 0.0,
+      "optimizer_s": 6.46000262349844e-05,
+      "best_trace_s": 0.0,
+      "total_s": 784.9043145000469
+    },
+    "memory_culprits": [
+      {
+        "name": "output/PSC/loss spike holders",
+        "mb": 22.736358642578125,
+        "source": "estimated generated CuPy/GPU int8 holders"
+      },
+      {
+        "name": "input, noise, and target arrays",
+        "mb": 69.34589385986328,
+        "source": "estimated CuPy/GPU float32 inputs/data"
+      },
+      {
+        "name": "eligibility and gradient accumulators",
+        "mb": 0.775146484375,
+        "source": "estimated generated CuPy/GPU float64 accumulators"
+      },
+      {
+        "name": "neuron and synapse rolling state",
+        "mb": 0.1373291015625,
+        "source": "estimated generated CuPy/GPU float64 state"
+      },
+      {
+        "name": "STRF rate and derivative arrays",
+        "mb": 9.09454345703125,
+        "source": "estimated float32 rate arrays"
+      }
+    ],
+    "phase_memory": {
+      "forward_state_and_output_holders_mb": 22.736358642578125,
+      "eligibility_gradient_holders_mb": 0.775146484375,
+      "inputs_targets_mb": 69.34589385986328
+    }
+  },
+  {
+    "test": "speed",
+    "method": "backprop_cpu",
+    "batch_size": 5,
+    "epochs": 10,
+    "final_loss": 29875.400390625,
+    "best_loss": 3626.0,
+    "best_batch_id": 5,
+    "best_epoch": 2,
+    "wall_time_s": 2680.752117499942,
+    "peak_cuda_allocated_mb": null,
+    "peak_cuda_reserved_mb": null,
+    "cupy_pool_used_mb": null,
+    "cupy_pool_reserved_mb": null,
+    "rss_start_mb": 1136.2109375,
+    "rss_end_mb": 13672.01953125,
+    "rss_delta_mb": 12535.80859375,
+    "phase_profile": {
+      "zero_grad_s": 0.030511599965393543,
+      "forward_s": 1586.7614943000954,
+      "backward_s": 967.3709102002904,
+      "optimizer_s": 0.007803600048646331,
+      "best_trace_s": 126.58051390014589,
+      "total_s": 2680.752117499942
+    },
+    "memory_culprits": [
+      {
+        "name": "input/target/noise tensors",
+        "mb": 22.736358642578125,
+        "source": "measured tensor sizes"
+      },
+      {
+        "name": "optimizer state, parameters, and gradients",
+        "mb": 0.0005340576171875,
+        "source": "measured/estimated tensor sizes"
+      },
+      {
+        "name": "binned PSTH/loss tensors",
+        "mb": 0.008525848388671875,
+        "source": "estimated from bin count"
+      },
+      {
+        "name": "best-output trace snapshot",
+        "mb": 5.684089660644531,
+        "source": "estimated no_grad trace copy"
+      }
+    ],
+    "phase_memory": {
+      "forward_graph_and_intermediates_mb": 22.736358642578125,
+      "backward_extra_peak_mb": 0.0,
+      "inputs_targets_mb": 22.736358642578125,
+      "optimizer_params_grads_mb": 0.0005340576171875
+    }
+  },
+  {
+    "test": "speed",
+    "method": "truncated_backprop_cpu",
+    "batch_size": 5,
+    "epochs": 10,
+    "final_loss": 429.642822265625,
+    "best_loss": 330.71429443359375,
+    "best_batch_id": 2,
+    "best_epoch": 2,
+    "wall_time_s": 1586.5370237000752,
+    "peak_cuda_allocated_mb": null,
+    "peak_cuda_reserved_mb": null,
+    "cupy_pool_used_mb": null,
+    "cupy_pool_reserved_mb": null,
+    "rss_start_mb": 796.15234375,
+    "rss_end_mb": 1680.6484375,
+    "rss_delta_mb": 884.49609375,
+    "phase_profile": {
+      "zero_grad_s": 0.03009389853104949,
+      "forward_s": 797.790850000456,
+      "backward_s": 665.6426447997801,
+      "optimizer_s": 0.10580030153505504,
+      "best_trace_s": 122.48738720011897,
+      "total_s": 1586.5370237000752
+    },
+    "memory_culprits": [
+      {
+        "name": "input/target/noise tensors",
+        "mb": 22.736358642578125,
+        "source": "measured tensor sizes"
+      },
+      {
+        "name": "optimizer state, parameters, and gradients",
+        "mb": 0.0005340576171875,
+        "source": "measured/estimated tensor sizes"
+      },
+      {
+        "name": "binned PSTH/loss tensors",
+        "mb": 0.008525848388671875,
+        "source": "estimated from bin count"
+      },
+      {
+        "name": "best-output trace snapshot",
+        "mb": 5.684089660644531,
+        "source": "estimated no_grad trace copy"
+      }
+    ],
+    "phase_memory": {
+      "forward_graph_and_intermediates_mb": 22.736358642578125,
+      "backward_extra_peak_mb": 0.0,
+      "inputs_targets_mb": 22.736358642578125,
+      "optimizer_params_grads_mb": 0.0005340576171875
+    }
+  },
+  {
+    "test": "speed",
+    "method": "backprop_cuda",
+    "batch_size": 5,
+    "epochs": 10,
+    "final_loss": 29875.400390625,
+    "best_loss": 3626.0,
+    "best_batch_id": 5,
+    "best_epoch": 2,
+    "wall_time_s": 5756.389266700018,
+    "peak_cuda_allocated_mb": 997.56494140625,
+    "peak_cuda_reserved_mb": 1020.0,
+    "cupy_pool_used_mb": null,
+    "cupy_pool_reserved_mb": null,
+    "rss_start_mb": 952.76171875,
+    "rss_end_mb": 10529.1640625,
+    "rss_delta_mb": 9576.40234375,
+    "phase_profile": {
+      "zero_grad_s": 0.015239900210872293,
+      "forward_s": 3136.613958000671,
+      "backward_s": 2267.9613228002563,
+      "optimizer_s": 0.033710900228470564,
+      "best_trace_s": 351.7289235002827,
+      "total_s": 5756.389266700018
+    },
+    "memory_culprits": [
+      {
+        "name": "autograd saved timestep graph and intermediates",
+        "mb": 974.819522857666,
+        "source": "measured residual from PyTorch peak allocation"
+      },
+      {
+        "name": "input/target/noise tensors",
+        "mb": 22.736358642578125,
+        "source": "measured tensor sizes"
+      },
+      {
+        "name": "optimizer state, parameters, and gradients",
+        "mb": 0.0005340576171875,
+        "source": "measured/estimated tensor sizes"
+      },
+      {
+        "name": "binned PSTH/loss tensors",
+        "mb": 0.008525848388671875,
+        "source": "estimated from bin count"
+      },
+      {
+        "name": "best-output trace snapshot",
+        "mb": 5.684089660644531,
+        "source": "estimated no_grad trace copy"
+      }
+    ],
+    "phase_memory": {
+      "forward_graph_and_intermediates_mb": 974.819522857666,
+      "backward_extra_peak_mb": 0.0,
+      "inputs_targets_mb": 22.736358642578125,
+      "optimizer_params_grads_mb": 0.0005340576171875
+    }
+  },
+  {
+    "test": "speed",
+    "method": "truncated_backprop_cuda",
+    "batch_size": 5,
+    "epochs": 10,
+    "final_loss": 404.9285583496094,
+    "best_loss": 325.5714416503906,
+    "best_batch_id": 2,
+    "best_epoch": 4,
+    "wall_time_s": 4018.4882298000157,
+    "peak_cuda_allocated_mb": 87.9873046875,
+    "peak_cuda_reserved_mb": 110.0,
+    "cupy_pool_used_mb": null,
+    "cupy_pool_reserved_mb": null,
+    "rss_start_mb": 1322.21875,
+    "rss_end_mb": 1888.35546875,
+    "rss_delta_mb": 566.13671875,
+    "phase_profile": {
+      "zero_grad_s": 0.031053798971697688,
+      "forward_s": 1907.6621163005475,
+      "backward_s": 1759.3062366978265,
+      "optimizer_s": 0.07642220240086317,
+      "best_trace_s": 350.61230079992674,
+      "total_s": 4018.4882298000157
+    },
+    "memory_culprits": [
+      {
+        "name": "autograd saved timestep graph and intermediates",
+        "mb": 65.24188613891602,
+        "source": "measured residual from PyTorch peak allocation"
+      },
+      {
+        "name": "input/target/noise tensors",
+        "mb": 22.736358642578125,
+        "source": "measured tensor sizes"
+      },
+      {
+        "name": "optimizer state, parameters, and gradients",
+        "mb": 0.0005340576171875,
+        "source": "measured/estimated tensor sizes"
+      },
+      {
+        "name": "binned PSTH/loss tensors",
+        "mb": 0.008525848388671875,
+        "source": "estimated from bin count"
+      },
+      {
+        "name": "best-output trace snapshot",
+        "mb": 5.684089660644531,
+        "source": "estimated no_grad trace copy"
+      }
+    ],
+    "phase_memory": {
+      "forward_graph_and_intermediates_mb": 65.24188613891602,
+      "backward_extra_peak_mb": 0.0,
+      "inputs_targets_mb": 22.736358642578125,
+      "optimizer_params_grads_mb": 0.0005340576171875
+    }
+  },
+  {
+    "test": "speed",
+    "method": "eprop_cpu",
+    "batch_size": 5,
+    "epochs": 10,
+    "final_loss": 166327.796875,
+    "best_loss": 4179.0,
+    "best_batch_id": 5,
+    "best_epoch": 7,
+    "wall_time_s": 334.20455429982394,
+    "peak_cuda_allocated_mb": null,
+    "peak_cuda_reserved_mb": null,
+    "cupy_pool_used_mb": null,
+    "cupy_pool_reserved_mb": null,
+    "rss_start_mb": 944.1484375,
+    "rss_end_mb": 968.421875,
+    "rss_delta_mb": 24.2734375,
+    "phase_profile": {
+      "zero_grad_s": 0.0,
+      "forward_s": 334.1368078000378,
+      "backward_s": 0.0,
+      "optimizer_s": 0.0005512998905032873,
+      "best_trace_s": 0.0,
+      "total_s": 334.20455429982394
+    },
+    "memory_culprits": [
+      {
+        "name": "output/PSC/loss spike holders",
+        "mb": 5.684089660644531,
+        "source": "estimated generated NumPy/CPU int8 holders"
+      },
+      {
+        "name": "input, noise, and target arrays",
+        "mb": 18.1890869140625,
+        "source": "estimated NumPy/CPU float32 inputs/data"
+      },
+      {
+        "name": "eligibility and gradient accumulators",
+        "mb": 0.19378662109375,
+        "source": "estimated generated NumPy/CPU float64 accumulators"
+      },
+      {
+        "name": "neuron and synapse rolling state",
+        "mb": 0.034332275390625,
+        "source": "estimated generated NumPy/CPU float64 state"
+      },
+      {
+        "name": "STRF rate and derivative arrays",
+        "mb": 2.2736358642578125,
+        "source": "estimated float32 rate arrays"
+      }
+    ],
+    "phase_memory": {
+      "forward_state_and_output_holders_mb": 5.684089660644531,
+      "eligibility_gradient_holders_mb": 0.19378662109375,
+      "inputs_targets_mb": 18.1890869140625
+    }
+  },
+  {
+    "test": "speed",
+    "method": "eprop_cupy",
+    "batch_size": 5,
+    "epochs": 10,
+    "final_loss": 166327.796875,
+    "best_loss": 4179.0,
+    "best_batch_id": 5,
+    "best_epoch": 7,
+    "wall_time_s": 7876.871232199948,
+    "peak_cuda_allocated_mb": null,
+    "peak_cuda_reserved_mb": null,
+    "cupy_pool_used_mb": 0.0,
+    "cupy_pool_reserved_mb": 25.447265625,
+    "rss_start_mb": 967.26171875,
+    "rss_end_mb": 996.47265625,
+    "rss_delta_mb": 29.2109375,
+    "phase_profile": {
+      "zero_grad_s": 0.0,
+      "forward_s": 7876.805978099583,
+      "backward_s": 0.0,
+      "optimizer_s": 0.000555199570953846,
+      "best_trace_s": 0.0,
+      "total_s": 7876.871232199948
+    },
+    "memory_culprits": [
+      {
+        "name": "output/PSC/loss spike holders",
+        "mb": 5.684089660644531,
+        "source": "estimated generated CuPy/GPU int8 holders"
+      },
+      {
+        "name": "input, noise, and target arrays",
+        "mb": 18.1890869140625,
+        "source": "estimated CuPy/GPU float32 inputs/data"
+      },
+      {
+        "name": "eligibility and gradient accumulators",
+        "mb": 0.19378662109375,
+        "source": "estimated generated CuPy/GPU float64 accumulators"
+      },
+      {
+        "name": "neuron and synapse rolling state",
+        "mb": 0.034332275390625,
+        "source": "estimated generated CuPy/GPU float64 state"
+      },
+      {
+        "name": "STRF rate and derivative arrays",
+        "mb": 2.2736358642578125,
+        "source": "estimated float32 rate arrays"
+      }
+    ],
+    "phase_memory": {
+      "forward_state_and_output_holders_mb": 5.684089660644531,
+      "eligibility_gradient_holders_mb": 0.19378662109375,
+      "inputs_targets_mb": 18.1890869140625
+    }
+  }
+]

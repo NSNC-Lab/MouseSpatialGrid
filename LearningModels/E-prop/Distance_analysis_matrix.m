@@ -1,12 +1,17 @@
 %% 1) For all of the outputs extract a PSTH
 cd('C:\Users\ipboy\Documents\GitHub\ModelingEffort\Multi-Channel\Plotting\OliverDataPlotting')
-load('output_compressed_Eprop_All_cells_20260328_203631')
+%load('output_compressed_Eprop_All_cells_20260328_203631')
+%load('LongRunResults.mat')
+%load('C:\Users\ipboy\Documents\New project\E-prop_all_cells_silent_window_psth10\output_compressed_Eprop_All_cells_20260421_135457.mat')
+load('C:\Users\ipboy\Documents\GitHub\ModelingEffort\Multi-Channel\Plotting\OliverDataPlotting\output_compressed_Eprop_All_cells_recovery_20260515_073632.mat')
 load('all_units_info_with_polished_criteria_modified_perf.mat','all_data');
 [target1, fs] = audioread('C:\Users\ipboy\Documents\GitHub\MouseSpatialGrid\LearningModels\resampled-stimuli\target\200k_target1.wav');
 
 %a Extract the best fit from all of the cells
 
-[a,idx] = min(squeeze(losses(100,2,:,:))'); %Idx is the index of the best amoung the batch
+%[a,idx] = min(squeeze(losses(1,2,:,:))'); %Idx is the index of the best amoung the batch
+[a,idx] = min(squeeze(objective_losses(50,:,:))'); %Idx is the index of the best amoung the batch
+
 
 %Look at an example
 figure(position=[0,0,1000,1000]);%Data plot
@@ -24,6 +29,9 @@ PSTHs = zeros([220,149]);
 dummy_idxs = 1:size(rasters,3);
 for k = 1:220
     PSTHs(k,:) = histcounts(squeeze(rasters(k,:,:)).*dummy_idxs,bin_edges);
+    %if max(PSTHs(k, :)) > 0
+    %    PSTHs(k, :) = PSTHs(k, :)/max(PSTHs(k, :));
+    %end
 end
 
 matrix = zeros([220,220]);
@@ -63,6 +71,10 @@ spy(squeeze(data_rasters(105,:,:)))
 data_PSTHs = zeros([220,149]);
 for k = 1:220
     data_PSTHs(k,:) = histcounts(squeeze(data_rasters(k,:,:)).*dummy_idxs,bin_edges);
+    %if max(data_PSTHs(k, :)) > 0
+    %    data_PSTHs(k, :) = data_PSTHs(k, :)/max(data_PSTHs(k, :));
+    %end
+
 end
 
 data_matrix = zeros([220,220]);
@@ -163,15 +175,15 @@ h = pcolor(new_mat);  %Looks like pcolor is flipping things to make it like a sp
 set(h, 'edgecolor', 'none')
 
 %% Giant Spy plot?
-figure;
-subplot(1,2,1);
-spy(reshape(Rasters_100_300ms,220*10,29801))
-axis normal
-title('sim')
-subplot(1,2,2);
-spy(reshape(Rasters_data,220*10,29801))
-axis normal
-title('data')
+% figure;
+% subplot(1,2,1);
+% spy(reshape(Rasters_100_300ms,220*10,29801))
+% axis normal
+% title('sim')
+% subplot(1,2,2);
+% spy(reshape(Rasters_data,220*10,29801))
+% axis normal
+% title('data')
 
 
 %% Lets looks at MDS plot
@@ -298,8 +310,8 @@ end
 
 %Y1 = mdscale(comp_matrix,2, 'criterion','sammon');
 %Y2 = mdscale(comp_matrix,2, 'criterion','strain');
-[Y3,stress] = mdscale(comp_matrix,2, 'criterion','metricsstress');
-Y4 = Y3;
+[Y4,stress] = mdscale(comp_matrix,2, 'criterion','metricsstress');
+%Y4 = Y3;
 
 %Use shepards plot to assess goodnes of fit? According to matlab mdscale
 %documentation
@@ -524,13 +536,15 @@ losses_100ms = losses;
 output_100ms = output;
 params_100ms = params;
 
-load('output_compressed_Eprop_All_cells_20260324_042421')
+%load('output_compressed_Eprop_All_cells_20260324_042421')
+load('LongRunResults.mat')
 
 losses_200ms = losses;
 output_200ms = output;
 params_200ms = params;
 
-load('output_compressed_Eprop_All_cells_20260331_060643')
+%oad('output_compressed_Eprop_All_cells_20260331_060643')
+load('C:\Users\ipboy\Documents\New project\E-prop_all_cells_silent_window_psth10\output_compressed_Eprop_All_cells_20260421_135457.mat')
 
 losses_100_300ms = losses;
 output_100_300ms = output;
@@ -586,11 +600,11 @@ PSTHs_100ms = zeros([220,149]);
 [val_100,idx_100] = min(squeeze(losses_100ms(100,2,:,:))');
 Rasters_200ms = zeros(220,10,29801);
 PSTHs_200ms = zeros([220,149]);
-[val_200,idx_200] = min(squeeze(losses_200ms(30,2,:,:))');
+[val_200,idx_200] = min(squeeze(losses_200ms(1,2,:,:))');
 Rasters_100_300ms = zeros(220,10,29801);
 PSTHs_100_300ms = zeros([220,149]);
-[val_100_300,idx_100_300] = min(squeeze(losses_100_300ms(50,2,:,:))');
-
+%[val_100_300,idx_100_300] = min(squeeze(losses_100_300ms(50,2,:,:))');
+[val_100_300,idx_100_300] = min(squeeze(silent_window_mass_losses(50,:,:))');
 
 Rasters_data = zeros(220,10,29801);
 PSTHs_data = zeros([220,149]);
@@ -619,50 +633,51 @@ for k = 1:220
     PSTHs_data(k,:) = histcounts(squeeze(Rasters_data(k,:,:)).*dummy_idxs,bin_edges);
 end
 
+% %%
+% 
+% %Loss comparison at 30epochs (Just L2 direct loss not PSTH)
+% x = 0;
+% y = 0;
+% figure;
+% subplot(1,2,1)
+% for k = 1:220
+%     plot(1,squeeze(losses_100ms(30,1,k,idx_100(k))),'k.'); hold on
+%     plot(2,squeeze(losses_200ms(30,1,k,idx_200(k))),'k.'); hold on
+%     if (losses_100ms(30,1,k,idx_100(k))) > squeeze(losses_200ms(30,1,k,idx_200(k)))
+%         plot([1,2],[squeeze(losses_100ms(30,1,k,idx_100(k))),squeeze(losses_200ms(30,1,k,idx_200(k)))],'b--'); hold on
+%         x = x+1;
+%     else
+%         plot([1,2],[squeeze(losses_100ms(30,1,k,idx_100(k))),squeeze(losses_200ms(30,1,k,idx_200(k)))],'r--'); hold on
+%         y = y+1;
+%     end
+% 
+% end
+% xticks([1 2])
+% xlim([0.25 2.75])
+% xticklabels({'100 ms','200 ms'})
+% title('loss comparison (L2 loss): ' + string(y) + ' out of 220 are better with 100ms loss')
+% 
+% x = 0;
+% y = 0;
+% subplot(1,2,2)
+% for k = 1:220
+%     plot(1,squeeze(losses_100ms(30,2,k,idx_100(k))),'k.'); hold on
+%     plot(2,squeeze(losses_200ms(30,2,k,idx_200(k))),'k.'); hold on
+%     if (losses_100ms(30,2,k,idx_100(k))) > squeeze(losses_200ms(30,2,k,idx_200(k)))
+%         plot([1,2],[squeeze(losses_100ms(30,2,k,idx_100(k))),squeeze(losses_200ms(30,2,k,idx_200(k)))],'b--'); hold on
+%         x = x+1;
+%     else
+%         plot([1,2],[squeeze(losses_100ms(30,2,k,idx_100(k))),squeeze(losses_200ms(30,2,k,idx_200(k)))],'r--'); hold on
+%         y = y+1;
+%     end
+% 
+% end
+% xticks([1 2])
+% xlim([0.25 2.75])
+% xticklabels({'100 ms','200 ms'})
+% title('loss comparison (200ms PSTH): ' + string(y) + ' out of 220 are better with 100ms loss')
+
 %%
-
-%Loss comparison at 30epochs (Just L2 direct loss not PSTH)
-x = 0;
-y = 0;
-figure;
-subplot(1,2,1)
-for k = 1:220
-    plot(1,squeeze(losses_100ms(30,1,k,idx_100(k))),'k.'); hold on
-    plot(2,squeeze(losses_200ms(30,1,k,idx_200(k))),'k.'); hold on
-    if (losses_100ms(30,1,k,idx_100(k))) > squeeze(losses_200ms(30,1,k,idx_200(k)))
-        plot([1,2],[squeeze(losses_100ms(30,1,k,idx_100(k))),squeeze(losses_200ms(30,1,k,idx_200(k)))],'b--'); hold on
-        x = x+1;
-    else
-        plot([1,2],[squeeze(losses_100ms(30,1,k,idx_100(k))),squeeze(losses_200ms(30,1,k,idx_200(k)))],'r--'); hold on
-        y = y+1;
-    end
-    
-end
-xticks([1 2])
-xlim([0.25 2.75])
-xticklabels({'100 ms','200 ms'})
-title('loss comparison (L2 loss): ' + string(y) + ' out of 220 are better with 100ms loss')
-
-x = 0;
-y = 0;
-subplot(1,2,2)
-for k = 1:220
-    plot(1,squeeze(losses_100ms(30,2,k,idx_100(k))),'k.'); hold on
-    plot(2,squeeze(losses_200ms(30,2,k,idx_200(k))),'k.'); hold on
-    if (losses_100ms(30,2,k,idx_100(k))) > squeeze(losses_200ms(30,2,k,idx_200(k)))
-        plot([1,2],[squeeze(losses_100ms(30,2,k,idx_100(k))),squeeze(losses_200ms(30,2,k,idx_200(k)))],'b--'); hold on
-        x = x+1;
-    else
-        plot([1,2],[squeeze(losses_100ms(30,2,k,idx_100(k))),squeeze(losses_200ms(30,2,k,idx_200(k)))],'r--'); hold on
-        y = y+1;
-    end
-    
-end
-xticks([1 2])
-xlim([0.25 2.75])
-xticklabels({'100 ms','200 ms'})
-title('loss comparison (200ms PSTH): ' + string(y) + ' out of 220 are better with 100ms loss')
-
 
 % Lest look at the same units from before
 %Cell 102, 133, 165, 200, 210, 84, 7, 36, 34, 79
@@ -742,12 +757,12 @@ for p = 1:n_pages
         nexttile
         A = squeeze(Rasters_200ms(k,:,:));
         plotSpikeRaster(A)
-        title("Cell " + k + " 200ms model " + "Xcorr: " + num2str(cors_200(k),'%.2f'),'FontSize',7)
+        title("Cell " + k + " Long run model " + "Xcorr: " + num2str(cors_200(k),'%.2f'),'FontSize',7)
         
         nexttile
         A = squeeze(Rasters_100_300ms(k,:,:));
         plotSpikeRaster(A)
-        title("Cell " + k + " 100 & 300ms model "+ "Xcorr: " + num2str(cors_100_300(k),'%.2f'),'FontSize',7)
+        title("Cell " + k + " Silent Active Window model "+ "Xcorr: " + num2str(cors_100_300(k),'%.2f'),'FontSize',7)
         
         nexttile
         A = squeeze(Rasters_data(k,:,:));
@@ -769,8 +784,8 @@ for p = 1:n_pages
     sgtitle("Cells " + start_k + " to " + end_k, ...
             'FontSize',12,'FontWeight','bold')
 
-    exportgraphics(f, sprintf('all_cells_page_%02d.pdf', p), 'ContentType','vector')
-    exportgraphics(f, sprintf('all_cells_page_%02d.png', p), 'Resolution',300)
+    exportgraphics(f, sprintf('all_cells_window_silent_page_%02d.pdf', p), 'ContentType','vector')
+    exportgraphics(f, sprintf('all_cells_window_silent_page_%02d.png', p), 'Resolution',300)
 
     close(f)
 end

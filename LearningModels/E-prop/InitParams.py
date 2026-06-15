@@ -7,7 +7,7 @@ def pinit(batch_size, num_params):
     rng = np.random
     p = np.zeros((num_params,batch_size))
     lrs = np.zeros((num_params,1))
-    lr_frac = 0.05
+    lr_frac = 0.1
 
     #All tested starting conditions
     #p[0:4,:] = rng.uniform(0.0, 0.08, size=(4, batch_size)).astype(np.float32) #GSYNs  
@@ -26,18 +26,21 @@ def pinit(batch_size, num_params):
     #p[0:5,:] = rng.uniform(0, 0.08, size=(5, batch_size)).astype(np.float32) #GSYNs
     #lrs[0:5] = 0.08*lr_frac
     
-    p[0,:] = rng.uniform(0, 0.03, size=(1, batch_size)).astype(np.float32) #strf gains
+    p[0,:] = rng.uniform(0.003, 0.2, size=(1, batch_size)).astype(np.float32) #strf gains
     #p[0,:] = np.ones((1,batch_size)).astype(np.float32)*0.015
     lrs[0] = 0.03*lr_frac
 
-    p[1,:] = rng.uniform(0, 0.02, size=(1, batch_size)).astype(np.float32) #strf Latencies
+    p[1,:] = rng.uniform(0.010, 0.03, size=(1, batch_size)).astype(np.float32) #strf Latencies
     lrs[1] = 0.02*lr_frac
 
-    p[2,:] = rng.uniform(0, 0.01, size=(1, batch_size)).astype(np.float32) #output adaptation
-    lrs[2] = 0.01*lr_frac
+    p[2,:] = rng.uniform(0.00, 0.00001, size=(1, batch_size)).astype(np.float32) #output adaptation
+    lrs[2] = 0.001*lr_frac
 
-    p[3:8,:] = rng.uniform(0, 0.2, size=(5, batch_size)).astype(np.float32) #GSYNs
-    lrs[3:8] = 0.2*lr_frac
+    p[3:5,:] = rng.uniform(0.02, 0.2, size=(2, batch_size)).astype(np.float32) #GSYN (Start high so that we have a signal)
+    lrs[3:6] = 0.02*lr_frac
+
+    p[5:8,:] = rng.uniform(0.00, 0.0001, size=(3, batch_size)).astype(np.float32) #GSYN inhibitory (Start low so that we have a signal)
+    lrs[5:8] = 0.02*lr_frac
 
 
     

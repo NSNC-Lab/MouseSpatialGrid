@@ -1,0 +1,18 @@
+{
+  "cell_id": 7,
+  "best_batch": 12,
+  "focus_column": 1,
+  "long_run_mat": "C:\\Users\\ipboy\\Documents\\GitHub\\MouseSpatialGrid\\JointMDS_Space\\LongRunResults.mat",
+  "oliver_data_dir": "C:\\Users\\ipboy\\Documents\\GitHub\\ModelingEffort\\Multi-Channel\\Plotting\\OliverDataPlotting",
+  "device": "cuda",
+  "seed": 1,
+  "bin_steps": 100,
+  "sim_len": 29801,
+  "longrun_losses": [
+    117.4000015258789,
+    2948.0
+  ],
+  "torch_forward_psth_sse": 2325.0,
+  "png_path": "C:\\Users\\ipboy\\Documents\\GitHub\\MouseSpatialGrid\\LearningModels\\BackPropTorch\\tbptt_forward_checks\\cell_007_longrun_batch_12_tbptt_forward_check.png",
+  "mat_path": "C:\\Users\\ipboy\\Documents\\GitHub\\MouseSpatialGrid\\LearningModels\\BackPropTorch\\tbptt_forward_checks\\cell_007_longrun_batch_12_tbptt_forward_check.mat"
+}

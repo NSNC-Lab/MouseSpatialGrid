@@ -6,6 +6,7 @@ import numpy as np
 import time
 from datetime import datetime
 import Update_params
+import Calculate_CVLoss
 import InitParams
 from scipy.io import loadmat, savemat
 import yaml
@@ -75,7 +76,7 @@ class runSimulation(object):
 
     os.chdir(cwd_path)
     num_cells = 1
-    n = 133  # MATLAB is 1-based
+    n = 7  # MATLAB is 1-based
     unit = all_data[n - 1]
 
     spike_times = unit.ctrl_tar1_timestamps
@@ -144,6 +145,7 @@ class runSimulation(object):
     t = 0
 
     losses = []
+    lifetime_sparsity_losses = []
     param_tracker = []
 
     best_loss = 1e32
@@ -156,7 +158,7 @@ class runSimulation(object):
 
 
 
-    for epoch in range(30):
+    for epoch in range(1):
 
         #spks = call_inputs(p,batch_size)
         #on_spks = np.transpose(spks[f'locs_masker_None_target_0_on'][f'stimulus_0_poisson_spks'],(2,0,1))
@@ -236,7 +238,9 @@ class runSimulation(object):
         #print(grads)
         #print(np.shape(grads))
 
-        out_grads,loss = calculate_loss.calculate(output,grads,data)
+        out_grads, loss, lifetime_sparsity_loss = calculate_loss.calculate(output,grads,data)
+
+        #grads = calculate_CVLoss.calculate(output,grads,data)
 
 
         grads = np.squeeze(grads)
@@ -244,6 +248,7 @@ class runSimulation(object):
         #print(np.shape(out_grads))
 
         losses.append(loss)
+        lifetime_sparsity_losses.append(lifetime_sparsity_loss)
         param_tracker.append(p)
 
         #print(np.max(out_grads))
@@ -255,7 +260,11 @@ class runSimulation(object):
         #print(np.shape(loss))
         #print(np.shape(loss[0]))
 
-        print(f'L2 loss : {np.mean(loss[0]):.2f}  -:-  MSE loss : {np.mean(loss[1]):.2f} ---- Epoch: {epoch}')
+        print(
+            f'L2 loss : {np.mean(loss[0]):.2f}  -:-  '
+            f'MSE loss : {np.mean(loss[1]):.2f}  -:-  '
+            f'Lifetime sparsity loss (avg batch): {np.nanmean(lifetime_sparsity_loss):.4f} ---- Epoch: {epoch}'
+        )
 
 
         best_loss_idx = np.argmin(np.array(loss)[1,:])
@@ -291,9 +300,23 @@ class runSimulation(object):
 
     elapsed = time.perf_counter() - start
     print(f"{elapsed:.2f} s")
+    if lifetime_sparsity_losses:
+        print(f"Final lifetime sparsity loss (avg batch): {np.nanmean(lifetime_sparsity_losses[-1]):.4f}")
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    savemat(f"output_compressed_Eprop_{timestamp}.mat", {"output": output, "losses":losses, "params" : param_tracker,  "best_loss" : np.asarray(best_loss, dtype=np.float32),"best_output" : np.asarray(best_output, dtype=np.float32),"best_params" : np.asarray(best_params, dtype=np.float32)}, do_compression=True)
+    savemat(
+        f"output_compressed_Eprop_{timestamp}.mat",
+        {
+            "output": output,
+            "losses": losses,
+            "lifetime_sparsity_loss": lifetime_sparsity_losses,
+            "params": param_tracker,
+            "best_loss": np.asarray(best_loss, dtype=np.float32),
+            "best_output": np.asarray(best_output, dtype=np.float32),
+            "best_params": np.asarray(best_params, dtype=np.float32),
+        },
+        do_compression=True,
+    )
 
     # # ============== PARAMETER EVOLUTION PLOT ==============
     # # param_tracker is a list of arrays, each with shape (1, 100) or (num_params, batch_size)

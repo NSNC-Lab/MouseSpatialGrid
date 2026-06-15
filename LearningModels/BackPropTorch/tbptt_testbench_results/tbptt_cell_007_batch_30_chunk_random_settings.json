@@ -1,0 +1,22 @@
+{
+  "cell_id": 7,
+  "batch_size": 30,
+  "epochs": 30,
+  "lr": 0.001,
+  "device": "cuda",
+  "tbptt_steps": 100,
+  "bin_steps": 100,
+  "sim_len": 29801,
+  "dt_ms": 0.1,
+  "seed": 1,
+  "long_run_mat": "C:\\Users\\ipboy\\Documents\\GitHub\\MouseSpatialGrid\\JointMDS_Space\\LongRunResults.mat",
+  "oliver_data_dir": null,
+  "results_dir": "C:\\Users\\ipboy\\Documents\\GitHub\\MouseSpatialGrid\\LearningModels\\BackPropTorch\\tbptt_testbench_results",
+  "init_mode": "random",
+  "step_mode": "chunk",
+  "grad_clip": 0.0,
+  "perturb_start": false,
+  "save_best_trace": false,
+  "plot_top_n": 5,
+  "plot_every": 1
+}

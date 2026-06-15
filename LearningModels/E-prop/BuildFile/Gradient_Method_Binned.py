@@ -47,7 +47,7 @@ def compileGrad(neurons,synapses,projections,options):
     Vwrtg_inc_declaration = compile_odeVoltage_wrt_g_inc(neurons,synapses,options)
 
     #Get E-prop Loss
-    loss_declration = fetch_loss(synapses)
+    loss_declration = fetch_loss(synapses,options)
 
     #E-prop definitions
     phi_declaration = compute_phi()
@@ -565,7 +565,7 @@ def depth_recursion(neuron,synapses,path,super_path):
 #   Helper Functions for compiling derivs    #
 ##############################################
 
-def fetch_loss(synapses):
+def fetch_loss(synapses, options):
     fetch_loss_declaration = '\n        #grab loss\n\n'
 
     
@@ -577,7 +577,11 @@ def fetch_loss(synapses):
     fetch_loss_declaration += f'\n            data_bin = np.sum(np.sum(np.squeeze(data[:,timestep-loss_bin_width:timestep,:], axis=-1)),axis=-1)\n'
     
     #SSE derivative
-    #fetch_loss_declaration += f'\n            loss_deriv = 2.0*(sim_bin - data_bin)\n'
+    fetch_loss_declaration += f'\n            loss_deriv = 2.0*(sim_bin - data_bin)\n'
+
+
+    #SSE & Offsetness & temporal sparsity
+
 
     #Poisson loss derivative
     #fetch_loss_declaration += f'\n            epsilon = 1e-8\n'
@@ -624,7 +628,63 @@ def fetch_loss(synapses):
     #fetch_loss_declaration += f'\n        else:'
     #fetch_loss_declaration += f'\n            loss_vals = np.array([1])'
 
+    # fetch_loss_declaration += f'\n        if timestep % 29800 == 0 and timestep != 0:'
+
+    # #Reshape to sum accross temporal bins
+
+    # #batch,10,149
+    # fetch_loss_declaration += f'\n            data_bin = np.sum(np.sum(np.squeeze(np.reshape(data[:,0:29800,:],(10,int(29800/200),200,1))), axis=0),axis=-1)\n'
     
+    # fetch_loss_declaration += f'\n            avg_rate = np.squeeze(np.sum(np.reshape(ROn_spikes_holder[:,:,:,0:29800],(options.N_batch,10,1,int(29800/200),200)),axis=-1))'
+    # fetch_loss_declaration += f'\n            sum_rate_across_trials = np.sum(avg_rate,axis=1)'
+    
+    # fetch_loss_declaration += f'\n            lowdihi = np.sum(sum_rate_across_trials**2) * np.ones((1,149))*2*np.sum(sum_rate_across_trials,axis=-1)[:,None]'
+    # fetch_loss_declaration += f'\n            hidilow = (np.sum(sum_rate_across_trials)**2) * 2*sum_rate_across_trials'
+    # fetch_loss_declaration += f'\n            lowlow = np.sum(sum_rate_across_trials**2)**2'
+
+   
+
+    # fetch_loss_declaration += f'\n            x = sum_rate_across_trials'          # shape: (batch, N)
+    # fetch_loss_declaration += f'\n            N = x.shape[-1]'
+
+    # fetch_loss_declaration += f'\n            A = np.sum(x, axis=-1, keepdims=True)'
+    # fetch_loss_declaration += f'\n            B = np.sum(x**2, axis=-1, keepdims=True) + 1e-12'
+
+    # fetch_loss_declaration += f'\n            s_sim = (N - A**2 / B) / (N - 1)'
+
+    # fetch_loss_declaration += f'\n            A_data = np.sum(data_bin)'
+    # fetch_loss_declaration += f'\n            B_data = np.sum(data_bin**2) + 1e-12'
+    # fetch_loss_declaration += f'\n            s_data = (N - A_data**2 / B_data) / (N - 1)'
+
+    # #fetch_loss_declaration += f'\n            ds_dx = 2 * A * (A * x - B) / ((N - 1) * B**2)'
+    # #fetch_loss_declaration += f'\n            sparse_deriv = np.sum(2 * (s_sim - s_data) * ds_dx, axis=-1)\n'
+    #                                                     #There is a negetive in from of the lowdihi here because the definition of lifetimes sparseness has a negetive before the block with ri in it. I just plugged it in here, but it could go anywhere.
+    # fetch_loss_declaration += f'\n            ds_dx = ((-lowdihi*hidilow/lowlow)*(1/(1-(1/149)))*(1/149))'
+    # fetch_loss_declaration += f'\n            sparse_deriv = np.sum(2 * (s_sim - s_data) * ds_dx, axis=-1)\n'
+    # #fetch_loss_declaration += f'\n            sparse_deriv = 2*np.sum(((lowdihi*hidilow/lowlow)*(1/(1-(1/149)))*(1/149)),axis=-1)\n'
+
+
+    # #fetch_loss_declaration += f'\n            avg_rate = np.sum(np.squeeze(np.sum(ROn_spikes_holder[:,:,:,timestep-loss_bin_width:timestep], axis=-1)),axis=-1)\n'
+    # #fetch_loss_declaration += f'\n            data_bin = np.sum(np.sum(np.squeeze(data[:,timestep-loss_bin_width:timestep,:], axis=-1)),axis=-1)\n'
+    
+    # for k in synapses:
+    #     synapse_name = k['name']
+    #     post_node = k['name'].rsplit('_', 1)[1]
+
+    #     if post_node == 'SOnOff':
+    #         fetch_loss_declaration += f'            grad_{synapse_name} += grad_{synapse_name}_accumulate2*Bk*sparse_deriv[:,None,None]\n'
+    #     else:
+    #         fetch_loss_declaration += f'            grad_{synapse_name} += grad_{synapse_name}_accumulate2*sparse_deriv[:,None,None]\n'
+   
+    #     fetch_loss_declaration += f'            grad_{synapse_name}_accumulate2 = 0\n'
+
+    # fetch_loss_declaration += f'            grad_strf_gain += grad_strf_gain_accumulate2*sparse_deriv[:,None,None]\n'
+    # fetch_loss_declaration += f'            grad_strf_gain_accumulate2 = 0\n'
+    # fetch_loss_declaration += f'            grad_strf_latency += grad_strf_latency_accumulate2*sparse_deriv[:,None,None]\n'
+    # fetch_loss_declaration += f'            grad_strf_latency_accumulate2 = 0\n'
+    # fetch_loss_declaration += f'            grad_output_adaptation += grad_output_adaptation_accumulate2*sparse_deriv[:,None,None]\n'
+    # fetch_loss_declaration += f'            grad_output_adaptation_accumulate2 = 0\n'
+    # fetch_loss_declaration += f'            print(\'here\')\n'
 
 
     return fetch_loss_declaration
@@ -689,11 +749,14 @@ def compute_gradients(synapses):
         synapse_name = k['name']
         
         gradients_declaration += f'        grad_{synapse_name}_accumulate += eligibility_{synapse_name}\n'
+        gradients_declaration += f'        grad_{synapse_name}_accumulate2 += eligibility_{synapse_name}\n'
 
     gradients_declaration += f'        grad_strf_gain_accumulate += eligibility_strf_gain\n'
     gradients_declaration += f'        grad_strf_latency_accumulate += eligibility_strf_latency\n'
     gradients_declaration += f'        grad_output_adaptation_accumulate += eligibility_output_adaptation\n'
-        
+    #gradients_declaration += f'        grad_strf_gain_accumulate2 += eligibility_strf_gain\n'
+    #gradients_declaration += f'        grad_strf_latency_accumulate2 += eligibility_strf_latency\n'
+    #gradients_declaration += f'        grad_output_adaptation_accumulate2 += eligibility_output_adaptation\n'
 
     return gradients_declaration
 

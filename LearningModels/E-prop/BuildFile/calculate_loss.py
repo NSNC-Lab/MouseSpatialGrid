@@ -6,6 +6,22 @@ import matplotlib.pyplot as plt
 from scipy.integrate import cumulative_trapezoid
 from scipy.io import loadmat, savemat
 
+def lifetime_sparseness(response):
+        response = np.asarray(response, dtype=np.float64).reshape(-1)
+        response = response[np.isfinite(response)]
+
+        n_bins = response.size
+        if n_bins <= 1:
+                return np.nan
+
+        response = np.clip(response, a_min=0.0, a_max=None)
+        normfact = float(np.sum(response * response))
+        if normfact <= 0.0:
+                return np.nan
+
+        numerator = n_bins - (float(np.sum(response)) ** 2) / normfact
+        return float(numerator / (n_bins - 1))
+
 def calculate(forwards_output, grads,data):
 
         # -- Constants
@@ -53,9 +69,28 @@ def calculate(forwards_output, grads,data):
 
         PSTH_deriv_avg = 2.0 * np.sum(diff, axis=-1)
 
+        sim_lifetime_sparsity = np.asarray(
+                [lifetime_sparseness(forwards_out_hist[k]) for k in range(forwards_out_hist.shape[0])],
+                dtype=np.float32,
+        )
+
+        data_lifetime_sparsity = np.asarray(
+                [lifetime_sparseness(data_hist[k]) for k in range(data_hist.shape[0])],
+                dtype=np.float32,
+        )
+
+        if data_lifetime_sparsity.shape[0] == 1 and sim_lifetime_sparsity.shape[0] > 1:
+                data_lifetime_sparsity = np.full(
+                        sim_lifetime_sparsity.shape,
+                        data_lifetime_sparsity[0],
+                        dtype=np.float32,
+                )
+
+        lifetime_sparsity_loss = (data_lifetime_sparsity - sim_lifetime_sparsity) ** 2
+
         #print(np.shape(PSTH_deriv_avg))
         #print(np.shape(grads))
         
         out_grad = np.squeeze(PSTH_deriv_avg[None,:,None] * grads)
 
-        return L2_deriv_avg, [L2_loss_avg, PSTH_loss_avg]
+        return L2_deriv_avg, [L2_loss_avg, PSTH_loss_avg], lifetime_sparsity_loss

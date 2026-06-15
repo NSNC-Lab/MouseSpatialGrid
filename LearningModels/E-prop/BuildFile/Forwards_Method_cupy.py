@@ -355,11 +355,18 @@ def declare_condtionals(neurons,synapses):
 
     for k in neurons:
         neuron_name = k["name"]
+
+        #2b (Refractory period implementation)
+        conditionals_declaration += f'\n        {neuron_name}_mask_2b = cp.any((t <= ({neuron_name}_tspike + {neuron_name}_t_ref)), axis=-1)'
+        conditionals_declaration += f'\n        if cp.any({neuron_name}_mask_2b).item():'
+        conditionals_declaration += f'\n            {neuron_name}_spikers_2b = cp.where({neuron_name}_mask_2b)'
+        conditionals_declaration += f'\n            {neuron_name}_V[{neuron_name}_spikers_2b + (-2,)] = {neuron_name}_V[{neuron_name}_spikers_2b + (-1,)]'
+        conditionals_declaration += f'\n            {neuron_name}_V[{neuron_name}_spikers_2b + (-1,)] = {neuron_name}_V_reset'
+
         #------------------------------------------------#
         # Condition 1 (Spiking Condition & Thresholding) #   ?TODO Make the buffer size changeable? Im not sure why it is 5, thats just what it has always been
         #------------------------------------------------#
         conditionals_declaration += f'\n        {neuron_name}_mask_1 = (({neuron_name}_V[:,:,:,:,-1] >= {neuron_name}_V_thresh) & ({neuron_name}_V[:,:,:,:,-2] < {neuron_name}_V_thresh)).astype(cp.int8)'
-        
 
         #Updated condition 1 post pythran
 
@@ -389,12 +396,7 @@ def declare_condtionals(neurons,synapses):
         else:
             conditionals_declaration += f'\n            {neuron_name}_g_ad[{neuron_name}_spikers_2a + (-1,)] = {neuron_name}_g_ad[{neuron_name}_spikers_2a + (-1,)] + {neuron_name}_g_inc'
         
-        #2b (Refractory period implementation)
-        conditionals_declaration += f'\n        {neuron_name}_mask_2b = cp.any((t <= ({neuron_name}_tspike + {neuron_name}_t_ref)), axis=-1)'
-        conditionals_declaration += f'\n        if cp.any({neuron_name}_mask_2b).item():'
-        conditionals_declaration += f'\n            {neuron_name}_spikers_2b = cp.where({neuron_name}_mask_2b)'
-        conditionals_declaration += f'\n            {neuron_name}_V[{neuron_name}_spikers_2b + (-2,)] = {neuron_name}_V[{neuron_name}_spikers_2b + (-1,)]'
-        conditionals_declaration += f'\n            {neuron_name}_V[{neuron_name}_spikers_2b + (-1,)] = {neuron_name}_V_reset'
+        
 
         #Updated condition 3 post pythran
 
